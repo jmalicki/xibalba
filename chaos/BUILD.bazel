@@ -1,8 +1,16 @@
-# Chaos testing and fault injection
+# Chaos testing and fault injection (minimal for tech de-risking)
 
 package(default_visibility = ["//visibility:public"])
 
-# Chaos utilities library
+# Simple chaos test (tech de-risking PoC)
+cc_binary(
+    name = "simple_chaos_test",
+    srcs = ["simple_chaos_test.c"],
+    deps = ["//common:dir_reader"],
+    linkopts = ["-pthread"],
+)
+
+# Chaos utilities library (for future use)
 cc_library(
     name = "chaos_utils",
     srcs = ["chaos_utils.c"],

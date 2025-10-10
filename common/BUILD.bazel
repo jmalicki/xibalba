@@ -1,30 +1,13 @@
-# DirectoryReader abstraction layer
+# DirectoryReader abstraction layer (minimal for tech de-risking)
 
 package(default_visibility = ["//visibility:public"])
 
-# DirectoryReader library
+# Minimal DirectoryReader library (classic readdir only)
 cc_library(
     name = "dir_reader",
-    srcs = [
-        "dir_reader.c",
-        "dir_reader_classic.c",
-        "dir_reader_ioring.c",
-    ],
+    srcs = ["dir_reader.c"],
     hdrs = ["dir_reader.h"],
-    deps = [
-        "@liburing",  # System library
-    ],
-    linkopts = [
-        "-luring",
-    ],
-)
-
-# Unit test for DirectoryReader
-cc_test(
-    name = "dir_reader_test",
-    srcs = ["dir_reader_test.c"],
-    deps = [":dir_reader"],
-    data = glob(["testdata/**"]),
+    # No liburing dependency for tech de-risking PoC
 )
 
 # Export headers
