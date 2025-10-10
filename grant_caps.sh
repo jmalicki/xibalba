@@ -2,6 +2,8 @@
 # Grant eBPF capabilities to pause_controller
 # Run: sudo ./grant_caps.sh
 
+set -euo pipefail
+
 if [ "$EUID" -ne 0 ]; then
     echo "Please run: sudo ./grant_caps.sh"
     exit 1

@@ -6,7 +6,7 @@
 #
 # Run once: sudo ./setup_ebpf_permissions.sh
 
-set -e
+set -euo pipefail
 
 if [ "$EUID" -ne 0 ]; then
     echo "ERROR: This setup script must run as root"
