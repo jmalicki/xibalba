@@ -120,20 +120,35 @@
 ### Documentation
 
 **Start Here**:
-1. **⚠️ [Risks & Open Questions](docs/RISKS-AND-OPEN-QUESTIONS.md)** - Read this FIRST!
-2. **🚀 [Tech De-Risking Plan](docs/TECH-DERISKING-PLAN.md)** - 2-3 week PoC to validate eBPF works ⭐
-3. **📋 [Full Implementation Plan](docs/IMPLEMENTATION-PLAN.md)** - Complete 12-16 week guide
+1. **📖 [START HERE Guide](docs/guides/START-HERE.md)** - Navigation hub ⭐
+2. **⚠️ [Risks & Open Questions](docs/plans/RISKS-AND-OPEN-QUESTIONS.md)** - Critical decisions
+3. **🚀 [Tech De-Risking Plan](docs/plans/TECH-DERISKING-PLAN.md)** - 2-3 week PoC (RECOMMENDED)
+4. **📋 [Full Implementation Plan](docs/plans/IMPLEMENTATION-PLAN.md)** - Complete 12-16 week guide
 
 **Recommended path**: Start with tech de-risking (2-3 weeks) to prove eBPF fault injection works, THEN commit to full implementation.
 
-**Conceptual Design**:
-- **🎓 [Jepsen Principles](docs/JEPSEN-INSPIRED-FILESYSTEM-TESTING.md)** - Conceptual foundation
-- **🎯 [Fault Injection Scope](docs/FAULT-INJECTION-SCOPE.md)** - What to test vs not test
+**Getting Started** (`docs/guides/`):
+- **📖 [START HERE](docs/guides/START-HERE.md)** - Navigation hub ⭐
+- **⚡ [Quick Start](docs/guides/QUICK-START.md)** - Run tests in 15 minutes
+- **🧪 [Run Test Now](docs/guides/RUN-TEST-NOW.md)** - Two-terminal validation
+- **✅ [Setup Complete](docs/guides/SETUP-COMPLETE.md)** - Initial setup verification
 
-**Technical Details**:
-- **🔧 [Race Conditions](docs/RACE-CONDITIONS-AND-FAULT-INJECTION.md)** - Fault injection mechanics
-- **📊 [Testing Framework](docs/TESTING-FRAMEWORK.md)** - Complete specification
-- **📛 [Naming](docs/NAMING-OPTIONS.md)** - Why "RUDRA"
+**Implementation Plans** (`docs/plans/`):
+- **🚀 [Tech De-Risking Plan](docs/plans/TECH-DERISKING-PLAN.md)** - 2-3 week PoC (RECOMMENDED)
+- **📋 [Full Implementation Plan](docs/plans/IMPLEMENTATION-PLAN.md)** - Complete 12-16 week guide
+- **🗺️ [After De-Risking](docs/plans/AFTER-DERISKING.md)** - Roadmap for Weeks 4-15
+- **⚠️ [Risks & Open Questions](docs/plans/RISKS-AND-OPEN-QUESTIONS.md)** - Critical decisions
+
+**Design & Concepts** (`docs/design/`):
+- **🎓 [Jepsen Principles](docs/design/JEPSEN-INSPIRED-FILESYSTEM-TESTING.md)** - Conceptual foundation
+- **🔧 [Race Conditions & Fault Injection](docs/design/RACE-CONDITIONS-AND-FAULT-INJECTION.md)** - Technical details
+- **🎯 [Fault Injection Scope](docs/design/FAULT-INJECTION-SCOPE.md)** - What to test vs not test
+- **📊 [Testing Framework](docs/design/TESTING-FRAMEWORK.md)** - Complete specification
+- **📛 [Naming Options](docs/design/NAMING-OPTIONS.md)** - Why "RUDRA"
+
+**Status & Progress** (`docs/status/`):
+- **📈 [Tech De-Risking Status](docs/status/TECH-DERISKING-STATUS.md)** - Current progress
+- **🎉 [Completed Today](docs/status/COMPLETED-TODAY.md)** - Day 1 achievements
 
 ---
 
