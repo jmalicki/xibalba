@@ -27,11 +27,6 @@ jobs:
             linux-headers-$(uname -r) \
             bpftool
       
-      - name: Install Bazel
-        uses: bazel-contrib/setup-bazel@0.8.1
-        with:
-          bazelisk-cache: true
-      
       - name: Compile eBPF program directly
         run: |
           # For now, compile directly with clang (Bazel eBPF support coming later)

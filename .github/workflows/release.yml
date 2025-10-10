@@ -25,9 +25,6 @@ jobs:
             libelf-dev \
             zlib1g-dev
       
-      - name: Setup Bazelisk
-        uses: bazelbuild/setup-bazelisk@v3
-      
       - name: Build release binaries
         run: |
           # Build C programs
