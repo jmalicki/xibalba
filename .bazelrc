@@ -1,0 +1,263 @@
+# RUDRA Bazel configuration - Maximum Safety Edition
+
+# ============================================================================
+# Default Build Configuration
+# ============================================================================
+
+# Build with optimization by default
+build --compilation_mode=opt
+
+# ============================================================================
+# C Compiler Warnings (Comprehensive)
+# ============================================================================
+
+# Essential warnings
+build --copt=-Wall
+build --copt=-Wextra
+build --copt=-Werror                    # Treat warnings as errors
+build --copt=-pedantic
+build --copt=-std=gnu11
+
+# Additional useful warnings
+build --copt=-Wshadow                   # Warn about variable shadowing
+build --copt=-Wcast-align               # Warn about alignment issues
+build --copt=-Wcast-qual                # Warn about casting away const
+build --copt=-Wconversion               # Warn about implicit conversions
+build --copt=-Wsign-conversion          # Warn about sign conversions
+build --copt=-Wdouble-promotion         # Warn about float to double promotion
+build --copt=-Wformat=2                 # Extra format string checks
+build --copt=-Wnull-dereference         # Warn about potential NULL dereferences
+build --copt=-Wstrict-overflow=5        # Warn about overflow in optimizations
+build --copt=-Wwrite-strings            # Warn about writing to string literals
+build --copt=-Wpointer-arith            # Warn about pointer arithmetic
+build --copt=-Wundef                    # Warn about undefined macros
+build --copt=-Wunused                   # Warn about unused variables/functions
+build --copt=-Wmissing-prototypes       # Warn about missing function prototypes
+build --copt=-Wstrict-prototypes        # Warn about old-style function declarations
+
+# Concurrency-specific warnings
+build --copt=-Wthread-safety            # Clang thread safety analysis
+build --copt=-Watomic-alignment         # Warn about unaligned atomics
+
+# Security warnings
+build --copt=-Wformat-security          # Warn about format string vulnerabilities
+build --copt=-Wimplicit-fallthrough     # Warn about switch fallthrough
+
+# ============================================================================
+# Security Hardening Flags
+# ============================================================================
+
+# Stack protection
+build --copt=-fstack-protector-strong   # Stack canaries
+build --linkopt=-fstack-protector-strong
+
+# Position independent code
+build --copt=-fPIC
+build --copt=-fPIE
+build --linkopt=-pie
+
+# Fortify source (buffer overflow detection)
+build --copt=-D_FORTIFY_SOURCE=2
+
+# Control flow integrity (Clang only)
+build:cfi --copt=-fsanitize=cfi
+build:cfi --linkopt=-fsanitize=cfi
+build:cfi --copt=-fvisibility=hidden
+
+# Safe stack (Clang only - separate stack for return addresses)
+build:safestack --copt=-fsanitize=safe-stack
+build:safestack --linkopt=-fsanitize=safe-stack
+
+# ============================================================================
+# Sanitizers (Runtime Error Detection)
+# ============================================================================
+
+# Address Sanitizer (memory errors)
+build:asan --copt=-fsanitize=address
+build:asan --copt=-fsanitize-address-use-after-scope
+build:asan --linkopt=-fsanitize=address
+build:asan --copt=-fno-omit-frame-pointer
+build:asan --copt=-O1
+
+# Thread Sanitizer (data races) - CRITICAL FOR RUDRA!
+build:tsan --copt=-fsanitize=thread
+build:tsan --linkopt=-fsanitize=thread
+build:tsan --copt=-fno-omit-frame-pointer
+build:tsan --copt=-O1
+
+# Memory Sanitizer (uninitialized memory reads)
+build:msan --copt=-fsanitize=memory
+build:msan --copt=-fsanitize-memory-track-origins
+build:msan --linkopt=-fsanitize=memory
+build:msan --copt=-fno-omit-frame-pointer
+build:msan --copt=-O1
+
+# Undefined Behavior Sanitizer
+build:ubsan --copt=-fsanitize=undefined
+build:ubsan --copt=-fsanitize=integer           # Integer overflow
+build:ubsan --copt=-fsanitize=nullability       # NULL pointer checks
+build:ubsan --linkopt=-fsanitize=undefined
+build:ubsan --copt=-fno-omit-frame-pointer
+
+# Leak Sanitizer (memory leaks)
+build:lsan --copt=-fsanitize=leak
+build:lsan --linkopt=-fsanitize=leak
+
+# ALL sanitizers (for paranoid testing)
+build:sanitizers --config=asan
+build:sanitizers --config=ubsan
+build:sanitizers --config=lsan
+# Note: Can't combine TSan with ASan, use separately
+
+# ============================================================================
+# Static Analysis
+# ============================================================================
+
+# Use clang-tidy for static analysis
+build:analyze --aspects=@bazel_clang_tidy//clang_tidy:clang_tidy.bzl%clang_tidy_aspect
+build:analyze --output_groups=report
+
+# Strict aliasing rules
+build --copt=-fstrict-aliasing
+build --copt=-Wstrict-aliasing=2
+
+# ============================================================================
+# Debug Builds
+# ============================================================================
+
+build:debug --compilation_mode=dbg
+build:debug --copt=-g3                  # Maximum debug info
+build:debug --copt=-O0                  # No optimization
+build:debug --strip=never
+build:debug --copt=-DDEBUG
+build:debug --copt=-fno-omit-frame-pointer
+
+# Debug with all checks
+build:debug-strict --config=debug
+build:debug-strict --copt=-D_GLIBCXX_DEBUG
+build:debug-strict --copt=-D_GLIBCXX_DEBUG_PEDANTIC
+
+# ============================================================================
+# eBPF Compilation
+# ============================================================================
+
+build:ebpf --copt=-target
+build:ebpf --copt=bpf
+build:ebpf --copt=-O2
+build:ebpf --copt=-g
+build:ebpf --copt=-D__BPF__
+build:ebpf --copt=-D__TARGET_ARCH_x86_64
+
+# ============================================================================
+# Code Coverage
+# ============================================================================
+
+coverage --combined_report=lcov
+coverage --instrument_test_targets
+coverage --experimental_use_llvm_covmap
+coverage --collect_code_coverage
+
+# ============================================================================
+# Link-Time Optimization
+# ============================================================================
+
+build:lto --copt=-flto
+build:lto --linkopt=-flto
+build:lto --linkopt=-fuse-ld=lld        # Faster linker
+
+# ============================================================================
+# Performance/Release Build
+# ============================================================================
+
+build:release --compilation_mode=opt
+build:release --copt=-O3
+build:release --copt=-march=native      # Optimize for current CPU
+build:release --copt=-DNDEBUG
+build:release --strip=always
+build:release --config=lto
+
+# ============================================================================
+# Test Configuration
+# ============================================================================
+
+# Output detailed test results
+test --test_output=all
+test --test_verbose_timeout_warnings
+
+# Test with sanitizers by default (can override)
+test --config=ubsan
+
+# Longer timeout for chaos tests
+test --test_timeout=300,600,900,1200    # short,moderate,long,eternal
+
+# Show test summary
+test --test_summary=detailed
+
+# ============================================================================
+# Cache Configuration
+# ============================================================================
+
+build --disk_cache=~/.cache/bazel/rudra
+build --repository_cache=~/.cache/bazel/rudra/repo
+
+# ============================================================================
+# Logging and Output
+# ============================================================================
+
+# Show command lines
+build --subcommands=pretty_print
+build --verbose_failures
+
+# Color output
+common --color=yes
+
+# ============================================================================
+# Platform-Specific
+# ============================================================================
+
+# Linux-specific flags
+build:linux --copt=-D_GNU_SOURCE
+build:linux --linkopt=-pthread
+build:linux --linkopt=-lrt
+
+# ============================================================================
+# CI Configuration
+# ============================================================================
+
+# CI uses stricter checks
+build:ci --config=sanitizers
+build:ci --keep_going                   # Continue past first error
+build:ci --jobs=auto                    # Use all available cores
+
+# ============================================================================
+# Developer Configurations
+# ============================================================================
+
+# Fast local build (for development iteration)
+build:fast --compilation_mode=fastbuild
+build:fast --copt=-O1
+build:fast --config=ubsan               # Still check UB
+
+# Maximum paranoia (all checks enabled)
+build:paranoid --config=debug-strict
+build:paranoid --config=asan
+build:paranoid --config=ubsan
+build:paranoid --config=lsan
+build:paranoid --copt=-Weverything      # Clang: enable ALL warnings
+build:paranoid --copt=-Wno-padded       # Except pedantic ones
+build:paranoid --copt=-Wno-packed
+
+# ============================================================================
+# Fuzzing Support
+# ============================================================================
+
+build:fuzz --copt=-fsanitize=fuzzer
+build:fuzz --linkopt=-fsanitize=fuzzer
+build:fuzz --copt=-O1
+
+# ============================================================================
+# Try importing user-specific settings (optional)
+# ============================================================================
+
+try-import %workspace%/.bazelrc.user
+

@@ -1,0 +1,32 @@
+# DirectoryReader abstraction layer
+
+package(default_visibility = ["//visibility:public"])
+
+# DirectoryReader library
+cc_library(
+    name = "dir_reader",
+    srcs = [
+        "dir_reader.c",
+        "dir_reader_classic.c",
+        "dir_reader_ioring.c",
+    ],
+    hdrs = ["dir_reader.h"],
+    deps = [
+        "@liburing",  # System library
+    ],
+    linkopts = [
+        "-luring",
+    ],
+)
+
+# Unit test for DirectoryReader
+cc_test(
+    name = "dir_reader_test",
+    srcs = ["dir_reader_test.c"],
+    deps = [":dir_reader"],
+    data = glob(["testdata/**"]),
+)
+
+# Export headers
+exports_files(["dir_reader.h"])
+

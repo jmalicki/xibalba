@@ -1,0 +1,56 @@
+name: eBPF Build & Verify
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'chaos/**/*.bpf.c'
+      - 'chaos/**/BUILD.bazel'
+  pull_request:
+    paths:
+      - 'chaos/**/*.bpf.c'
+
+jobs:
+  build-ebpf:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install eBPF dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang \
+            llvm \
+            libbpf-dev \
+            linux-headers-$(uname -r) \
+            bpftool
+      
+      - name: Install Bazel
+        uses: bazel-contrib/setup-bazel@0.8.1
+        with:
+          bazelisk-cache: true
+      
+      - name: Build eBPF programs
+        run: bazel build //chaos:ebpf_injector_bpf
+      
+      - name: Verify eBPF programs
+        run: |
+          # Check eBPF object files are valid
+          if [ -f bazel-bin/chaos/ebpf_injector.bpf.o ]; then
+            llvm-objdump -h bazel-bin/chaos/ebpf_injector.bpf.o
+            echo "✓ eBPF program compiled successfully"
+          else
+            echo "✗ eBPF program not found"
+            exit 1
+          fi
+      
+      - name: Check eBPF program size
+        run: |
+          size=$(stat -f%z bazel-bin/chaos/ebpf_injector.bpf.o 2>/dev/null || stat -c%s bazel-bin/chaos/ebpf_injector.bpf.o)
+          echo "eBPF program size: $size bytes"
+          if [ $size -gt 1000000 ]; then
+            echo "⚠️  Warning: eBPF program is very large"
+          fi
+
