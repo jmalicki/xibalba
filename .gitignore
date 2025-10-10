@@ -1,0 +1,43 @@
+# RUDRA - Build artifacts
+*.o
+*.a
+*.so
+*.bpf.o
+
+# Compiled tests
+test_*
+chaos_*
+bench_*
+!*.c
+!*.h
+
+# VM images
+vms/images/*.qcow2
+vms/images/*.img
+vms/cloud-init/
+
+# Test results
+test-results/*/
+!test-results/.gitkeep
+
+# Logs
+logs/
+*.log
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
