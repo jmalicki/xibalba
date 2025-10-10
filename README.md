@@ -64,9 +64,25 @@
 
 ---
 
-## Quick Start
+## 🚀 Getting Started
 
-**Note**: RUDRA is currently in design phase. This README describes the planned functionality.
+**Current Status**: Design complete, ready for implementation
+
+### **→ START HERE: [Implementation Plan](docs/IMPLEMENTATION-PLAN.md)** ⭐
+
+**265 checkboxes** across 10 phases - follow them sequentially to build RUDRA.
+
+---
+
+### Quick Links
+
+- **📋 [Implementation Plan](docs/IMPLEMENTATION-PLAN.md)** - Step-by-step guide (START HERE!)
+- **🎓 [Jepsen Principles](docs/JEPSEN-INSPIRED-FILESYSTEM-TESTING.md)** - Conceptual foundation
+- **🔧 [Race Conditions](docs/RACE-CONDITIONS-AND-FAULT-INJECTION.md)** - Technical details
+- **📊 [Testing Framework](docs/TESTING-FRAMEWORK.md)** - Complete specification
+- **🎯 [Fault Injection Scope](docs/FAULT-INJECTION-SCOPE.md)** - What to test
+
+---
 
 ### Prerequisites
 
@@ -82,10 +98,11 @@
 git clone https://github.com/your-org/rudra.git
 cd rudra
 
-# One-command setup (creates VMs, builds tests)
-./SETUP_ALL.sh
+# Follow the implementation plan
+cat docs/IMPLEMENTATION-PLAN.md
 
-# This will take 2-3 hours
+# One-command setup (when complete)
+./SETUP_ALL.sh
 ```
 
 ### Running Tests

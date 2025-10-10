@@ -16,23 +16,46 @@
 
 ---
 
+## 🚀 **READY TO BUILD? → [Implementation Plan](docs/IMPLEMENTATION-PLAN.md)** ⭐
+
+**265 checkboxes, 10 phases, 8-12 weeks**
+
+**Start at checkbox 1 and work sequentially!**
+
+---
+
 ## Reading Order
+
+### If You Want to Implement (→ START HERE!)
+
+**1. [Implementation Plan](docs/IMPLEMENTATION-PLAN.md)** ⭐ **← BEGIN HERE**
+   - 265-checkbox step-by-step guide
+   - Every task broken down
+   - Estimated time for each phase
+
+**2. [Testing Framework](docs/TESTING-FRAMEWORK.md)**
+   - Complete framework specification
+   - Code examples
+   - Architecture details
+
+**3. [Race Conditions & Fault Injection](docs/RACE-CONDITIONS-AND-FAULT-INJECTION.md)**
+   - Technical mechanics
+   - Specific fault types
+   - Working eBPF examples
+
+---
 
 ### If You Want to Understand the Concept (30 min)
 
 1. **README.md** ← Overview
-2. **docs/JEPSEN-INSPIRED-FILESYSTEM-TESTING.md** ← Conceptual foundation
-3. **docs/FAULT-INJECTION-SCOPE.md** ← What we test vs don't test
+2. **[Jepsen Principles](docs/JEPSEN-INSPIRED-FILESYSTEM-TESTING.md)** ← Conceptual foundation
+3. **[Fault Injection Scope](docs/FAULT-INJECTION-SCOPE.md)** ← What we test vs don't test
 
-### If You Want to Implement (Start Here!)
-
-1. **docs/IMPLEMENTATION-PLAN.md** ← 265-checkbox step-by-step guide
-2. **docs/TESTING-FRAMEWORK.md** ← Complete framework spec
-3. **docs/RACE-CONDITIONS-AND-FAULT-INJECTION.md** ← Technical details
+---
 
 ### If You're Curious About the Name
 
-1. **docs/NAMING-OPTIONS.md** ← Why "RUDRA"?
+1. **[Naming Options](docs/NAMING-OPTIONS.md)** ← Why "RUDRA"?
 
 ---
 
