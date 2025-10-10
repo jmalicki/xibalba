@@ -25,7 +25,8 @@ jobs:
             llvm \
             libbpf-dev \
             linux-headers-$(uname -r) \
-            bpftool
+            linux-tools-common \
+            linux-tools-generic
       
       - name: Compile eBPF program directly
         run: |

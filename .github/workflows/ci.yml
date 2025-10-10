@@ -53,6 +53,7 @@ jobs:
           llvm-objdump -h pause_injector.bpf.o
           size=$(stat -c%s pause_injector.bpf.o)
           echo "eBPF program size: $size bytes"
+          echo "✓ eBPF program valid"
       
       - name: Test Simple Chaos (Smoke Test)
         run: |
