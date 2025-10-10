@@ -68,28 +68,92 @@
 
 **Current Status**: Design complete, ready for implementation
 
-### **→ START HERE: [Implementation Plan](docs/IMPLEMENTATION-PLAN.md)** ⭐
-
-**265 checkboxes** across 10 phases - follow them sequentially to build RUDRA.
+### Two Paths Forward:
 
 ---
 
-### Quick Links
+### **Path 1: Tech De-Risking (RECOMMENDED)** 🚀
 
-- **📋 [Implementation Plan](docs/IMPLEMENTATION-PLAN.md)** - Step-by-step guide (START HERE!)
+**→ [Tech De-Risking Plan](docs/TECH-DERISKING-PLAN.md)** ⭐ **START HERE!**
+
+**Why this first**: Validate eBPF fault injection works in 2-3 weeks before committing to 12-16 week full build
+
+**What you'll build**:
+- Minimal DirectoryReader (~200 lines)
+- Simple chaos test (~100 lines)
+- Basic eBPF pause injection (~50 lines eBPF + ~150 lines userspace)
+- Total: ~500 lines of code
+
+**What you'll prove**:
+- ✅ eBPF toolchain works on your machine
+- ✅ Can inject pauses via eBPF → userspace coordination
+- ✅ Pauses increase race detection (find at least one bug)
+- ✅ Approach is viable
+
+**Investment**: 2-3 weeks | **Risk reduction**: 80%+
+
+**Then**: If successful, proceed to full implementation with confidence!
+
+---
+
+### **Path 2: Full Implementation**
+
+**→ [Full Implementation Plan](docs/IMPLEMENTATION-PLAN.md)**
+
+**Choose this if**: You're already confident in eBPF and ready to commit 12-16 weeks
+
+**What you'll build**: Complete RUDRA with VMs, 5 filesystems, full automation
+
+**265 checkboxes** across 9 phases
+
+---
+
+### **Supporting Documents**
+
+**Must read**:
+- **⚠️ [Risks & Open Questions](docs/RISKS-AND-OPEN-QUESTIONS.md)** - Critical decisions needed
+
+**Good news**: Most risks resolved! VMs + custom kernels = full control ✅
+
+---
+
+### Documentation
+
+**Start Here**:
+1. **⚠️ [Risks & Open Questions](docs/RISKS-AND-OPEN-QUESTIONS.md)** - Read this FIRST!
+2. **🚀 [Tech De-Risking Plan](docs/TECH-DERISKING-PLAN.md)** - 2-3 week PoC to validate eBPF works ⭐
+3. **📋 [Full Implementation Plan](docs/IMPLEMENTATION-PLAN.md)** - Complete 12-16 week guide
+
+**Recommended path**: Start with tech de-risking (2-3 weeks) to prove eBPF fault injection works, THEN commit to full implementation.
+
+**Conceptual Design**:
 - **🎓 [Jepsen Principles](docs/JEPSEN-INSPIRED-FILESYSTEM-TESTING.md)** - Conceptual foundation
-- **🔧 [Race Conditions](docs/RACE-CONDITIONS-AND-FAULT-INJECTION.md)** - Technical details
+- **🎯 [Fault Injection Scope](docs/FAULT-INJECTION-SCOPE.md)** - What to test vs not test
+
+**Technical Details**:
+- **🔧 [Race Conditions](docs/RACE-CONDITIONS-AND-FAULT-INJECTION.md)** - Fault injection mechanics
 - **📊 [Testing Framework](docs/TESTING-FRAMEWORK.md)** - Complete specification
-- **🎯 [Fault Injection Scope](docs/FAULT-INJECTION-SCOPE.md)** - What to test
+- **📛 [Naming](docs/NAMING-OPTIONS.md)** - Why "RUDRA"
 
 ---
 
 ### Prerequisites
 
-- Linux host with KVM support
-- 32GB+ RAM recommended
-- 500GB+ disk space
+**Host Machine**:
+- Linux host with KVM support (QEMU/KVM + libvirt)
+- 32GB+ RAM ✅ (confirmed available)
+- 500GB+ disk space ✅ (confirmed available)
 - Ubuntu 22.04 or later
+- Shared dev machine OK (use overnight for long benchmarks)
+
+**Kernel Development**:
+- Kernel source tree (with your patches or baseline)
+- Build environment (gcc, make, pahole for BTF)
+- Will build custom kernels with eBPF support enabled
+
+**VM Technology**: QEMU/KVM managed via libvirt
+- Fast, hardware-accelerated virtualization
+- Standard Linux VM tooling (virsh, virt-install)
 
 ### Setup (When Implemented)
 
@@ -251,16 +315,20 @@ sudo rudra-chaos --fs ext4 --enable-ebpf --duration 60s
 
 ## Timeline
 
-**Full implementation**: 8-12 weeks
+**Optimistic**: 8-10 weeks (if everything works smoothly)
+
+**Realistic**: 12-16 weeks (including learning curve, debugging, iteration)
 
 **Phases**:
-- Week 1-2: DirectoryReader abstraction
-- Week 3-4: Basic chaos framework
-- Week 5-7: eBPF fault injection
-- Week 8-9: VM infrastructure
-- Week 10-12: Integration and polish
+- Week 1-2: DirectoryReader abstraction + basic chaos
+- Week 3-5: eBPF fault injection (⚠️ learning curve)
+- Week 6-8: VM infrastructure (base + 3 filesystems for MVP)
+- Week 9-12: Orchestration, automation, testing
+- Week 13-16: Polish, add remaining filesystems, documentation
 
-**Minimal viable**: 2 weeks (just abstraction layer + one VM)
+**MVP** (6-8 weeks): DirectoryReader + basic chaos + eBPF + 3 filesystems (ext4, XFS, tmpfs)
+
+**Full system** (12-16 weeks): All 5 filesystems, complete automation, production-ready
 
 ---
 
