@@ -1,5 +1,6 @@
 #include "dir_reader.h"
 #include <dirent.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -52,8 +53,8 @@ int dir_reader_read(struct dir_reader *reader,
         
         entries[count].ino = ent->d_ino;
         entries[count].type = ent->d_type;
-        strncpy(entries[count].name, ent->d_name, sizeof(entries[count].name) - 1);
-        entries[count].name[sizeof(entries[count].name) - 1] = '\0';
+        // Use snprintf for safe string copying with guaranteed null-termination
+        (void)snprintf(entries[count].name, sizeof(entries[count].name), "%s", ent->d_name);
         count++;
     }
     

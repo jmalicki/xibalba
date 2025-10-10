@@ -1,13 +1,13 @@
-# DirectoryReader abstraction layer (minimal for tech de-risking)
+# DirectoryReader abstraction layer
 
 package(default_visibility = ["//visibility:public"])
 
-# Minimal DirectoryReader library (classic readdir only)
+# DirectoryReader library (skeleton only for now)
 cc_library(
     name = "dir_reader",
     srcs = ["dir_reader.c"],
     hdrs = ["dir_reader.h"],
-    # No liburing dependency for tech de-risking PoC
+    # linkopts will include -luring when we add io_uring support
 )
 
 # Export headers

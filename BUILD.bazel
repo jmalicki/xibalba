@@ -8,20 +8,9 @@ exports_files([
     "START-HERE.md",
 ])
 
-# Alias for running all tests
-alias(
-    name = "all_tests",
-    actual = "//chaos:all",
-)
-
 # Convenience targets
 alias(
     name = "libdir_reader",
     actual = "//common:dir_reader",
-)
-
-alias(
-    name = "chaos_tests",
-    actual = "//chaos:chaos_rapid_modifications",
 )
 

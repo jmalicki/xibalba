@@ -23,7 +23,7 @@ struct test_state {
     atomic_int total_entries;
 };
 
-void *reader_thread(void *arg) {
+static void *reader_thread(void *arg) {
     struct test_state *state = arg;
     struct dir_reader *reader = dir_reader_create_classic();
     
@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
     printf("\n=== Results ===\n");
     printf("Operations completed: %d\n", ops);
     printf("Total entries read: %d\n", entries);
-    printf("Operations/second: %.1f\n", (float)ops / TEST_DURATION);
+    printf("Operations/second: %.1f\n", (double)ops / (double)TEST_DURATION);
     printf("\n");
     printf("✅ PASS: No crashes detected\n");
     printf("\n");

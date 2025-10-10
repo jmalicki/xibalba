@@ -1,101 +1,42 @@
-# Chaos testing and fault injection (minimal for tech de-risking)
+# Chaos testing and fault injection
 
 package(default_visibility = ["//visibility:public"])
 
-# Simple chaos test (tech de-risking PoC)
+# Simple chaos test (skeleton implementation)
 cc_binary(
     name = "simple_chaos_test",
     srcs = ["simple_chaos_test.c"],
     deps = ["//common:dir_reader"],
-    linkopts = ["-pthread"],
-)
-
-# Chaos utilities library (for future use)
-cc_library(
-    name = "chaos_utils",
-    srcs = ["chaos_utils.c"],
-    hdrs = ["chaos_framework.h"],
-)
-
-# Main chaos test binary
-cc_binary(
-    name = "chaos_rapid_modifications",
-    srcs = ["chaos_rapid_modifications.c"],
-    deps = [
-        ":chaos_utils",
-        "//common:dir_reader",
-    ],
     linkopts = [
         "-lpthread",
-        "-latomic",
     ],
 )
 
-# Invariant checker library
-cc_library(
-    name = "invariant_checker",
-    srcs = ["invariant_checker.c"],
-    hdrs = ["chaos_framework.h"],
-    deps = ["//common:dir_reader"],
-)
-
-# eBPF injector (custom rule for eBPF compilation)
+# eBPF pause injector (custom rule for eBPF compilation)
 genrule(
-    name = "ebpf_injector_bpf",
-    srcs = ["ebpf_injector.bpf.c"],
-    outs = ["ebpf_injector.bpf.o"],
+    name = "pause_injector_bpf",
+    srcs = ["pause_injector.bpf.c"],
+    outs = ["pause_injector.bpf.o"],
     cmd = """
         clang -g -O2 -target bpf \
             -D__TARGET_ARCH_x86_64 \
             -I/usr/include/x86_64-linux-gnu \
-            -c $(location ebpf_injector.bpf.c) \
-            -o $(location ebpf_injector.bpf.o)
+            -c $(location pause_injector.bpf.c) \
+            -o $(location pause_injector.bpf.o)
     """,
     tools = [],
 )
 
-# eBPF loader binary
+# Pause controller (loads eBPF program)
 cc_binary(
-    name = "ebpf_injector_load",
-    srcs = ["ebpf_injector_load.c"],
-    data = [":ebpf_injector_bpf"],
+    name = "pause_controller",
+    srcs = ["pause_controller.c"],
+    data = [":pause_injector_bpf"],
     linkopts = [
         "-lbpf",
         "-lelf",
         "-lz",
-    ],
-)
-
-# ptrace injector binary
-cc_binary(
-    name = "ptrace_injector",
-    srcs = ["ptrace_injector.c"],
-    linkopts = ["-lpthread"],
-)
-
-# Ultimate stress test (combines everything)
-cc_binary(
-    name = "ultimate_stress_test",
-    srcs = ["ultimate_stress_test.c"],
-    deps = [
-        ":chaos_utils",
-        ":invariant_checker",
-        "//common:dir_reader",
-    ],
-    data = [
-        ":ebpf_injector_load",
-        ":ptrace_injector",
-    ],
-    linkopts = [
         "-lpthread",
-        "-latomic",
     ],
-)
-
-# Test suite
-cc_test(
-    name = "chaos_utils_test",
-    srcs = ["chaos_utils_test.c"],
-    deps = [":chaos_utils"],
 )
 

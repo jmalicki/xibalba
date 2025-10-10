@@ -26,23 +26,27 @@ static volatile bool keep_running = true;
 static uint64_t pauses_injected = 0;
 static uint32_t pause_duration_us = 5000;  // 5ms default
 
-void signal_handler(int sig) {
+static void signal_handler(int sig) {
+    (void)sig;  // Unused parameter
     keep_running = false;
 }
 
-void handle_pause_event(void *ctx, int cpu, void *data, __u32 size) {
+static void handle_pause_event(void *ctx, int cpu, void *data, __u32 size) {
+    (void)ctx;   // Unused parameter
+    (void)size;  // Unused parameter
+    
     struct pause_request *req = data;
     
     printf("[CPU %d] Pause request: pid=%d, tid=%d, ts=%lu\n",
            cpu, req->pid, req->tid, (unsigned long)req->timestamp_ns);
     
     // Pause the process using SIGSTOP
-    if (kill(req->pid, SIGSTOP) == 0) {
+    if (kill((pid_t)req->pid, SIGSTOP) == 0) {
         // Process stopped successfully
         usleep(pause_duration_us);
         
         // Resume with SIGCONT
-        if (kill(req->pid, SIGCONT) == 0) {
+        if (kill((pid_t)req->pid, SIGCONT) == 0) {
             pauses_injected++;
             printf("  ✓ Paused pid=%d for %uμs (total: %lu)\n",
                    req->pid, pause_duration_us, pauses_injected);
@@ -74,8 +78,10 @@ int main(int argc, char *argv[]) {
     }
     
     int pause_prob = atoi(argv[1]);
-    if (argc >= 3)
-        pause_duration_us = atoi(argv[2]);
+    if (argc >= 3) {
+        int duration = atoi(argv[2]);
+        pause_duration_us = (uint32_t)duration;
+    }
     
     printf("=== RUDRA Pause Controller ===\n");
     printf("Pause probability: %d%%\n", pause_prob);
@@ -136,7 +142,7 @@ int main(int argc, char *argv[]) {
     }
     
     uint32_t key = 0;
-    uint32_t val = pause_prob;
+    uint32_t val = (uint32_t)pause_prob;
     err = bpf_map_update_elem(config_fd, &key, &val, BPF_ANY);
     if (err) {
         fprintf(stderr, "ERROR: Failed to update config: %d\n", err);
