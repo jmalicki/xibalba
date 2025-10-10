@@ -5,11 +5,23 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+BIN_DIR="$SCRIPT_DIR/bin"
+
 echo "=== RUDRA eBPF Test (Quick Version) ==="
 echo ""
 
+# Check if binaries exist
+if [ ! -f "$BIN_DIR/pause_controller" ]; then
+    echo "❌ ERROR: Binaries not found in $BIN_DIR"
+    echo ""
+    echo "Please run first:"
+    echo "  ./compile.sh"
+    exit 1
+fi
+
 # Check if capabilities granted
-if ! getcap /tmp/pause_controller 2>/dev/null | grep -q cap_bpf; then
+if ! getcap "$BIN_DIR/pause_controller" 2>/dev/null | grep -q cap_bpf; then
     echo "❌ ERROR: pause_controller doesn't have capabilities"
     echo ""
     echo "Please run first:"
@@ -29,7 +41,7 @@ echo ""
 
 # Baseline test
 echo "=== Test 1: Baseline (no eBPF) ==="
-/tmp/simple_chaos_test /tmp/rudra_test | tee /tmp/baseline.txt
+"$BIN_DIR/simple_chaos_test" /tmp/rudra_test | tee /tmp/baseline.txt
 BASELINE=$(grep "Operations/second:" /tmp/baseline.txt | awk '{print $2}')
 echo ""
 
@@ -37,7 +49,7 @@ echo ""
 echo "=== Test 2: With eBPF (20% pauses, 5ms each) ==="
 echo "Starting pause controller..."
 
-cd /tmp
+cd "$BIN_DIR" || exit 1
 ./pause_controller 20 5000 > /tmp/pause_log.txt 2>&1 &
 PID=$!
 echo "  Pause controller PID: $PID"
@@ -54,7 +66,7 @@ else
 fi
 
 # Run test
-/tmp/simple_chaos_test /tmp/rudra_test | tee /tmp/ebpf_test.txt
+"$BIN_DIR/simple_chaos_test" /tmp/rudra_test | tee /tmp/ebpf_test.txt
 EBPF=$(grep "Operations/second:" /tmp/ebpf_test.txt | awk '{print $2}')
 
 # Stop controller
