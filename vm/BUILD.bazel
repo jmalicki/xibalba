@@ -14,6 +14,13 @@ sh_binary(
     data = [],
 )
 
+# Gauntlet test runner - progressive consistency testing across all filesystems
+sh_binary(
+    name = "gauntlet_script",
+    srcs = ["xibalba-gauntlet.sh"],
+    data = [],
+)
+
 # Check if host has required VM tools (QEMU/KVM, libvirt, etc.)
 sh_binary(
     name = "check_prerequisites",

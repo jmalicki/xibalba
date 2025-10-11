@@ -270,7 +270,7 @@ sudo mkfs.ext4 test.img
 ## See Also
 
 - [FILESYSTEM-CONSISTENCY-MODELS.md](design/FILESYSTEM-CONSISTENCY-MODELS.md) - Detailed filesystem documentation
-- [TESTING-GUIDE.md](../TESTING-GUIDE.md) - How to run tests on different filesystems
+- [TESTING-GUIDE.md](TESTING-GUIDE.md) - How to run tests on different filesystems
 - [vm/README.md](../vm/README.md) - VM setup and configuration
 
 ---
