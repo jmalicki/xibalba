@@ -4,8 +4,14 @@ set -euo pipefail
 # Run shellcheck on all shell scripts
 # Bazel-managed shellcheck binary (hermetic)
 
-# Workspace location (hardcoded for lint test - needs real sources)
-WORKSPACE="/home/jmalicki/src/rudra"
+# Find workspace via git (works locally and in CI)
+if command -v git &> /dev/null && git rev-parse --show-toplevel &> /dev/null 2>&1; then
+    WORKSPACE=$(git rev-parse --show-toplevel)
+else
+    # Fallback: navigate from script location
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    WORKSPACE="$(cd "$SCRIPT_DIR/.." && pwd)"
+fi
 
 # Find Bazel-provided shellcheck
 RUNFILES_DIR="${RUNFILES_DIR:-$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")}"
