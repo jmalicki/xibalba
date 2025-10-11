@@ -46,6 +46,25 @@ sh_test(
     timeout = "long",  # 15+ minutes
 )
 
+# Quick smoke test for VM infrastructure (~2 minutes)
+# Validates: VM boot, package install, filesystem setup, test execution
+sh_test(
+    name = "vm_smoke_test",
+    srcs = ["run-vm-smoke-test.sh"],
+    args = ["$(location //packaging:xibalba-deb)"],
+    data = [
+        ":verify_host_deps.sh",
+        ":create_test_vm.sh",
+        ":deploy_xibalba.sh",
+        ":xibalba-smoke-test.sh",
+        ":destroy_vm.sh",
+        "//packaging:xibalba-deb",
+    ],
+    tags = ["manual", "local", "requires-kvm"],
+    size = "medium",
+    timeout = "moderate",  # ~2 minutes
+)
+
 # Direct VM test runner (no automatic validation)
 # Use parallel_vm_tests_validated instead for safety
 sh_binary(
