@@ -64,34 +64,51 @@ trap cleanup EXIT
 echo "Step 1: Creating VM..."
 "$SCRIPT_DIR/create_test_vm.sh" --name "$VM_NAME" --filesystem "$FILESYSTEM"
 
-# Step 2: Wait for SSH
-echo "Step 2: Waiting for SSH..."
-timeout 120 bash -c "until ssh $SSH_OPTS root@$VM_NAME true 2>/dev/null; do sleep 2; done" || {
-    echo "❌ Failed to connect to VM"
+# Step 2: Get VM IP (hostnames don't resolve in libvirt)
+echo "Step 2: Getting VM IP address..."
+VM_IP=""
+for i in {1..30}; do
+    VM_IP=$(virsh domifaddr "$VM_NAME" --source lease 2>/dev/null | grep -oP '(\d+\.){3}\d+' | head -1)
+    if [ -n "$VM_IP" ]; then
+        echo "  ✓ VM IP: $VM_IP"
+        break
+    fi
+    sleep 2
+done
+
+if [ -z "$VM_IP" ]; then
+    echo "❌ Failed to get VM IP address"
+    exit 1
+fi
+
+# Step 3: Wait for SSH
+echo "Step 3: Waiting for SSH..."
+timeout 120 bash -c "until ssh $SSH_OPTS root@$VM_IP true 2>/dev/null; do sleep 2; done" || {
+    echo "❌ Failed to connect to VM at $VM_IP"
     exit 1
 }
 
-# Step 3: Deploy package
-echo "Step 3: Deploying Xibalba..."
-scp $SSH_OPTS "$PACKAGE" "root@${VM_NAME}:/tmp/" || exit 1
-ssh $SSH_OPTS "root@${VM_NAME}" "apt update && apt install -y /tmp/$(basename $PACKAGE)" || exit 1
+# Step 4: Deploy package
+echo "Step 4: Deploying Xibalba..."
+scp $SSH_OPTS "$PACKAGE" "root@${VM_IP}:/tmp/" || exit 1
+ssh $SSH_OPTS "root@${VM_IP}" "apt update && apt install -y /tmp/$(basename $PACKAGE)" || exit 1
 
-# Step 4: Run gauntlet
-echo "Step 4: Running progressive gauntlet..."
+# Step 5: Run gauntlet
+echo "Step 5: Running progressive gauntlet..."
 echo "  1. EVENTUAL (baseline) - should PASS"
 echo "  2. WEAK (POSIX) - should PASS"  
 echo "  3. STRICT (ideal) - quantify departures"
 echo
 
-if ssh $SSH_OPTS "root@${VM_NAME}" \
+if ssh $SSH_OPTS "root@${VM_IP}" \
     "XIBALBA_DURATION=${XIBALBA_DURATION:-300} XIBALBA_READERS=${XIBALBA_READERS:-10} XIBALBA_WRITERS=${XIBALBA_WRITERS:-3} xibalba-gauntlet $FILESYSTEM"; then
     echo "✅ Gauntlet PASSED"
     
     # Collect results to Bazel's test output directory
     if [ -n "${TEST_UNDECLARED_OUTPUTS_DIR:-}" ]; then
-        ssh $SSH_OPTS "root@${VM_NAME}" "cat /var/log/xibalba/gauntlet/latest-gauntlet.json" \
+        ssh $SSH_OPTS "root@${VM_IP}" "cat /var/log/xibalba/gauntlet/latest-gauntlet.json" \
             > "$TEST_UNDECLARED_OUTPUTS_DIR/${VM_NAME}-gauntlet.json" 2>/dev/null || true
-        ssh $SSH_OPTS "root@${VM_NAME}" "cat /var/log/xibalba/gauntlet/latest-gauntlet.txt" \
+        ssh $SSH_OPTS "root@${VM_IP}" "cat /var/log/xibalba/gauntlet/latest-gauntlet.txt" \
             > "$TEST_UNDECLARED_OUTPUTS_DIR/${VM_NAME}-gauntlet.txt" 2>/dev/null || true
     fi
     
@@ -101,9 +118,9 @@ else
     
     # Collect failure artifacts
     if [ -n "${TEST_UNDECLARED_OUTPUTS_DIR:-}" ]; then
-        ssh $SSH_OPTS "root@${VM_NAME}" "cat /var/log/xibalba/gauntlet/latest-gauntlet.json" \
+        ssh $SSH_OPTS "root@${VM_IP}" "cat /var/log/xibalba/gauntlet/latest-gauntlet.json" \
             > "$TEST_UNDECLARED_OUTPUTS_DIR/${VM_NAME}-gauntlet.json" 2>/dev/null || true
-        ssh $SSH_OPTS "root@${VM_NAME}" "cat /var/log/xibalba/gauntlet/latest-gauntlet.txt" \
+        ssh $SSH_OPTS "root@${VM_IP}" "cat /var/log/xibalba/gauntlet/latest-gauntlet.txt" \
             > "$TEST_UNDECLARED_OUTPUTS_DIR/${VM_NAME}-gauntlet.txt" 2>/dev/null || true
     fi
     
