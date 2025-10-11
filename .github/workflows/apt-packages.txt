@@ -1,0 +1,11 @@
+# DEPRECATED: This file is no longer used
+#
+# Build dependencies are now managed by Bazel as the single source of truth.
+#
+# See: packaging/BUILD.bazel (BUILD_DEPS variable)
+#
+# To generate the build dependencies list:
+#   bazel build //packaging:generate_build_deps
+#   cat bazel-bin/packaging/build-deps.txt
+#
+# CI automatically generates and uses this file.

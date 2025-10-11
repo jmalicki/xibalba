@@ -1,6 +1,6 @@
-# RUDRA Setup Complete! 🎉
+# Xibalba Setup Complete! 🎉
 
-**Repository**: https://github.com/jmalicki/rudra-chaos
+**Repository**: https://github.com/jmalicki/xibalba-chaos
 
 **Status**: ✅ Ready for implementation
 
@@ -9,7 +9,7 @@
 ## What's Been Created
 
 ### ✅ GitHub Repository
-- **Public repository**: jmalicki/rudra-chaos
+- **Public repository**: jmalicki/xibalba-chaos
 - **SSH enabled**: Can push/pull via SSH
 - **Topics**: chaos-engineering, ebpf, testing, kernel, filesystem, jepsen, concurrency, race-detection
 
@@ -31,7 +31,7 @@
 
 **Sanitizers** (5 types):
 - ASan: Memory errors (use-after-free, buffer overflow)
-- **TSan: Data races** ← CRITICAL for RUDRA!
+- **TSan: Data races** ← CRITICAL for Xibalba!
 - MSan: Uninitialized memory
 - UBSan: Undefined behavior (integer overflow, NULL deref)
 - LSan: Memory leaks
@@ -145,7 +145,7 @@ bazel coverage //...
 **Build configuration**: 839 lines
 
 **Branches**: main
-**Remote**: origin (git@github.com:jmalicki/rudra-chaos.git)
+**Remote**: origin (git@github.com:jmalicki/xibalba-chaos.git)
 
 ---
 
@@ -153,8 +153,8 @@ bazel coverage //...
 
 ### 1. Clone the Repository
 ```bash
-git clone git@github.com:jmalicki/rudra-chaos.git
-cd rudra-chaos
+git clone git@github.com:jmalicki/xibalba-chaos.git
+cd xibalba-chaos
 ```
 
 ### 2. Install Pre-commit
@@ -207,7 +207,7 @@ cat docs/IMPLEMENTATION-PLAN.md
 - Static analysis in CI
 - Format enforcement
 
-**Specifically tuned for RUDRA**:
+**Specifically tuned for Xibalba**:
 - Thread safety warnings enabled
 - TSan for race detection
 - Concurrency checks in clang-tidy
@@ -249,7 +249,7 @@ pre-commit run clang-format          # Format C code
 
 ## Status
 
-✅ **Repository created**: https://github.com/jmalicki/rudra-chaos
+✅ **Repository created**: https://github.com/jmalicki/xibalba-chaos
 
 ✅ **Build system**: Bazel with maximum safety
 
@@ -265,6 +265,6 @@ pre-commit run clang-format          # Format C code
 
 ---
 
-*RUDRA: Built with safety in mind, because we're testing safety-critical kernel code!*
+*Xibalba: Built with safety in mind, because we're testing safety-critical kernel code!*
 
 *The Howler roars with modern safety tooling!* 🌪️

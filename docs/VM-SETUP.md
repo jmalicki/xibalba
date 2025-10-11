@@ -1,4 +1,4 @@
-# RUDRA VM Setup Guide
+# Xibalba VM Setup Guide
 
 **Why VMs?** Full control over kernel config, no permission issues, test custom kernels safely.
 
@@ -10,13 +10,13 @@
 
 ```bash
 # Create VM with custom kernel
-bazel run //vm:create_vm -- --name rudra-test-01 --kernel /path/to/your/kernel
+bazel run //vm:create_vm -- --name xibalba-test-01 --kernel /path/to/your/kernel
 
-# Deploy RUDRA
-bazel run //vm:deploy_rudra -- rudra-test-01
+# Deploy Xibalba
+bazel run //vm:deploy_xibalba -- xibalba-test-01
 
 # Run tests
-bazel run //vm:run_tests -- rudra-test-01
+bazel run //vm:run_tests -- xibalba-test-01
 ```
 
 ### Option 2: Multi-Filesystem Matrix (Full Testing)
@@ -24,11 +24,11 @@ bazel run //vm:run_tests -- rudra-test-01
 ```bash
 # Create VMs for each filesystem
 for fs in ext4 xfs btrfs tmpfs; do
-  bazel run //vm:create_vm -- --name rudra-$fs --filesystem $fs
+  bazel run //vm:create_vm -- --name xibalba-$fs --filesystem $fs
 done
 
 # Run tests on all VMs in parallel
-for vm in rudra-{ext4,xfs,btrfs,tmpfs}; do
+for vm in xibalba-{ext4,xfs,btrfs,tmpfs}; do
   bazel run //vm:run_tests -- $vm > results-$vm.txt 2>&1 &
 done
 wait
@@ -57,7 +57,7 @@ cat results-*.txt
 
 ## VM Kernel Configuration
 
-**Required kernel options for RUDRA**:
+**Required kernel options for Xibalba**:
 
 ```bash
 CONFIG_BPF_SYSCALL=y                 # eBPF support
@@ -91,9 +91,9 @@ virt-customize -a noble-server-cloudimg-amd64.img \
   --install build-essential,clang,libbpf-dev,linux-headers-generic
 
 # Clone for each filesystem
-cp noble-server-cloudimg-amd64.img rudra-ext4.qcow2
-cp noble-server-cloudimg-amd64.img rudra-xfs.qcow2
-cp noble-server-cloudimg-amd64.img rudra-btrfs.qcow2
+cp noble-server-cloudimg-amd64.img xibalba-ext4.qcow2
+cp noble-server-cloudimg-amd64.img xibalba-xfs.qcow2
+cp noble-server-cloudimg-amd64.img xibalba-btrfs.qcow2
 ```
 
 ---
@@ -125,17 +125,17 @@ mount -t tmpfs -o size=1G tmpfs /test
 
 ---
 
-## Deploy RUDRA to VMs
+## Deploy Xibalba to VMs
 
 ```bash
 # Build locally with Bazel
 bazel build //...
 
 # Deploy to VM (automated)
-bazel run //vm:deploy_rudra -- VM_NAME
+bazel run //vm:deploy_xibalba -- VM_NAME
 
 # Or manually copy
-scp -r bazel-bin/chaos/{pause_controller,simple_chaos_test,pause_injector.bpf.o} root@vm-ip:/root/rudra/
+scp -r bazel-bin/chaos/{pause_controller,simple_chaos_test,pause_injector.bpf.o} root@vm-ip:/root/xibalba/
 ```
 
 ---
@@ -152,13 +152,13 @@ bazel run //vm:run_tests -- VM_NAME
 **Or manually inside VM** (SSH in as root, no permission issues!):
 
 ```bash
-cd /root/rudra
+cd /root/xibalba
 
 # Start error injector (works perfectly in VM!)
 ./pause_controller 50 11 &
 
 # Run chaos test
-./simple_chaos_test /test/rudra_test
+./simple_chaos_test /test/xibalba_test
 
 # Should see:
 #   - Errors injected: ~20K/sec
@@ -173,7 +173,7 @@ cd /root/rudra
 All VM operations are exposed as Bazel targets (see `vm/BUILD.bazel`):
 
 1. **`//vm:create_vm`** - Create single VM with custom kernel
-2. **`//vm:deploy_rudra`** - Deploy RUDRA binaries to VM
+2. **`//vm:deploy_xibalba`** - Deploy Xibalba binaries to VM
 3. **`//vm:run_tests`** - SSH in and run tests
 4. **`//vm:destroy_vm`** - Destroy VM and clean up
 5. **`//vm:check_prerequisites`** - Verify host has QEMU/KVM/libvirt
@@ -210,7 +210,7 @@ wait
 
 1. ✅ Confirm QEMU/KVM installed on host
 2. ✅ Create first test VM with your custom kernel
-3. ✅ Deploy RUDRA binaries
+3. ✅ Deploy Xibalba binaries
 4. ✅ Run test with full eBPF support
 5. ✅ Find bugs! 🐛
 

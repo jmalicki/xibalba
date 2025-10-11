@@ -1,4 +1,4 @@
-# VM Infrastructure for RUDRA Testing
+# VM Infrastructure for Xibalba Testing
 #
 # These scripts create, manage, and test VMs for kernel filesystem testing.
 # Run them via Bazel to ensure proper dependency tracking and hermetic execution.
@@ -6,6 +6,13 @@
 package(default_visibility = ["//visibility:public"])
 
 load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
+
+# Automated test runner (gets installed in VMs as /usr/bin/xibalba-test-runner)
+sh_binary(
+    name = "test_runner_script",
+    srcs = ["test-runner.sh"],
+    data = [],
+)
 
 # Check if host has required VM tools (QEMU/KVM, libvirt, etc.)
 sh_binary(
@@ -25,11 +32,11 @@ sh_binary(
     ],
 )
 
-# Deploy RUDRA binaries to a running VM
-# Usage: bazel run //vm:deploy_rudra -- <vm-name>
+# Deploy Xibalba binaries to a running VM
+# Usage: bazel run //vm:deploy_xibalba -- <vm-name>
 sh_binary(
-    name = "deploy_rudra",
-    srcs = ["deploy_rudra.sh"],
+    name = "deploy_xibalba",
+    srcs = ["deploy_xibalba.sh"],
     data = [
         "//chaos:pause_controller",
         "//chaos:pause_injector_bpf",
@@ -38,12 +45,12 @@ sh_binary(
     # The script will copy binaries from bazel-bin/ to VM
 )
 
-# Run RUDRA tests inside a VM
+# Run Xibalba tests inside a VM
 # Usage: bazel run //vm:run_tests -- <vm-name>
 sh_binary(
     name = "run_tests",
     srcs = ["run_tests.sh"],
-    # Depends on deploy_rudra being run first
+    # Depends on deploy_xibalba being run first
 )
 
 # Destroy a test VM
@@ -60,11 +67,10 @@ sh_binary(
 #     data = [
 #         ":check_prerequisites",
 #         ":create_vm",
-#         ":deploy_rudra",
+#         ":deploy_xibalba",
 #         ":run_tests",
 #         ":destroy_vm",
 #     ],
 #     size = "large",
 #     tags = ["integration", "requires-kvm", "requires-sudo"],
 # )
-
