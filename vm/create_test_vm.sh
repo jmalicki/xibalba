@@ -186,7 +186,7 @@ ethernets:
 EOF
 
 # Create cloud-init ISO
-CLOUD_INIT_ISO="$SCRIPT_DIR/images/${VM_NAME}-cloud-init.iso"
+CLOUD_INIT_ISO="$IMAGES_DIR/${VM_NAME}-cloud-init.iso"
 if [ -f "$CLOUD_INIT_ISO" ]; then
     rm "$CLOUD_INIT_ISO"
 fi
