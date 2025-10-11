@@ -6,6 +6,16 @@ set -euo pipefail
 # Script directory for relative paths
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Use project vm/images directory (not Bazel runfiles) for VM disks
+# This avoids Bazel cache permission issues with libvirt
+if [ -w "$SCRIPT_DIR/images" ] 2>/dev/null; then
+    IMAGES_DIR="$SCRIPT_DIR/images"
+else
+    # Fallback for Bazel runfiles: use /tmp (world-writable)
+    IMAGES_DIR="/tmp/xibalba-vm-images"
+    mkdir -p "$IMAGES_DIR"
+fi
+
 # Default values
 VM_NAME=""
 CUSTOM_KERNEL=""
@@ -78,7 +88,7 @@ if [ ! -f "$CLOUD_IMAGE" ]; then
 fi
 
 # Create VM disk from cloud image
-VM_DISK="$SCRIPT_DIR/images/${VM_NAME}.qcow2"
+VM_DISK="$IMAGES_DIR/${VM_NAME}.qcow2"
 if [ -f "$VM_DISK" ]; then
     if [ -t 0 ]; then
         # Interactive: ask for confirmation
@@ -109,7 +119,7 @@ qemu-img create -f qcow2 -F qcow2 -b "$CLOUD_IMAGE" "$VM_DISK" "${DISK_GB}G"
 echo "  ✓ Created $VM_DISK"
 
 # Create data disk for tests
-DATA_DISK="$SCRIPT_DIR/images/${VM_NAME}-data.qcow2"
+DATA_DISK="$IMAGES_DIR/${VM_NAME}-data.qcow2"
 if [ -f "$DATA_DISK" ]; then
     rm "$DATA_DISK"
 fi
