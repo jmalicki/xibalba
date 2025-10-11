@@ -44,26 +44,6 @@ echo "VM: $VM_NAME"
 echo "Package: $PACKAGE"
 echo
 
-# Detect SSH key
-# Always bypass known_hosts (VMs reuse IPs, causing host key conflicts)
-if [ -f "/tmp/xibalba-ssh-keys/id_rsa" ]; then
-    SSH_KEY="/tmp/xibalba-ssh-keys/id_rsa"
-    echo "INFO: Using temporary SSH key"
-elif [ -n "${HOME:-}" ] && [ -f "$HOME/.ssh/id_rsa" ]; then
-    SSH_KEY="$HOME/.ssh/id_rsa"
-    echo "INFO: Using user SSH key"
-else
-    SSH_KEY=""
-    echo "WARNING: No SSH key found"
-fi
-
-# Build SSH options (quote the key path!)
-if [ -n "$SSH_KEY" ]; then
-    SSH_OPTS="-i $SSH_KEY -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=2"
-else
-    SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=2"
-fi
-
 # Cleanup on exit (hermetic: remove all test artifacts)
 # shellcheck disable=SC2317
 cleanup() {
@@ -85,6 +65,26 @@ trap cleanup EXIT
 # Step 1: Create VM
 echo "Step 1: Creating VM..."
 "$SCRIPT_DIR/create_test_vm.sh" --name "$VM_NAME" --filesystem "$FILESYSTEM"
+
+# Detect SSH key (AFTER create_test_vm.sh which generates it)
+# Always bypass known_hosts (VMs reuse IPs, causing host key conflicts)
+if [ -f "/tmp/xibalba-ssh-keys/id_rsa" ]; then
+    SSH_KEY="/tmp/xibalba-ssh-keys/id_rsa"
+    echo "INFO: Using temporary SSH key"
+elif [ -n "${HOME:-}" ] && [ -f "$HOME/.ssh/id_rsa" ]; then
+    SSH_KEY="$HOME/.ssh/id_rsa"
+    echo "INFO: Using user SSH key"
+else
+    SSH_KEY=""
+    echo "WARNING: No SSH key found"
+fi
+
+# Build SSH options
+if [ -n "$SSH_KEY" ]; then
+    SSH_OPTS="-i $SSH_KEY -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=2"
+else
+    SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=2"
+fi
 
 # Step 2: Wait for VM network and SSH (cloud-init takes 5-10 min)
 echo "Step 2: Waiting for VM network and SSH..."
