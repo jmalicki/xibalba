@@ -66,7 +66,14 @@
 
 ## 🚀 Getting Started
 
-**Current Status**: Design complete, ready for implementation
+**Current Status**: ✅ Core implementation complete, eBPF fault injection working
+
+**⚠️ IMPORTANT**: [CI and VM Testing Strategy](docs/CI-AND-VM-TESTING.md) - **Read this first!**
+
+**Key points**:
+- CI validates builds/packages (✅ automated)
+- VM testing requires KVM (run locally or self-hosted)
+- **Why**: We test CUSTOM KERNELS - containers can't do this!
 
 ### Two Paths Forward:
 
