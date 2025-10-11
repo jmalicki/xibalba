@@ -4,31 +4,9 @@
 
 set -euo pipefail
 
-# First, validate host dependencies (fail fast if not met)
+# Host dependencies are validated by Bazel test dependency
+# Bazel ensures //vm:verify_host_deps passes before this runs
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-# Find verify_host_deps script
-VERIFY_SCRIPT=""
-for loc in "$SCRIPT_DIR/verify_host_deps.sh" "$SCRIPT_DIR/../vm/verify_host_deps.sh" "$(pwd)/vm/verify_host_deps.sh"; do
-    if [ -f "$loc" ]; then
-        VERIFY_SCRIPT="$loc"
-        break
-    fi
-done
-
-if [ -n "$VERIFY_SCRIPT" ]; then
-    echo "Validating host dependencies..."
-    if ! "$VERIFY_SCRIPT"; then
-        echo
-        echo "❌ Host dependencies not met. Cannot proceed with VM testing."
-        echo "Install missing packages as shown above, then try again."
-        exit 1
-    fi
-    echo
-else
-    echo "⚠️  Warning: Could not find verify_host_deps.sh, skipping validation"
-    echo
-fi
 
 # Get the package path from Bazel (first argument)
 PACKAGE_PATH="$1"
