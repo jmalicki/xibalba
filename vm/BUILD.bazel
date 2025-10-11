@@ -22,19 +22,19 @@ sh_binary(
 )
 
 # Parallel VM test runner - runs multiple VMs with different filesystems simultaneously
-# Wrapper script that passes the package path to the test script
+# Automatically validates host dependencies before running
 #
-# IMPORTANT: Run //vm:verify_host_deps first to check prerequisites:
-#   bazel test //vm:verify_host_deps
-#
-# If that fails, install missing packages then run:
+# Usage:
 #   bazel run //vm:parallel_vm_tests
+#
+# If host dependencies are missing, the test will fail with install instructions.
 sh_binary(
     name = "parallel_vm_tests",
     srcs = ["run-parallel-vm-tests-wrapper.sh"],
     args = ["$(location //packaging:xibalba-deb)"],
     data = [
         ":run-parallel-vm-tests.sh",
+        ":verify_host_deps.sh",  # Validation runs automatically
         ":create_test_vm.sh",
         ":deploy_xibalba.sh",
         ":run_tests.sh",
