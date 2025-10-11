@@ -49,9 +49,12 @@ if ! groups 2>/dev/null | grep -q libvirt; then
 fi
 echo "✓ User in libvirt group"
 
-# Check and auto-start libvirt default network
+# Check and auto-start libvirt default network (IDEMPOTENT)
+# Always use system libvirt explicitly
+VIRSH="virsh --connect qemu:///system"
+
 if command -v virsh &> /dev/null; then
-    if ! virsh net-list --all 2>/dev/null | grep -q "default"; then
+    if ! $VIRSH net-list --all 2>/dev/null | grep -q "default"; then
         echo "✗ libvirt default network not found"
         echo
         echo "ERROR: Default network doesn't exist"
@@ -61,10 +64,10 @@ if command -v virsh &> /dev/null; then
         exit 1
     fi
     
-    if ! virsh net-list 2>/dev/null | grep -q "default.*active"; then
+    if ! $VIRSH net-list 2>/dev/null | grep -q "default.*active"; then
         echo "⚠ Default network inactive, starting..."
         # User is in libvirt group, so this should work
-        if ! virsh net-start default 2>&1; then
+        if ! $VIRSH net-start default 2>&1; then
             echo
             echo "ERROR: Failed to start libvirt default network"
             echo

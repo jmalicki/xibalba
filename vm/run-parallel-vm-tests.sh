@@ -15,6 +15,20 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
+# Detect SSH key (from create_test_vm.sh or user's home)
+if [ -n "${XIBALBA_SSH_KEY:-}" ] && [ -f "$XIBALBA_SSH_KEY" ]; then
+    SSH_OPTS="-i $XIBALBA_SSH_KEY -o StrictHostKeyChecking=no -o ConnectTimeout=2"
+    echo "INFO: Using SSH key: $XIBALBA_SSH_KEY"
+elif [ -f "/tmp/xibalba-ssh-keys/id_rsa" ]; then
+    SSH_OPTS="-i /tmp/xibalba-ssh-keys/id_rsa -o StrictHostKeyChecking=no -o ConnectTimeout=2"
+    echo "INFO: Using temporary SSH key: /tmp/xibalba-ssh-keys/id_rsa"
+elif [ -n "${HOME:-}" ] && [ -f "$HOME/.ssh/id_rsa" ]; then
+    SSH_OPTS="-i $HOME/.ssh/id_rsa -o StrictHostKeyChecking=no -o ConnectTimeout=2"
+else
+    SSH_OPTS="-o StrictHostKeyChecking=no -o ConnectTimeout=2"
+    echo "WARNING: No SSH key found, relying on default auth"
+fi
+
 # Default configuration (per consistency model)
 DURATION="${XIBALBA_DURATION:-300}"  # 5 minutes per model (15 min total per VM)
 READERS="${XIBALBA_READERS:-10}"
@@ -131,7 +145,8 @@ run_vm_test() {
     
     # Wait for VM to be ready
     echo "[${vm_name}] Waiting for SSH..."
-    timeout 60 bash -c "until ssh -o StrictHostKeyChecking=no -o ConnectTimeout=2 root@$vm_name true 2>/dev/null; do sleep 2; done" || {
+    # shellcheck disable=SC2086
+    timeout 60 bash -c "until ssh $SSH_OPTS root@$vm_name true 2>/dev/null; do sleep 2; done" || {
         echo "[${vm_name}] ❌ Failed to connect via SSH"
         echo 1 > "$exit_code_file"
         return 1
@@ -139,13 +154,15 @@ run_vm_test() {
     
     # Deploy package
     echo "[${vm_name}] Deploying Xibalba..."
-    scp -o StrictHostKeyChecking=no "$PACKAGE_PATH" "root@${vm_name}:/tmp/" || {
+    # shellcheck disable=SC2086
+    scp $SSH_OPTS "$PACKAGE_PATH" "root@${vm_name}:/tmp/" || {
         echo "[${vm_name}] ❌ Failed to copy package"
         echo 1 > "$exit_code_file"
         return 1
     }
     
-    ssh -o StrictHostKeyChecking=no "root@${vm_name}" "apt update && apt install -y /tmp/xibalba_0.1.0_amd64.deb" || {
+    # shellcheck disable=SC2086
+    ssh $SSH_OPTS "root@${vm_name}" "apt update && apt install -y /tmp/xibalba_0.1.0_amd64.deb" || {
         echo "[${vm_name}] ❌ Failed to install package"
         echo 1 > "$exit_code_file"
         return 1
@@ -157,14 +174,17 @@ run_vm_test() {
     echo "[${vm_name}]   2. WEAK (POSIX) - should PASS"
     echo "[${vm_name}]   3. STRICT (ideal) - quantify departures"
     
-    if ssh -o StrictHostKeyChecking=no "root@${vm_name}" \
+    # shellcheck disable=SC2086,SC2029
+    if ssh $SSH_OPTS "root@${vm_name}" \
         "XIBALBA_DURATION=$DURATION XIBALBA_READERS=$READERS XIBALBA_WRITERS=$WRITERS xibalba-gauntlet $filesystem"; then
         echo "[${vm_name}] ✅ TEST PASSED at $(date +%H:%M:%S)"
         
         # Get gauntlet results (comprehensive summary + individual model results)
-        ssh -o StrictHostKeyChecking=no "root@${vm_name}" \
+        # shellcheck disable=SC2086
+        ssh $SSH_OPTS "root@${vm_name}" \
             "cat /var/log/xibalba/gauntlet/latest-gauntlet.json" > "$RESULTS_DIR/${vm_name}-gauntlet.json" 2>/dev/null || true
-        ssh -o StrictHostKeyChecking=no "root@${vm_name}" \
+        # shellcheck disable=SC2086
+        ssh $SSH_OPTS "root@${vm_name}" \
             "cat /var/log/xibalba/gauntlet/latest-gauntlet.txt" > "$RESULTS_DIR/${vm_name}-gauntlet.txt" 2>/dev/null || true
         
         echo 0 > "$exit_code_file"
@@ -173,9 +193,11 @@ run_vm_test() {
         echo "[${vm_name}] ❌ TEST FAILED at $(date +%H:%M:%S)"
         
         # Get gauntlet failure details
-        ssh -o StrictHostKeyChecking=no "root@${vm_name}" \
+        # shellcheck disable=SC2086
+        ssh $SSH_OPTS "root@${vm_name}" \
             "cat /var/log/xibalba/gauntlet/latest-gauntlet.json" > "$RESULTS_DIR/${vm_name}-gauntlet.json" 2>/dev/null || true
-        ssh -o StrictHostKeyChecking=no "root@${vm_name}" \
+        # shellcheck disable=SC2086
+        ssh $SSH_OPTS "root@${vm_name}" \
             "cat /var/log/xibalba/gauntlet/latest-gauntlet.txt" > "$RESULTS_DIR/${vm_name}-gauntlet.txt" 2>/dev/null || true
         
         echo 1 > "$exit_code_file"

@@ -6,12 +6,18 @@ set -euo pipefail
 # Script directory for relative paths
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Use project vm/images directory (not Bazel runfiles) for VM disks
-# This avoids Bazel cache permission issues with libvirt
-if [ -w "$SCRIPT_DIR/images" ] 2>/dev/null; then
+# Use /tmp for VM images when running via Bazel (avoids permission issues)
+# Use project directory when running manually
+if [ -n "${RUNFILES_DIR:-}" ]; then
+    # Running via Bazel - use /tmp (world-readable, libvirt-qemu can access)
+    IMAGES_DIR="/tmp/xibalba-vm-images"
+    mkdir -p "$IMAGES_DIR"
+    echo "INFO: Using /tmp for VM images (Bazel mode)"
+elif [ -w "$SCRIPT_DIR/images" ] 2>/dev/null; then
+    # Manual run - use project directory
     IMAGES_DIR="$SCRIPT_DIR/images"
 else
-    # Fallback for Bazel runfiles: use /tmp (world-writable)
+    # Fallback
     IMAGES_DIR="/tmp/xibalba-vm-images"
     mkdir -p "$IMAGES_DIR"
 fi
@@ -135,10 +141,24 @@ mkdir -p "$CLOUD_INIT_DIR"
 # HOME may not be set in Bazel test environment
 if [ -n "${HOME:-}" ] && [ -f "$HOME/.ssh/id_rsa.pub" ]; then
     SSH_PUBKEY=$(cat "$HOME/.ssh/id_rsa.pub")
+    SSH_KEY_PATH="$HOME/.ssh/id_rsa"
 else
-    # No SSH key available - VM will use password auth (ubuntu/ubuntu)
-    echo "INFO: No SSH key found (HOME=${HOME:-unset}), using password auth"
-    SSH_PUBKEY=""
+    # Generate temporary SSH key for testing
+    echo "INFO: Generating temporary SSH key for VM access"
+    SSH_KEY_DIR="/tmp/xibalba-ssh-keys"
+    mkdir -p "$SSH_KEY_DIR"
+    chmod 700 "$SSH_KEY_DIR"
+    SSH_KEY_PATH="$SSH_KEY_DIR/id_rsa"
+    
+    if [ ! -f "$SSH_KEY_PATH" ]; then
+        ssh-keygen -t ed25519 -f "$SSH_KEY_PATH" -N "" -C "xibalba-test" >/dev/null
+        echo "  ✓ Created temporary SSH key: $SSH_KEY_PATH"
+    fi
+    
+    SSH_PUBKEY=$(cat "$SSH_KEY_PATH.pub")
+    
+    # Export for other scripts to use
+    export XIBALBA_SSH_KEY="$SSH_KEY_PATH"
 fi
 
 # Create user-data
