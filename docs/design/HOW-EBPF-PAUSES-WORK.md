@@ -1,4 +1,4 @@
-# How eBPF Pauses Work in RUDRA
+# How eBPF Pauses Work in Xibalba
 
 *Understanding the pause injection mechanism*
 
@@ -7,7 +7,7 @@
 ## The Jepsen Analogy
 
 **Jepsen**: Nemesis directly causes chaos (network partitions, process kills)  
-**RUDRA**: eBPF directly causes chaos (pauses at critical kernel functions)
+**Xibalba**: eBPF directly causes chaos (pauses at critical kernel functions)
 
 **Key insight**: The pause must happen **AT THE MOMENT** of the hook, not later!
 

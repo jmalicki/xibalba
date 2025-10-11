@@ -72,12 +72,12 @@ Our CI pipeline validates the **build and packaging**:
 ✅ **Bazel builds all targets**
 ```bash
 bazel build //...
-bazel build //packaging:rudra-deb
+bazel build //packaging:xibalba-deb
 ```
 
 ✅ **Creates Debian package**
 ```
-rudra_0.1.0_amd64.deb (52KB)
+xibalba_0.1.0_amd64.deb (52KB)
 Contains: pause_controller, simple_chaos_test, pause_injector.bpf.o
 ```
 
@@ -127,7 +127,7 @@ lsmod | grep kvm
 bazel run //vm:create_vm -- --name test-01 --filesystem ext4
 
 # Deploy and test
-bazel run //vm:deploy_rudra -- test-01
+bazel run //vm:deploy_xibalba -- test-01
 bazel run //vm:run_tests -- test-01
 
 # Test with custom kernel
@@ -271,7 +271,7 @@ bazel build //...
 
 # 3. Test locally in VM
 bazel run //vm:create_vm -- --name dev-test
-bazel run //vm:deploy_rudra -- dev-test
+bazel run //vm:deploy_xibalba -- dev-test
 bazel run //vm:run_tests -- dev-test
 
 # 4. Push when tests pass
@@ -289,7 +289,7 @@ git push origin feature-branch
 # Full test matrix on self-hosted runner OR locally
 for fs in ext4 xfs btrfs tmpfs; do
   bazel run //vm:create_vm -- --name test-$fs --filesystem $fs
-  bazel run //vm:deploy_rudra -- test-$fs
+  bazel run //vm:deploy_xibalba -- test-$fs
   bazel run //vm:run_tests -- test-$fs
 done
 ```

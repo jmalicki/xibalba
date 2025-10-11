@@ -1,0 +1,16 @@
+# APT packages required for Xibalba CI builds
+# 
+# This file defines the eBPF dependencies needed for building.
+# Changing this file will invalidate the GitHub Actions cache and
+# trigger a fresh package installation.
+#
+# Pre-installed on ubuntu-latest (don't need to install):
+#   - clang
+#   - llvm
+#   - gcc
+#
+# Need to install:
+libbpf-dev
+libelf-dev
+linux-headers-generic
+

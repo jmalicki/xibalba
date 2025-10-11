@@ -1,4 +1,4 @@
-# 🚀 START HERE: RUDRA Tech De-Risking
+# 🚀 START HERE: Xibalba Tech De-Risking
 
 *You are here: Day 1 of tech de-risking, ready to validate eBPF!*
 
@@ -40,7 +40,7 @@ In the last hour, we created:
 ### Step 1: Run Setup Script (1 minute)
 
 ```bash
-cd /home/jmalicki/src/rudra
+cd /home/jmalicki/src/xibalba
 sudo ./setup_ebpf_permissions.sh
 ```
 
@@ -62,9 +62,9 @@ bazel run //chaos:pause_controller -- 50 11
 
 **Terminal 2** - Run Chaos Test:
 ```bash
-mkdir -p /tmp/rudra_test
-touch /tmp/rudra_test/file{1..100}
-bazel run //chaos:simple_chaos_test -- /tmp/rudra_test
+mkdir -p /tmp/xibalba_test
+touch /tmp/xibalba_test/file{1..100}
+bazel run //chaos:simple_chaos_test -- /tmp/xibalba_test
 ```
 
 **Expected Results**:
@@ -131,7 +131,7 @@ If you have kernel with async getdents:
 ## Current File Structure
 
 ```
-rudra/
+xibalba/
 ├── bin/                           (created by setup script)
 │   ├── pause_injector.bpf.o       eBPF bytecode
 │   ├── pause_controller           Controller (has capabilities!)
@@ -199,7 +199,7 @@ sudo bpftool prog list | grep getdents
 sudo cat /sys/kernel/debug/tracing/trace_pipe
 
 # Clean up
-rm -rf /tmp/rudra_test
+rm -rf /tmp/xibalba_test
 rm bin/*
 ```
 

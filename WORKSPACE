@@ -1,6 +1,6 @@
-workspace(name = "rudra")
+workspace(name = "xibalba")
 
-# RUDRA: Chaos Testing Framework for Kernel Filesystems
+# Xibalba: Chaos Testing Framework for Kernel Filesystems
 # Build system: Bazel
 
 # External dependencies

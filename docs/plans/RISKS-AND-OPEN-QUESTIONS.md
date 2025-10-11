@@ -1,4 +1,4 @@
-# RUDRA: Risks and Open Questions
+# Xibalba: Risks and Open Questions
 
 *Critical issues to address before implementation*
 *Date: October 10, 2025*
@@ -24,7 +24,7 @@
 
 ## Overview
 
-This document outlines **risks, open questions, and decisions needed** before starting RUDRA implementation. Address these early to avoid costly mid-project pivots.
+This document outlines **risks, open questions, and decisions needed** before starting Xibalba implementation. Address these early to avoid costly mid-project pivots.
 
 **Update**: Using VMs with custom kernels **eliminates most risks**! This document now focuses on actual remaining questions.
 
@@ -237,7 +237,7 @@ make -j$(nproc) bindeb-pkg
 bazel run //vm:create_vm -- --name test-01 --kernel /path/to/vmlinuz
 
 # 4. Deploy and run tests
-bazel run //vm:deploy_rudra -- test-01
+bazel run //vm:deploy_xibalba -- test-01
 bazel run //vm:run_tests -- test-01
 
 # 5. Analyze results, iterate
@@ -392,7 +392,7 @@ grep IORING_OP_GETDENTS /usr/include/liburing/io_uring.h
 
 **Suggestion**: Create requirements manifest
 ```yaml
-# rudra-dependencies.yaml
+# xibalba-dependencies.yaml
 kernel: "6.8.0-custom"
 liburing: "2.4"
 bpftool: "7.0.0"
@@ -825,14 +825,14 @@ done
 **Option A: Testing patches you're developing**
 ```bash
 # You're writing async getdents code
-# RUDRA validates it works correctly
-# Typical use: iterate on patches based on RUDRA findings
+# Xibalba validates it works correctly
+# Typical use: iterate on patches based on Xibalba findings
 ```
 
 **Option B: Testing existing kernel features**
 ```bash
 # Kernel already has the feature
-# RUDRA validates stability/correctness
+# Xibalba validates stability/correctness
 # Typical use: confidence before production deployment
 ```
 
@@ -898,5 +898,5 @@ done
 
 ---
 
-*RUDRA: The path is clear, just need to choose your route through it.* ⚡
+*Xibalba: The path is clear, just need to choose your route through it.* ⚡
 

@@ -1,4 +1,4 @@
-# RUDRA Debian Package
+# Xibalba Debian Package
 #
 # Creates .deb packages for easy installation in VMs
 
@@ -7,57 +7,104 @@ package(default_visibility = ["//visibility:public"])
 load("@rules_pkg//pkg:deb.bzl", "pkg_deb")
 load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
 
-# Tar archive of binaries
+# Tar archive of test binaries
 pkg_tar(
-    name = "rudra-bin",
+    name = "xibalba-test-bins",
     srcs = [
         "//chaos:pause_controller",
         "//chaos:simple_chaos_test",
-        "//chaos:pause_injector_bpf",
     ],
     mode = "0755",
     package_dir = "/usr/bin",
     strip_prefix = "/chaos",
 )
 
+# Copy and rename test-runner.sh to xibalba-test-runner
+genrule(
+    name = "copy_test_runner",
+    srcs = ["//vm:test-runner.sh"],
+    outs = ["xibalba-test-runner"],
+    cmd = "cp $< $@",
+)
+
+# Tar archive of test runner script
+pkg_tar(
+    name = "xibalba-test-runner-tar",
+    srcs = [":copy_test_runner"],
+    mode = "0755",
+    package_dir = "/usr/bin",
+)
+
+# Combined binaries
+pkg_tar(
+    name = "xibalba-bin",
+    deps = [
+        ":xibalba-test-bins",
+        ":xibalba-test-runner-tar",
+    ],
+)
+
 # Tar archive of data files (eBPF bytecode)
 pkg_tar(
-    name = "rudra-data",
+    name = "xibalba-data",
     srcs = [
         "//chaos:pause_injector_bpf",
     ],
     mode = "0644",
-    package_dir = "/usr/share/rudra",
+    package_dir = "/usr/share/xibalba",
     strip_prefix = "/chaos",
 )
 
 # Debian package
 pkg_deb(
-    name = "rudra-deb",
+    name = "xibalba-deb",
     architecture = "amd64",
-    data = ":rudra-bin",
+    data = ":xibalba-bin",
     depends = [
         "libbpf0",
         "libelf1",
     ],
-    description = """RUDRA: Chaos Testing Framework for Kernel Filesystems
- RUDRA is a Jepsen-inspired chaos testing framework for Linux kernel VFS
+    recommends = [
+        "e2fsprogs",       # ext4
+        "xfsprogs",        # XFS
+        "btrfs-progs",     # btrfs
+        "zfsutils-linux",  # ZFS (primary test target with ext4)
+        "f2fs-tools",      # F2FS
+        "nilfs-tools",     # NILFS2
+        "nfs-common",      # NFS client
+        "exfatprogs",      # exFAT (common on USB drives, SD cards)
+        "ntfs-3g",         # NTFS (common for dual-boot, external drives)
+    ],
+    suggests = [
+        "nfs-kernel-server",  # NFS server (only for server testing)
+        "cifs-utils",         # CIFS/SMB (network filesystems)
+        "fuse3",              # FUSE filesystems (user-space implementations)
+    ],
+    description = """Xibalba: Chaos Testing Framework for Kernel Filesystems
+ Xibalba is a Jepsen-inspired chaos testing framework for Linux kernel VFS
  operations, specifically designed to test concurrent filesystem operations
  using eBPF fault injection.
+ .
+ Named after the Maya underworld of trials, Xibalba puts your code through
+ a gauntlet of chaos tests to prove its worthiness for production.
  .
  This package includes:
   - pause_controller: eBPF userspace controller
   - simple_chaos_test: Multi-threaded directory reading test
-  - pause_injector.bpf.o: eBPF bytecode for fault injection""",
-    homepage = "https://github.com/your-org/rudra",
-    maintainer = "RUDRA Developers <rudra@example.com>",
-    package = "rudra",
+  - pause_injector.bpf.o: eBPF bytecode for fault injection
+ .
+ For comprehensive filesystem testing, recommended packages include tools
+ for ext4, XFS, btrfs, ZFS, F2FS, NILFS2, and NFS. These are automatically
+ installed when using 'apt install' (but not 'dpkg -i').""",
+    homepage = "https://github.com/your-org/xibalba",
+    maintainer = "Xibalba Developers <xibalba@example.com>",
+    package = "xibalba",
     version = "0.1.0",
 )
 
 # Convenience alias for building the package
 alias(
     name = "package",
-    actual = ":rudra-deb",
+    actual = ":xibalba-deb",
 )
 

@@ -1,12 +1,12 @@
-# RUDRA VM Infrastructure
+# Xibalba VM Infrastructure
 
-Automated scripts for testing RUDRA in VMs with full kernel control.
+Automated scripts for testing Xibalba in VMs with full kernel control.
 
 ---
 
 ## Quick Start
 
-**Note**: All VM operations use Bazel for consistency with the rest of RUDRA.
+**Note**: All VM operations use Bazel for consistency with the rest of Xibalba.
 
 ### 1. Prerequisites Check
 
@@ -20,19 +20,19 @@ Verifies: QEMU/KVM, libvirt, virt-install, virt-customize
 
 ```bash
 # Simple: Use existing kernel
-bazel run //vm:create_vm -- --name rudra-test-01
+bazel run //vm:create_vm -- --name xibalba-test-01
 
 # With custom kernel
-bazel run //vm:create_vm -- --name rudra-test-01 --kernel /path/to/vmlinuz --initrd /path/to/initrd
+bazel run //vm:create_vm -- --name xibalba-test-01 --kernel /path/to/vmlinuz --initrd /path/to/initrd
 
 # With specific filesystem
-bazel run //vm:create_vm -- --name rudra-xfs-test --filesystem xfs
+bazel run //vm:create_vm -- --name xibalba-xfs-test --filesystem xfs
 ```
 
-### 3. Deploy RUDRA
+### 3. Deploy Xibalba
 
 ```bash
-bazel run //vm:deploy_rudra -- rudra-test-01
+bazel run //vm:deploy_xibalba -- xibalba-test-01
 ```
 
 **Note**: This automatically uses the latest Bazel-built binaries from `bazel-bin/chaos/`.
@@ -41,10 +41,10 @@ bazel run //vm:deploy_rudra -- rudra-test-01
 
 ```bash
 # Interactive (see output in real-time)
-bazel run //vm:run_tests -- rudra-test-01
+bazel run //vm:run_tests -- xibalba-test-01
 
 # Automated (collect results)
-bazel run //vm:run_tests -- --automated rudra-test-01 > results.txt
+bazel run //vm:run_tests -- --automated xibalba-test-01 > results.txt
 ```
 
 ---
@@ -61,7 +61,7 @@ bazel run //vm:check_prerequisites
 ```
 
 ### `//vm:create_vm`
-Creates a VM configured for RUDRA testing.
+Creates a VM configured for Xibalba testing.
 
 **Options**:
 - `--name NAME` - VM name (required)
@@ -77,19 +77,19 @@ Creates a VM configured for RUDRA testing.
 - Installs your custom kernel (if provided)
 - Creates test data disk
 - Formats with specified filesystem
-- Configures for RUDRA testing
+- Configures for Xibalba testing
 
 **Example**:
 ```bash
 bazel run //vm:create_vm -- --name test-01 --filesystem xfs
 ```
 
-### `//vm:deploy_rudra`
-Deploys RUDRA binaries to a VM.
+### `//vm:deploy_xibalba`
+Deploys Xibalba binaries to a VM.
 
 **Usage**:
 ```bash
-bazel run //vm:deploy_rudra -- VM_NAME
+bazel run //vm:deploy_xibalba -- VM_NAME
 ```
 
 **What it does**:
@@ -100,7 +100,7 @@ bazel run //vm:deploy_rudra -- VM_NAME
 
 **Example**:
 ```bash
-bazel run //vm:deploy_rudra -- test-01
+bazel run //vm:deploy_xibalba -- test-01
 ```
 
 ### `//vm:run_tests`
@@ -145,18 +145,18 @@ To test across multiple filesystems, create VMs individually:
 
 ```bash
 # Create VMs for each filesystem
-bazel run //vm:create_vm -- --name rudra-ext4 --filesystem ext4
-bazel run //vm:create_vm -- --name rudra-xfs --filesystem xfs
-bazel run //vm:create_vm -- --name rudra-btrfs --filesystem btrfs
-bazel run //vm:create_vm -- --name rudra-tmpfs --filesystem tmpfs
+bazel run //vm:create_vm -- --name xibalba-ext4 --filesystem ext4
+bazel run //vm:create_vm -- --name xibalba-xfs --filesystem xfs
+bazel run //vm:create_vm -- --name xibalba-btrfs --filesystem btrfs
+bazel run //vm:create_vm -- --name xibalba-tmpfs --filesystem tmpfs
 ```
 
 ### Deploying to Multiple VMs
 
 ```bash
 # Deploy to all VMs
-for vm in rudra-ext4 rudra-xfs rudra-btrfs rudra-tmpfs; do
-  bazel run //vm:deploy_rudra -- $vm
+for vm in xibalba-ext4 xibalba-xfs xibalba-btrfs xibalba-tmpfs; do
+  bazel run //vm:deploy_xibalba -- $vm
 done
 ```
 
@@ -164,7 +164,7 @@ done
 
 ```bash
 # Run tests on all VMs (in parallel with background jobs)
-for vm in rudra-ext4 rudra-xfs rudra-btrfs rudra-tmpfs; do
+for vm in xibalba-ext4 xibalba-xfs xibalba-btrfs xibalba-tmpfs; do
   bazel run //vm:run_tests -- $vm > results-$vm.txt &
 done
 
@@ -212,15 +212,15 @@ bazel run //vm:create_vm -- --name my-test \
   --kernel ~/linux/arch/x86/boot/bzImage \
   --initrd ~/linux/initrd.img
 
-# 2. Deploy RUDRA
-bazel run //vm:deploy_rudra -- my-test
+# 2. Deploy Xibalba
+bazel run //vm:deploy_xibalba -- my-test
 
 # 3. Run tests
 bazel run //vm:run_tests -- my-test
 
 # 4. Iterate (make changes, redeploy)
 bazel build //chaos:pause_controller  # Rebuild after changes
-bazel run //vm:deploy_rudra -- my-test  # Deploy updated binaries
+bazel run //vm:deploy_xibalba -- my-test  # Deploy updated binaries
 bazel run //vm:run_tests -- my-test     # Re-run tests
 
 # 5. Clean up when done
@@ -232,16 +232,16 @@ bazel run //vm:destroy_vm -- my-test
 ```bash
 # 1. Create VMs for each filesystem
 for fs in ext4 xfs btrfs tmpfs; do
-  bazel run //vm:create_vm -- --name rudra-$fs --filesystem $fs
+  bazel run //vm:create_vm -- --name xibalba-$fs --filesystem $fs
 done
 
 # 2. Deploy to all
-for vm in rudra-{ext4,xfs,btrfs,tmpfs}; do
-  bazel run //vm:deploy_rudra -- $vm
+for vm in xibalba-{ext4,xfs,btrfs,tmpfs}; do
+  bazel run //vm:deploy_xibalba -- $vm
 done
 
 # 3. Run tests on all (parallel)
-for vm in rudra-{ext4,xfs,btrfs,tmpfs}; do
+for vm in xibalba-{ext4,xfs,btrfs,tmpfs}; do
   bazel run //vm:run_tests -- $vm > results-$vm.txt 2>&1 &
 done
 wait
@@ -250,7 +250,7 @@ wait
 cat results-*.txt
 
 # 5. Clean up all VMs
-for vm in rudra-{ext4,xfs,btrfs,tmpfs}; do
+for vm in xibalba-{ext4,xfs,btrfs,tmpfs}; do
   bazel run //vm:destroy_vm -- $vm
 done
 ```
@@ -289,7 +289,7 @@ dmesg | grep -i bpf
 ## Advanced Usage
 
 ### Custom Kernel Config
-Edit `configs/kernel-config-rudra` before creating VM.
+Edit `configs/kernel-config-xibalba` before creating VM.
 
 ### Snapshot Before Testing
 ```bash
@@ -311,11 +311,11 @@ virsh console VM_NAME
 ```
 vm/
 ├── images/              # VM disk images
-│   ├── rudra-test-01.qcow2
-│   └── rudra-test-01-data.qcow2
+│   ├── xibalba-test-01.qcow2
+│   └── xibalba-test-01-data.qcow2
 ├── configs/             # Config files
 │   ├── cloud-init/
-│   └── kernel-config-rudra
+│   └── kernel-config-xibalba
 ├── results/             # Test results
 │   └── test-run-YYYYMMDD-HHMMSS/
 └── scripts/             # Generated scripts
@@ -341,8 +341,8 @@ For automated CI testing:
 - name: Create test VM
   run: bazel run //vm:create_vm -- --name ci-test-${{ github.run_id }}
 
-- name: Deploy RUDRA to VM
-  run: bazel run //vm:deploy_rudra -- ci-test-${{ github.run_id }}
+- name: Deploy Xibalba to VM
+  run: bazel run //vm:deploy_xibalba -- ci-test-${{ github.run_id }}
 
 - name: Run tests in VM
   run: bazel run //vm:run_tests -- ci-test-${{ github.run_id }}
