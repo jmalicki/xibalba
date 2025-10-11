@@ -5,8 +5,6 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
 # Quick test configuration
 TEST_DURATION="${TEST_DURATION:-30}"       # 30 seconds (vs 300 for full test)
 TEST_READERS="${TEST_READERS:-3}"          # 3 reader threads (vs 10)
