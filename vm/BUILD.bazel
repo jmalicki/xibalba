@@ -29,6 +29,11 @@ sh_binary(
     args = ["$(location //packaging:xibalba-deb)"],
     data = [
         ":run-parallel-vm-tests.sh",
+        ":create_test_vm.sh",
+        ":deploy_xibalba.sh",
+        ":run_tests.sh",
+        ":destroy_vm.sh",
+        ":check_prerequisites.sh",
         "//packaging:xibalba-deb",
     ],
 )
