@@ -7,64 +7,162 @@ on:
     branches: [main]
 
 jobs:
-  compile-check:
-    name: Compile Check
+  # Stage 1: Basic build and smoke tests
+  build-and-test:
+    name: Build and Smoke Test
     runs-on: ubuntu-latest
     
     steps:
       - uses: actions/checkout@v4
       
-      - name: Install dependencies
+      - name: Setup Bazel
+        uses: bazelbuild/setup-bazelisk@v2
+      
+      - name: Install eBPF dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            gcc \
             clang \
             llvm \
             libbpf-dev \
-            libelf-dev
+            libelf-dev \
+            linux-headers-$(uname -r)
       
-      - name: Compile DirectoryReader
-        run: |
-          gcc -c -o dir_reader.o common/dir_reader.c -I.
-          echo "✓ DirectoryReader compiles"
+      - name: Build all targets
+        run: bazel build //...
       
-      - name: Compile Simple Chaos Test
+      - name: Verify eBPF program
         run: |
-          gcc -o simple_chaos_test chaos/simple_chaos_test.c common/dir_reader.c -I. -pthread
-          echo "✓ Simple chaos test compiles"
+          llvm-objdump -h bazel-bin/chaos/pause_injector.bpf.o
+          size=$(stat -c%s bazel-bin/chaos/pause_injector.bpf.o)
+          echo "✓ eBPF program size: $size bytes"
       
-      - name: Compile Pause Controller
+      - name: Run chaos test (smoke test)
         run: |
-          gcc -o pause_controller chaos/pause_controller.c -lbpf -lelf
-          echo "✓ Pause controller compiles"
-      
-      - name: Compile eBPF Program
-        run: |
-          clang -g -O2 -target bpf \
-            -D__TARGET_ARCH_x86_64 \
-            -I/usr/include/x86_64-linux-gnu \
-            -c chaos/pause_injector.bpf.c \
-            -o pause_injector.bpf.o
-          echo "✓ eBPF program compiles"
-      
-      - name: Verify eBPF Program
-        run: |
-          llvm-objdump -h pause_injector.bpf.o
-          size=$(stat -c%s pause_injector.bpf.o)
-          echo "eBPF program size: $size bytes"
-          echo "✓ eBPF program valid"
-      
-      - name: Test Simple Chaos (Smoke Test)
-        run: |
-          # Create test directory
           mkdir -p /tmp/rudra_test
-          touch /tmp/rudra_test/file{1..50}
-          
-          # Run for 1 second (quick smoke test)
-          timeout 2s ./simple_chaos_test /tmp/rudra_test || true
+          touch /tmp/rudra_test/file{1..100}
+          timeout 3s bazel-bin/chaos/simple_chaos_test /tmp/rudra_test || true
           echo "✓ Chaos test runs without crashing"
+      
+      # Upload all build artifacts for VM tests (preserve directory structure)
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: rudra-build-artifacts
+          path: |
+            bazel-bin/chaos/pause_controller
+            bazel-bin/chaos/pause_injector.bpf.o
+            bazel-bin/chaos/simple_chaos_test
+            bazel-bin/vm/
+          retention-days: 1
 
+  # Stage 2: Parallel VM tests across filesystems
+  vm-tests:
+    name: VM Test (${{ matrix.filesystem }})
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    
+    strategy:
+      fail-fast: false  # Continue other tests even if one fails
+      matrix:
+        filesystem: [ext4, xfs, btrfs, tmpfs]
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install VM dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            qemu-kvm \
+            libvirt-daemon-system \
+            libvirt-clients \
+            virtinst \
+            bridge-utils
+      
+      - name: Download pre-built artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: rudra-build-artifacts
+          path: .
+      
+      - name: Make binaries executable
+        run: |
+          chmod +x bazel-bin/chaos/{pause_controller,simple_chaos_test}
+          chmod +x bazel-bin/vm/* || true
+      
+      - name: Verify artifacts
+        run: |
+          echo "=== Build artifacts downloaded ==="
+          ls -lh bazel-bin/chaos/
+          file bazel-bin/chaos/pause_controller
+          file bazel-bin/chaos/pause_injector.bpf.o
+      
+      - name: Create test VM (${{ matrix.filesystem }})
+        run: |
+          # Use pre-built script directly (no rebuild)
+          ./vm/create_test_vm.sh \
+            --name ci-test-${{ matrix.filesystem }}-${{ github.run_id }} \
+            --filesystem ${{ matrix.filesystem }} \
+            --ram 2048 \
+            --disk 8
+        timeout-minutes: 15
+      
+      - name: Deploy RUDRA to VM (using pre-built binaries)
+        run: |
+          # Use pre-built script and binaries (no rebuild)
+          ./vm/deploy_rudra.sh ci-test-${{ matrix.filesystem }}-${{ github.run_id }}
+        timeout-minutes: 5
+      
+      - name: Run tests in VM
+        run: |
+          # Use pre-built script (no rebuild)
+          ./vm/run_tests.sh ci-test-${{ matrix.filesystem }}-${{ github.run_id }} \
+            > test-results-${{ matrix.filesystem }}.txt 2>&1
+        timeout-minutes: 10
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.filesystem }}
+          path: test-results-${{ matrix.filesystem }}.txt
+          retention-days: 7
+      
+      - name: Cleanup VM
+        if: always()
+        run: |
+          ./vm/destroy_vm.sh ci-test-${{ matrix.filesystem }}-${{ github.run_id }} || true
+
+  # Stage 3: Collect and report results
+  report:
+    name: Test Report
+    runs-on: ubuntu-latest
+    needs: vm-tests
+    if: always()
+    
+    steps:
+      - name: Download all test results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: test-results-*
+          path: results/
+      
+      - name: Display results summary
+        run: |
+          echo "=== RUDRA Test Results ==="
+          echo
+          for fs in ext4 xfs btrfs tmpfs; do
+            echo "## $fs filesystem:"
+            if [ -f "results/test-results-$fs/test-results-$fs.txt" ]; then
+              tail -20 "results/test-results-$fs/test-results-$fs.txt"
+            else
+              echo "  ❌ No results found"
+            fi
+            echo
+          done
+
+  # Linting (runs in parallel with build)
   shellcheck:
     name: Shell Script Linting
     runs-on: ubuntu-latest
