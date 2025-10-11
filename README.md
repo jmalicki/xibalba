@@ -173,7 +173,7 @@ But if your code survives—like the Hero Twins—it doesn't just work. It has b
 
 **Choose this if**: You're already confident in eBPF and ready to commit 12-16 weeks
 
-**What you'll build**: Complete RUDRA with VMs, 5 filesystems, full automation
+**What you'll build**: Complete Xibalba with VMs, 5 filesystems, full automation
 
 **265 checkboxes** across 9 phases
 
