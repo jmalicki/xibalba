@@ -231,11 +231,21 @@ But if your code survives—like the Hero Twins—it doesn't just work. It has b
 ### Prerequisites
 
 **Host Machine**:
-- Linux host with KVM support (QEMU/KVM + libvirt)
-- 32GB+ RAM ✅ (confirmed available)
-- 500GB+ disk space ✅ (confirmed available)
+- Linux host with KVM support
+- 8GB+ RAM (16GB+ recommended for parallel VM testing)
+- 50GB+ disk space (for VM images)
 - Ubuntu 22.04 or later
-- Shared dev machine OK (use overnight for long benchmarks)
+
+**System Prerequisites** (one-time install):
+```bash
+sudo apt install -y libvirt-daemon-system qemu-kvm virtinst cloud-image-utils
+sudo usermod -aG libvirt,kvm $USER  # No more sudo needed after this!
+```
+
+**Validate** before testing:
+```bash
+bazel test //vm:verify_host_deps  # Bazel ensures environment is ready
+```
 
 **Kernel Development**:
 - Kernel source tree (with your patches or baseline)
@@ -270,10 +280,36 @@ bazel run //chaos:pause_controller -- 50 11
 
 ### VM Testing
 
+**Step 1 - One-Time System Setup** (install prerequisites):
 ```bash
-# Check VM prerequisites
-bazel run //vm:check_prerequisites
+# Install system services and tools
+sudo apt install -y libvirt-daemon-system qemu-kvm virtinst cloud-image-utils
 
+# Grant yourself VM permissions (no more sudo needed!)
+sudo usermod -aG libvirt,kvm $USER
+# Log out and back in for group changes to take effect
+```
+
+**Step 2 - Validate Host** (Bazel ensures environment is ready):
+```bash
+# Bazel test validates all dependencies are met
+bazel test //vm:verify_host_deps
+
+# If it fails, install missing packages (shown in test output)
+# If it passes, you're ready for VM testing!
+```
+
+**Step 3 - Run VM Tests**:
+```bash
+# Run progressive gauntlet on ext4 and ZFS (parallel)
+# Tests with 3 consistency models: EVENTUAL → WEAK → STRICT
+bazel run //vm:parallel_vm_tests
+
+# Results saved to: test-results/parallel-vm-tests-{timestamp}/
+```
+
+**Or manual VM operations**:
+```bash
 # Create a test VM
 bazel run //vm:create_vm -- --name test-01
 
@@ -286,6 +322,8 @@ bazel run //vm:run_tests -- test-01
 # Destroy VM when done
 bazel run //vm:destroy_vm -- test-01
 ```
+
+**See**: `docs/VM-PERMISSIONS.md` for detailed permission setup
 
 ### The Trials (Running Tests)
 
