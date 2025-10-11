@@ -115,16 +115,17 @@ jobs:
       
       - name: Install Xibalba package
         run: |
-          # Install the .deb (this tests runtime dependencies)
+          # Install the .deb (apt install auto-resolves dependencies)
           echo "Installing xibalba_0.1.0_amd64.deb..."
-          sudo dpkg -i xibalba_0.1.0_amd64.deb || true
-          
-          # Fix any missing runtime dependencies
           sudo apt-get update
-          sudo apt-get install -f -y
+          
+          # Use apt install (not dpkg -i) to auto-install dependencies
+          sudo apt install -y ./xibalba_0.1.0_amd64.deb
           
           # Verify installation
           dpkg -l | grep xibalba
+          echo ""
+          echo "✅ Package installed successfully with dependencies"
       
       - name: Verify installed binaries
         run: |
