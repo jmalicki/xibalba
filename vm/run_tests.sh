@@ -98,7 +98,7 @@ else
     echo "  ./simple_chaos_test /test/xibalba_test"
     echo
     echo "Press Enter to SSH, or Ctrl+C to cancel"
-    read
+    read -r
     ssh root@"$VM_IP"
 fi
 

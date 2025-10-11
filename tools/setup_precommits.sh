@@ -9,50 +9,36 @@ echo "  Xibalba Pre-Commit Setup"
 echo "════════════════════════════════════════════════════════════════"
 echo
 
-# Check if pre-commit is installed
-if command -v pre-commit &> /dev/null; then
-    echo "✓ pre-commit is already installed ($(pre-commit --version))"
-else
-    echo "Installing pre-commit..."
-    
-    # Try pipx first (recommended for modern Python environments)
-    if command -v pipx &> /dev/null; then
-        echo "  Using pipx..."
-        pipx install pre-commit
-    else
-        echo "❌ Error: pipx not found"
-        echo
-        echo "Modern Python (3.11+) requires pipx for installing tools."
-        echo
-        echo "Install pipx first:"
-        echo "  sudo apt install pipx"
-        echo "  pipx ensurepath  # Add ~/.local/bin to PATH"
-        echo
-        echo "Then re-run this script:"
-        echo "  bazel run //tools:setup_precommits"
-        exit 1
+# Bazel provides pre-commit via runfiles - find it
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PRECOMMIT_BIN=""
+
+# Search for pre-commit in Bazel runfiles
+RUNFILES_LOCATIONS=(
+    "$SCRIPT_DIR/precommit"
+    "$SCRIPT_DIR/../tools/precommit" 
+    "$(dirname "$SCRIPT_DIR")/tools/precommit"
+)
+
+for loc in "${RUNFILES_LOCATIONS[@]}"; do
+    if [ -x "$loc" ]; then
+        PRECOMMIT_BIN="$loc"
+        echo "✓ Using Bazel-managed pre-commit: $loc"
+        break
     fi
-    
-    # Verify installation
-    if ! command -v pre-commit &> /dev/null; then
-        echo "❌ Error: pre-commit installed but not in PATH"
-        echo
-        echo "Run pipx's PATH setup:"
-        echo "  pipx ensurepath"
-        echo "  source ~/.bashrc  # Or restart your shell"
-        echo
-        echo "Then re-run this script."
-        exit 1
-    fi
-    
-    echo "✓ pre-commit installed successfully"
+done
+
+if [ -z "$PRECOMMIT_BIN" ]; then
+    echo "❌ Error: Could not find pre-commit in Bazel runfiles"
+    echo "This shouldn't happen - please report this bug."
+    exit 1
 fi
 
 echo
 
 # Install the git hooks
 echo "Installing git hooks..."
-if pre-commit install; then
+if "$PRECOMMIT_BIN" install; then
     echo "✓ Git hooks installed"
 else
     echo "❌ Failed to install git hooks"
@@ -63,7 +49,7 @@ echo
 
 # Run against all files as a test
 echo "Running pre-commit checks on all files (test run)..."
-if pre-commit run --all-files; then
+if "$PRECOMMIT_BIN" run --all-files; then
     echo
     echo "✓ All checks passed!"
 else

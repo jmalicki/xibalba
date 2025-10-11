@@ -54,7 +54,7 @@ for i in $(seq 1 $MAX_WAIT); do
         echo "✓ VM is ready"
         break
     fi
-    if [ $i -eq $MAX_WAIT ]; then
+    if [ "$i" -eq "$MAX_WAIT" ]; then
         echo "ERROR: VM failed to boot within ${MAX_WAIT}s"
         exit 1
     fi
@@ -68,6 +68,7 @@ echo "Deploying xibalba package..."
 # Run smoke test
 echo
 echo "Running smoke test..."
+# shellcheck disable=SC2029  # Intentionally expand on client side
 ssh "root@$VM_NAME" "FILESYSTEMS=$FILESYSTEM TEST_DURATION=$TEST_DURATION xibalba-smoke-test" | tee "$RESULTS_DIR/smoke-test.log"
 
 # Check result

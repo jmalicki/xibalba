@@ -1,0 +1,5 @@
+# Python dependencies for Xibalba development tools
+# Managed by Bazel via rules_python
+
+pre-commit==3.6.0
+

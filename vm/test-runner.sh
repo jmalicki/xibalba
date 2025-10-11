@@ -13,7 +13,7 @@ RESULTS_DIR="${XIBALBA_RESULTS:-${4:-/var/log/xibalba}}"
 
 echo "=== Xibalba Automated Test Runner ==="
 echo "Filesystem: $FILESYSTEM"
-echo "Duration: $TEST_DURATION seconds ($(($TEST_DURATION / 60)) minutes)"
+echo "Duration: $TEST_DURATION seconds ($((TEST_DURATION / 60)) minutes)"
 echo "Model: $CONSISTENCY_MODEL"
 echo "Results: $RESULTS_DIR"
 echo

@@ -33,6 +33,16 @@ http_archive(
 load("@rules_pkg//pkg:deps.bzl", "rules_pkg_dependencies")
 rules_pkg_dependencies()
 
+# Shellcheck for linting (hermetic, no system install needed)
+http_archive(
+    name = "shellcheck",
+    urls = ["https://github.com/koalaman/shellcheck/releases/download/v0.9.0/shellcheck-v0.9.0.linux.x86_64.tar.xz"],
+    sha256 = "700324c6dd0ebea0117591c6cc9d7350d9c7c5c287acbad7630fa17b1d4d9e2f",
+    build_file_content = """
+exports_files(["shellcheck-v0.9.0/shellcheck"])
+""",
+)
+
 # System libraries (liburing, libbpf)
 # These must be installed on the system
 # Bazel will link against them
