@@ -45,7 +45,18 @@ sh_binary(
     tags = ["manual", "local", "requires-kvm"],
 )
 
+# Lightweight host dependency verification (Bazel test)
+# Run FIRST to validate system prerequisites:
+#   bazel test //vm:verify_host_deps
+sh_test(
+    name = "verify_host_deps",
+    srcs = ["verify_host_deps.sh"],
+    tags = ["manual", "local", "requires-host-tools"],
+    size = "small",
+)
+
 # Check if host has required VM tools (QEMU/KVM, libvirt, etc.)
+# More comprehensive than verify_host_deps
 sh_binary(
     name = "check_prerequisites",
     srcs = ["check_prerequisites.sh"],
