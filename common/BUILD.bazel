@@ -1,8 +1,8 @@
-# DirectoryReader abstraction layer
+# DirectoryReader abstraction layer and state tracking
 
 package(default_visibility = ["//visibility:public"])
 
-# DirectoryReader library (skeleton only for now)
+# DirectoryReader library
 cc_library(
     name = "dir_reader",
     srcs = ["dir_reader.c"],
@@ -10,6 +10,17 @@ cc_library(
     # linkopts will include -luring when we add io_uring support
 )
 
+# State tracker for validation (Jepsen-style ground truth)
+cc_library(
+    name = "state_tracker",
+    srcs = ["state_tracker.c"],
+    hdrs = ["state_tracker.h"],
+    linkopts = ["-pthread"],
+)
+
 # Export headers
-exports_files(["dir_reader.h"])
+exports_files([
+    "dir_reader.h",
+    "state_tracker.h",
+])
 
