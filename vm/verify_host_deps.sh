@@ -64,9 +64,26 @@ if command -v virsh &> /dev/null; then
     if ! virsh net-list 2>/dev/null | grep -q "default.*active"; then
         echo "⚠ Default network inactive, starting..."
         # User is in libvirt group, so this should work
-        virsh net-start default
+        if ! virsh net-start default 2>&1; then
+            echo
+            echo "ERROR: Failed to start libvirt default network"
+            echo
+            echo "This usually means:"
+            echo "  1. You're not actually in the libvirt group (group change requires re-login)"
+            echo "  2. libvirtd is not running"
+            echo
+            echo "Fix:"
+            echo "  groups | grep libvirt  # Should show libvirt"
+            echo "  sudo systemctl status libvirtd  # Should be active"
+            echo
+            echo "If not in group: log out and back in after running:"
+            echo "  sudo usermod -aG libvirt,kvm \$USER"
+            exit 1
+        fi
+        echo "✓ libvirt default network (started)"
+    else
+        echo "✓ libvirt default network (active)"
     fi
-    echo "✓ libvirt default network (active)"
 fi
 
 echo
