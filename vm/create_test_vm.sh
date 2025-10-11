@@ -191,6 +191,7 @@ echo "  ✓ Created cloud-init ISO"
 # Install VM with virt-install
 echo "Installing VM..."
 virt-install \
+    --connect qemu:///session \
     --name "$VM_NAME" \
     --ram "$RAM_MB" \
     --vcpus 2 \
