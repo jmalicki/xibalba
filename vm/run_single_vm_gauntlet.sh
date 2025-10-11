@@ -87,50 +87,26 @@ else
 fi
 
 # Step 2: Wait for VM network and SSH (cloud-init takes 5-10 min)
+# NOTE: This is now delegated to wait_for_vm.sh in the modular design
+# This code remains for backwards compatibility with old run_single_vm_gauntlet.sh
 echo "Step 2: Waiting for VM network and SSH..."
 echo "  Note: Ubuntu cloud-init is slow. Install 'libnss-libvirt' for faster hostname resolution."
-echo "  [ENV DEBUG] PATH=$PATH"
-echo "  [ENV DEBUG] RUNFILES_DIR=${RUNFILES_DIR:-unset}"
-echo "  [ENV DEBUG] which virsh: $(which virsh 2>/dev/null || echo 'NOT FOUND')"
 VM_IP=""
 
 # Simple, reliable approach: poll ARP + test SSH
-# Accept reality: cloud-init takes time
 for attempt in $(seq 1 300); do
     # Try ARP first (appears faster), fallback to DHCP lease
-    # Capture full output to see what's happening
-    if [ "$attempt" -le 5 ]; then
-        echo "  [DEBUG #$attempt] Running: virsh domifaddr $VM_NAME --source arp"
-        ARP_OUTPUT=$(virsh domifaddr "$VM_NAME" --source arp 2>&1 || true)
-        echo "  [DEBUG #$attempt] ARP output: '$ARP_OUTPUT'"
-    fi
-    
     VM_IP=$(virsh domifaddr "$VM_NAME" --source arp 2>/dev/null | grep -oP '(\d+\.){3}\d+' | head -1 || true)
     if [ -z "$VM_IP" ]; then
-        if [ "$attempt" -le 5 ]; then
-            echo "  [DEBUG #$attempt] ARP empty, trying lease"
-            LEASE_OUTPUT=$(virsh domifaddr "$VM_NAME" --source lease 2>&1 || true)
-            echo "  [DEBUG #$attempt] LEASE output: '$LEASE_OUTPUT'"
-        fi
         VM_IP=$(virsh domifaddr "$VM_NAME" --source lease 2>/dev/null | grep -oP '(\d+\.){3}\d+' | head -1 || true)
     fi
     
-    # DEBUG for first few attempts
-    if [ "$attempt" -le 5 ]; then
-        echo "  [DEBUG #$attempt] Final IP='$VM_IP', SSH_KEY='$SSH_KEY'"
-    fi
-    
-    # Test SSH connectivity (most reliable check)
+    # Test SSH connectivity
     if [ -n "$VM_IP" ]; then
         # shellcheck disable=SC2086
         if timeout 3 ssh $SSH_OPTS root@"$VM_IP" true 2>/dev/null; then
             echo "  ✓ VM ready at $VM_IP (after $((attempt * 2))s)"
             break
-        else
-            # DEBUG SSH failure
-            if [ "$attempt" -le 5 ]; then
-                echo "  [DEBUG #$attempt] SSH failed to $VM_IP"
-            fi
         fi
         VM_IP=""  # Reset if not ready
     fi
