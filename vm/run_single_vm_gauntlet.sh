@@ -75,42 +75,38 @@ trap cleanup EXIT
 echo "Step 1: Creating VM..."
 "$SCRIPT_DIR/create_test_vm.sh" --name "$VM_NAME" --filesystem "$FILESYSTEM"
 
-# Step 2: Wait for SSH using nmap to find VM (faster than waiting for DHCP lease)
+# Step 2: Wait for VM to be SSH-accessible
 echo "Step 2: Waiting for VM to be SSH-accessible (up to 5 min)..."
 VM_IP=""
 
-# Try for 5 minutes (150 attempts × 2s)
-for attempt in {1..150}; do
-    # First try virsh (fast when it works)
-    VM_IP=$(virsh domifaddr "$VM_NAME" --source lease 2>/dev/null | grep -oP '(\d+\.){3}\d+' | head -1)
+# Try for 5 minutes
+for attempt in $(seq 1 150); do
+    # Get IP from virsh
+    VM_IP=$(virsh domifaddr "$VM_NAME" --source lease 2>/dev/null | grep -oP '(\d+\.){3}\d+' | head -1 || true)
     
-    # If no IP yet, scan the network for SSH on libvirt subnet
-    if [ -z "$VM_IP" ] && command -v nmap >/dev/null; then
-        # Scan for SSH on port 22 in libvirt's default subnet
-        VM_IP=$(nmap -p 22 --open 192.168.122.0/24 2>/dev/null | grep -B4 "22/tcp open" | grep "Nmap scan report" | tail -1 | grep -oP '(\d+\.){3}\d+')
-    fi
-    
-    # Test if we can actually SSH (most reliable check)
+    # Test if we can SSH
     if [ -n "$VM_IP" ]; then
         # shellcheck disable=SC2086
-        if ssh $SSH_OPTS -o ConnectTimeout=2 root@$VM_IP true 2>/dev/null; then
-            echo "  ✓ VM ready at $VM_IP (attempt $attempt)"
+        if timeout 2 ssh $SSH_OPTS -o ConnectTimeout=2 root@"$VM_IP" true 2>/dev/null; then
+            echo "  ✓ VM ready at $VM_IP (after $((attempt * 2))s)"
             break
         fi
+        VM_IP=""  # Reset if SSH failed
     fi
     
     # Show progress every 30 seconds
-    if [ $((attempt % 15)) -eq 0 ]; then
+    remainder=$((attempt % 15))
+    if [ "$remainder" -eq 0 ]; then
         echo "  ...still waiting ($((attempt * 2))s elapsed)..."
     fi
     
-    VM_IP=""  # Reset if SSH failed
     sleep 2
 done
 
 if [ -z "$VM_IP" ]; then
-    echo "❌ VM did not become SSH-accessible after 5 minutes"
+    echo "❌ VM did not become SSH-accessible after $((150 * 2)) seconds"
     echo "   Try: virsh console $VM_NAME"
+    echo "   Or:  virsh domifaddr $VM_NAME --source lease"
     exit 1
 fi
 
