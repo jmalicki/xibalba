@@ -29,8 +29,8 @@ genrule(
 
 # Tar archive of test runner script
 pkg_tar(
-    name = "xibalba-test-runner",
-    srcs = [":xibalba-test-runner"],
+    name = "xibalba-test-runner-tar",
+    srcs = [":copy_test_runner"],
     mode = "0755",
     package_dir = "/usr/bin",
 )
@@ -40,7 +40,7 @@ pkg_tar(
     name = "xibalba-bin",
     deps = [
         ":xibalba-test-bins",
-        ":xibalba-test-runner",
+        ":xibalba-test-runner-tar",
     ],
 )
 
