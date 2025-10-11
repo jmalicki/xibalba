@@ -89,6 +89,9 @@ echo "Step 1: Creating VM..."
 # Step 2: Wait for VM network and SSH (cloud-init takes 5-10 min)
 echo "Step 2: Waiting for VM network and SSH..."
 echo "  Note: Ubuntu cloud-init is slow. Install 'libnss-libvirt' for faster hostname resolution."
+echo "  [ENV DEBUG] PATH=$PATH"
+echo "  [ENV DEBUG] RUNFILES_DIR=${RUNFILES_DIR:-unset}"
+echo "  [ENV DEBUG] which virsh: $(which virsh 2>/dev/null || echo 'NOT FOUND')"
 VM_IP=""
 
 # Simple, reliable approach: poll ARP + test SSH
