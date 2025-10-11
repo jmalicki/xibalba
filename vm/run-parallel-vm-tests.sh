@@ -1,18 +1,24 @@
 #!/bin/bash
 set -euo pipefail
 
-# Parallel VM Testing
-# Creates and runs tests on multiple VMs simultaneously
-# Each VM tests a different filesystem
+# Parallel VM Testing with Progressive Consistency Models
+# 
+# Creates and runs tests on multiple VMs simultaneously.
+# Each VM runs the GAUNTLET: tests the same filesystem with escalating
+# consistency models to quantify departures from ideal behavior.
+#
+# Testing Strategy per VM:
+#   1. EVENTUAL (baseline) → Should PASS (no duplicates)
+#   2. WEAK (POSIX std)    → Should PASS (POSIX guarantee)
+#   3. STRICT (ideal)      → Quantify weak consistency (expected failures)
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-# Default configuration
-DURATION="${XIBALBA_DURATION:-300}"  # 5 minutes
+# Default configuration (per consistency model)
+DURATION="${XIBALBA_DURATION:-300}"  # 5 minutes per model (15 min total per VM)
 READERS="${XIBALBA_READERS:-10}"
 WRITERS="${XIBALBA_WRITERS:-3}"
-MODEL="${XIBALBA_MODEL:-weak}"
 
 # Results directory with timestamp
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
@@ -36,10 +42,16 @@ for vm_config in "${VMS[@]}"; do
     IFS=':' read -r vm_name fs <<< "$vm_config"
     echo "    - $vm_name → $fs"
 done
-echo "  Duration: $DURATION seconds"
+echo "  Duration: $DURATION seconds PER MODEL"
 echo "  Readers: $READERS threads"
 echo "  Writers: $WRITERS threads"
-echo "  Model: $MODEL"
+echo
+echo "Progressive Testing (per VM):"
+echo "  1. EVENTUAL → Baseline (only duplicates are bugs)"
+echo "  2. WEAK     → POSIX guarantee (should pass)"
+echo "  3. STRICT   → Quantify departures (measure weak consistency)"
+echo
+echo "Total time per VM: ~$((DURATION * 3 / 60)) minutes (3 models × ${DURATION}s)"
 echo
 echo "Results will be saved to:"
 echo "  $RESULTS_DIR"
@@ -102,27 +114,31 @@ run_vm_test() {
             return 1
         }
         
-        # Run test
-        echo "[${vm_name}] Running test on $filesystem..."
+        # Run gauntlet (progressive testing: EVENTUAL → WEAK → STRICT)
+        echo "[${vm_name}] Running progressive gauntlet on $filesystem..."
+        echo "[${vm_name}]   1. EVENTUAL (baseline) - should PASS"
+        echo "[${vm_name}]   2. WEAK (POSIX) - should PASS"
+        echo "[${vm_name}]   3. STRICT (ideal) - quantify departures"
+        
         if ssh -o StrictHostKeyChecking=no "root@${vm_name}" \
-            "XIBALBA_FILESYSTEM=$filesystem XIBALBA_DURATION=$DURATION XIBALBA_READERS=$READERS XIBALBA_WRITERS=$WRITERS XIBALBA_MODEL=$MODEL xibalba-test-runner"; then
+            "XIBALBA_DURATION=$DURATION XIBALBA_READERS=$READERS XIBALBA_WRITERS=$WRITERS xibalba-gauntlet $filesystem"; then
             echo "[${vm_name}] ✅ TEST PASSED at $(date +%H:%M:%S)"
             
-            # Get results (both JSON and text)
+            # Get gauntlet results (comprehensive summary + individual model results)
             ssh -o StrictHostKeyChecking=no "root@${vm_name}" \
-                "cat /var/log/xibalba/latest-${filesystem}.json" > "$RESULTS_DIR/${vm_name}-results.json" 2>/dev/null || true
+                "cat /var/log/xibalba/gauntlet/latest-gauntlet.json" > "$RESULTS_DIR/${vm_name}-gauntlet.json" 2>/dev/null || true
             ssh -o StrictHostKeyChecking=no "root@${vm_name}" \
-                "cat /var/log/xibalba/latest-${filesystem}.txt" > "$RESULTS_DIR/${vm_name}-results.txt" 2>/dev/null || true
+                "cat /var/log/xibalba/gauntlet/latest-gauntlet.txt" > "$RESULTS_DIR/${vm_name}-gauntlet.txt" 2>/dev/null || true
             
             return 0
         else
             echo "[${vm_name}] ❌ TEST FAILED at $(date +%H:%M:%S)"
             
-            # Get failure details (both JSON and text)
+            # Get gauntlet failure details
             ssh -o StrictHostKeyChecking=no "root@${vm_name}" \
-                "cat /var/log/xibalba/latest-${filesystem}.json" > "$RESULTS_DIR/${vm_name}-results.json" 2>/dev/null || true
+                "cat /var/log/xibalba/gauntlet/latest-gauntlet.json" > "$RESULTS_DIR/${vm_name}-gauntlet.json" 2>/dev/null || true
             ssh -o StrictHostKeyChecking=no "root@${vm_name}" \
-                "cat /var/log/xibalba/latest-${filesystem}.txt" > "$RESULTS_DIR/${vm_name}-results.txt" 2>/dev/null || true
+                "cat /var/log/xibalba/gauntlet/latest-gauntlet.txt" > "$RESULTS_DIR/${vm_name}-gauntlet.txt" 2>/dev/null || true
             
             return 1
         fi
@@ -200,13 +216,14 @@ for i in "${!VM_NAMES[@]}"; do
     [ "$first" = false ] && echo "    ," >> "$RESULTS_DIR/summary.json"
     first=false
     
-    if [ -f "$RESULTS_DIR/${vm_name}-results.json" ]; then
-        # Extract metrics from individual result
-        ops=$(jq -r '.results.total_operations // 0' "$RESULTS_DIR/${vm_name}-results.json" 2>/dev/null || echo "0")
-        bugs=$(jq -r '.results.bugs_found // 0' "$RESULTS_DIR/${vm_name}-results.json" 2>/dev/null || echo "0")
-        missing=$(jq -r '.results.missing_entries // 0' "$RESULTS_DIR/${vm_name}-results.json" 2>/dev/null || echo "0")
-        phantom=$(jq -r '.results.phantom_entries // 0' "$RESULTS_DIR/${vm_name}-results.json" 2>/dev/null || echo "0")
-        duplicate=$(jq -r '.results.duplicate_entries // 0' "$RESULTS_DIR/${vm_name}-results.json" 2>/dev/null || echo "0")
+    if [ -f "$RESULTS_DIR/${vm_name}-gauntlet.json" ]; then
+        # Extract metrics from gauntlet (aggregate across all models)
+        # Count total operations across all 3 models
+        ops=$(jq -r '[.results[].total_operations] | add // 0' "$RESULTS_DIR/${vm_name}-gauntlet.json" 2>/dev/null || echo "0")
+        bugs=$(jq -r '[.results[].bugs_found] | add // 0' "$RESULTS_DIR/${vm_name}-gauntlet.json" 2>/dev/null || echo "0")
+        missing=$(jq -r '[.results[].missing_entries] | add // 0' "$RESULTS_DIR/${vm_name}-gauntlet.json" 2>/dev/null || echo "0")
+        phantom=$(jq -r '[.results[].phantom_entries] | add // 0' "$RESULTS_DIR/${vm_name}-gauntlet.json" 2>/dev/null || echo "0")
+        duplicate=$(jq -r '[.results[].duplicate_entries] | add // 0' "$RESULTS_DIR/${vm_name}-gauntlet.json" 2>/dev/null || echo "0")
     else
         ops=0
         bugs=0
@@ -227,7 +244,7 @@ for i in "${!VM_NAMES[@]}"; do
       "phantom_entries": $phantom,
       "duplicate_entries": $duplicate,
       "log_file": "${vm_name}.log",
-      "results_file": "${vm_name}-results.json"
+      "gauntlet_file": "${vm_name}-gauntlet.json"
     }
 EOF
 done
@@ -254,27 +271,36 @@ for i in "${!VM_NAMES[@]}"; do
     if [ "$exit_code" -eq 0 ]; then
         echo "✅ ${vm_name} ($fs): PASSED"
         
-        # Show metrics if available
-        if [ -f "$RESULTS_DIR/${vm_name}-results.json" ]; then
-            ops=$(jq -r '.results.total_operations // "N/A"' "$RESULTS_DIR/${vm_name}-results.json" 2>/dev/null || echo "N/A")
-            missing=$(jq -r '.results.missing_entries // "N/A"' "$RESULTS_DIR/${vm_name}-results.json" 2>/dev/null || echo "N/A")
-            phantom=$(jq -r '.results.phantom_entries // "N/A"' "$RESULTS_DIR/${vm_name}-results.json" 2>/dev/null || echo "N/A")
-            duplicate=$(jq -r '.results.duplicate_entries // "N/A"' "$RESULTS_DIR/${vm_name}-results.json" 2>/dev/null || echo "N/A")
-            echo "   Operations: $ops | Missing: $missing | Phantom: $phantom | Duplicate: $duplicate"
+        # Show gauntlet metrics if available
+        if [ -f "$RESULTS_DIR/${vm_name}-gauntlet.json" ]; then
+            # Show per-model results
+            eventual_status=$(jq -r '.results[] | select(.model == "eventual") | .status' "$RESULTS_DIR/${vm_name}-gauntlet.json" 2>/dev/null || echo "N/A")
+            weak_status=$(jq -r '.results[] | select(.model == "weak") | .status' "$RESULTS_DIR/${vm_name}-gauntlet.json" 2>/dev/null || echo "N/A")
+            strict_status=$(jq -r '.results[] | select(.model == "strict") | .status' "$RESULTS_DIR/${vm_name}-gauntlet.json" 2>/dev/null || echo "N/A")
+            strict_bugs=$(jq -r '.results[] | select(.model == "strict") | .bugs_found' "$RESULTS_DIR/${vm_name}-gauntlet.json" 2>/dev/null || echo "0")
+            
+            echo "   Progressive Results:"
+            echo "     EVENTUAL: $eventual_status (baseline)"
+            echo "     WEAK:     $weak_status (POSIX)"
+            echo "     STRICT:   $strict_status (departures: $strict_bugs)"
         fi
     else
         echo "❌ ${vm_name} ($fs): FAILED (exit code: $exit_code)"
         all_passed=false
         
         # Show failure details if available
-        if [ -f "$RESULTS_DIR/${vm_name}-results.json" ]; then
-            bugs=$(jq -r '.results.bugs_found // "N/A"' "$RESULTS_DIR/${vm_name}-results.json" 2>/dev/null || echo "N/A")
-            echo "   Bugs found: $bugs"
+        if [ -f "$RESULTS_DIR/${vm_name}-gauntlet.json" ]; then
+            # Show which models failed
+            eventual_bugs=$(jq -r '.results[] | select(.model == "eventual") | .bugs_found' "$RESULTS_DIR/${vm_name}-gauntlet.json" 2>/dev/null || echo "0")
+            weak_bugs=$(jq -r '.results[] | select(.model == "weak") | .bugs_found' "$RESULTS_DIR/${vm_name}-gauntlet.json" 2>/dev/null || echo "0")
+            
+            [ "$eventual_bugs" -gt 0 ] && echo "   ⚠️ EVENTUAL bugs: $eventual_bugs (CRITICAL - duplicates!)"
+            [ "$weak_bugs" -gt 0 ] && echo "   ⚠️ WEAK bugs: $weak_bugs (POSIX violation!)"
         fi
     fi
     
     echo "   Log: $RESULTS_DIR/${vm_name}.log"
-    echo "   Results: $RESULTS_DIR/${vm_name}-results.json"
+    echo "   Gauntlet: $RESULTS_DIR/${vm_name}-gauntlet.json"
     echo
 done
 
