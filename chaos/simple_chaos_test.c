@@ -193,11 +193,13 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "  --strict    Strict/linearizable consistency (most bugs detected)\n");
         fprintf(stderr, "  --weak      POSIX weak consistency (default)\n");
         fprintf(stderr, "  --eventual  Eventual consistency (only duplicates are bugs)\n");
+        fprintf(stderr, "  --json      Output results as JSON (for benchmarking)\n");
         fprintf(stderr, "\n");
         fprintf(stderr, "Example:\n");
         fprintf(stderr, "  mkdir -p /tmp/xibalba_test\n");
         fprintf(stderr, "  %s /tmp/xibalba_test\n", argv[0]);
         fprintf(stderr, "  %s --strict /tmp/xibalba_test  # Strictest validation\n", argv[0]);
+        fprintf(stderr, "  %s --json --weak /tmp/test > results.json\n", argv[0]);
         fprintf(stderr, "\n");
         fprintf(stderr, "With eBPF delays (separate terminal):\n");
         fprintf(stderr, "  bazel run //chaos:pause_controller -- 50 500\n");
@@ -207,6 +209,7 @@ int main(int argc, char *argv[]) {
     // Parse arguments
     consistency_model_t model = CONSISTENCY_WEAK_POSIX;  // Default
     const char *test_dir = NULL;
+    bool json_output = false;
     
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--strict") == 0) {
@@ -215,6 +218,8 @@ int main(int argc, char *argv[]) {
             model = CONSISTENCY_WEAK_POSIX;
         } else if (strcmp(argv[i], "--eventual") == 0) {
             model = CONSISTENCY_EVENTUAL;
+        } else if (strcmp(argv[i], "--json") == 0) {
+            json_output = true;
         } else {
             test_dir = argv[i];
         }
@@ -237,15 +242,22 @@ int main(int argc, char *argv[]) {
         model == CONSISTENCY_WEAK_POSIX ? "POSIX Weak" :
         "Eventual";
     
-    printf("=== Xibalba Chaos Test ===\n");
-    printf("The Dark House Trial: Race Conditions in Darkness\n");
-    printf("\n");
-    printf("Directory: %s\n", test_dir);
-    printf("Consistency model: %s\n", model_name);
-    printf("Reader threads: %d\n", NUM_READER_THREADS);
-    printf("Writer threads: %d\n", NUM_WRITER_THREADS);
-    printf("Duration: %d seconds\n", TEST_DURATION);
-    printf("\n");
+    const char *model_short =
+        model == CONSISTENCY_STRICT ? "strict" :
+        model == CONSISTENCY_WEAK_POSIX ? "weak" :
+        "eventual";
+    
+    if (!json_output) {
+        printf("=== Xibalba Chaos Test ===\n");
+        printf("The Dark House Trial: Race Conditions in Darkness\n");
+        printf("\n");
+        printf("Directory: %s\n", test_dir);
+        printf("Consistency model: %s\n", model_name);
+        printf("Reader threads: %d\n", NUM_READER_THREADS);
+        printf("Writer threads: %d\n", NUM_WRITER_THREADS);
+        printf("Duration: %d seconds\n", TEST_DURATION);
+        printf("\n");
+    }
     
     // Initialize state tracker (ground truth)
     state_tracker_t *tracker = tracker_init();
@@ -264,8 +276,10 @@ int main(int argc, char *argv[]) {
         .reads_completed = ATOMIC_VAR_INIT(0),
     };
     
-    printf("Starting test...\n");
-    printf("\n");
+    if (!json_output) {
+        printf("Starting test...\n");
+        printf("\n");
+    }
     
     pthread_t reader_threads[NUM_READER_THREADS];
     pthread_t writer_threads[NUM_WRITER_THREADS];
@@ -290,7 +304,9 @@ int main(int argc, char *argv[]) {
     sleep(TEST_DURATION);
     
     // Stop all threads
-    printf("Stopping threads...\n");
+    if (!json_output) {
+        printf("Stopping threads...\n");
+    }
     atomic_store(&state.stop, true);
     
     for (int i = 0; i < NUM_READER_THREADS; i++) {
@@ -304,17 +320,44 @@ int main(int argc, char *argv[]) {
     uint64_t ops = atomic_load(&state.operations);
     uint64_t bugs = atomic_load(&state.bugs_found);
     uint64_t reads = atomic_load(&state.reads_completed);
+    double bug_rate = reads > 0 ? (double)bugs / (double)reads : 0.0;
+    double ops_per_sec = (double)ops / (double)TEST_DURATION;
     
+    if (json_output) {
+        // Machine-readable JSON output for benchmarking
+        printf("{\n");
+        printf("  \"test\": \"xibalba_chaos\",\n");
+        printf("  \"directory\": \"%s\",\n", test_dir);
+        printf("  \"consistency_model\": \"%s\",\n", model_short);
+        printf("  \"duration_seconds\": %d,\n", TEST_DURATION);
+        printf("  \"reader_threads\": %d,\n", NUM_READER_THREADS);
+        printf("  \"writer_threads\": %d,\n", NUM_WRITER_THREADS);
+        printf("  \"results\": {\n");
+        printf("    \"total_operations\": %lu,\n", ops);
+        printf("    \"directory_scans\": %lu,\n", reads);
+        printf("    \"ops_per_second\": %.2f,\n", ops_per_sec);
+        printf("    \"bugs_found\": %lu,\n", bugs);
+        printf("    \"bug_rate\": %.6f,\n", bug_rate);
+        printf("    \"bugs_per_1000_scans\": %.2f\n", bug_rate * 1000.0);
+        printf("  }\n");
+        printf("}\n");
+        
+        tracker_cleanup(tracker);
+        return bugs > 0 ? 1 : 0;
+    }
+    
+    // Human-readable output
     printf("\n");
     printf("=== Results ===\n");
     printf("\n");
     printf("Operations:\n");
     printf("  Total operations: %lu\n", ops);
     printf("  Directory scans:  %lu\n", reads);
-    printf("  Ops/second:       %.1f\n", (double)ops / (double)TEST_DURATION);
+    printf("  Ops/second:       %.1f\n", ops_per_sec);
     printf("\n");
     printf("Validation:\n");
     printf("  Bugs found: %lu\n", bugs);
+    printf("  Bug rate: %.6f (%.2f per 1000 scans)\n", bug_rate, bug_rate * 1000.0);
     
     if (bugs == 0) {
         printf("  Status: ✅ NO BUGS DETECTED\n");

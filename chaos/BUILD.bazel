@@ -42,3 +42,10 @@ cc_binary(
     # After building, run: sudo ./grant_caps.sh
 )
 
+# Consistency model benchmark - measures bug detection rates
+cc_binary(
+    name = "benchmark_consistency",
+    srcs = ["benchmark_consistency.c"],
+    # Runs simple_chaos_test multiple times with different models
+)
+
