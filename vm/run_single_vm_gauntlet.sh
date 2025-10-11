@@ -53,11 +53,21 @@ else
     SSH_OPTS="-o StrictHostKeyChecking=no -o ConnectTimeout=2"
 fi
 
-# Cleanup on exit
+# Cleanup on exit (hermetic: remove all test artifacts)
 # shellcheck disable=SC2317
 cleanup() {
     echo "Cleaning up VM: $VM_NAME"
     "$SCRIPT_DIR/destroy_vm.sh" "$VM_NAME" || true
+    
+    # Clean up test-specific image directory (hermetic cleanup)
+    if [ -n "${TEST_TMPDIR:-}" ]; then
+        TEST_ID="${TEST_TARGET##*/}"
+        IMAGES_DIR="/tmp/xibalba-${TEST_ID}-$$"
+        if [ -d "$IMAGES_DIR" ]; then
+            rm -rf "$IMAGES_DIR"
+            echo "  ✓ Removed hermetic temp dir: $IMAGES_DIR"
+        fi
+    fi
 }
 trap cleanup EXIT
 
