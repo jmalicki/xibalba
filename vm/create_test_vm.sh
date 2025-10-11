@@ -189,9 +189,11 @@ cloud-localds "$CLOUD_INIT_ISO" \
 echo "  ✓ Created cloud-init ISO"
 
 # Install VM with virt-install
-# Use system libvirt (default) - works without sudo when user is in libvirt group
+# Explicitly use system libvirt (qemu:///system)
+# Without this, virt-install defaults to session mode when run as non-root
 echo "Installing VM..."
 virt-install \
+    --connect qemu:///system \
     --name "$VM_NAME" \
     --ram "$RAM_MB" \
     --vcpus 2 \
