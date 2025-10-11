@@ -6,11 +6,11 @@
 
 ## Quick Answer
 
-**YES, but only if you install correctly!**
+**YES! Filesystem tools are auto-installed!**
 
 The Xibalba Debian package declares:
-- **Recommends**: ext4, XFS, btrfs, F2FS, NILFS2, NFS tools
-- **Suggests**: ZFS, exFAT, NTFS, CIFS, FUSE tools
+- **Recommends**: ext4, XFS, btrfs, ZFS, F2FS, NILFS2, NFS, exFAT, NTFS tools
+- **Suggests**: NFS server, CIFS, FUSE tools (network/user-space filesystems)
 
 ### Installation Methods
 
@@ -25,8 +25,9 @@ dpkg -i xibalba_0.1.0_amd64.deb
 ```bash
 apt install ./xibalba_0.1.0_amd64.deb
 # Installs libbpf0, libelf1 (depends)
-# ALSO installs e2fsprogs, xfsprogs, btrfs-progs, etc. (recommends)
-# Does NOT install zfsutils-linux (suggests only)
+# ALSO installs e2fsprogs, xfsprogs, btrfs-progs, zfsutils-linux,
+#             exfatprogs, ntfs-3g, etc. (recommends)
+# 9 filesystems ready to test out of the box!
 ```
 
 ---
@@ -40,11 +41,15 @@ apt install ./xibalba_0.1.0_amd64.deb
 | e2fsprogs (ext4) | recommends | ❌ | ✅ | ext4 testing |
 | xfsprogs (XFS) | recommends | ❌ | ✅ | XFS testing |
 | btrfs-progs | recommends | ❌ | ✅ | btrfs testing |
+| **zfsutils-linux (ZFS)** | **recommends** | ❌ | ✅ | **Auto-installed now!** |
 | f2fs-tools | recommends | ❌ | ✅ | F2FS testing |
 | nilfs-tools | recommends | ❌ | ✅ | NILFS2 testing |
 | nfs-common | recommends | ❌ | ✅ | NFS client |
-| **zfsutils-linux** | **suggests** | ❌ | ❌ | **Must install manually!** |
-| exfatprogs | suggests | ❌ | ❌ | Must install manually |
+| exfatprogs (exFAT) | recommends | ❌ | ✅ | exFAT testing |
+| ntfs-3g (NTFS) | recommends | ❌ | ✅ | NTFS testing |
+| nfs-kernel-server | suggests | ❌ | ❌ | Only for NFS server |
+| cifs-utils | suggests | ❌ | ❌ | Only for CIFS/SMB |
+| fuse3 | suggests | ❌ | ❌ | Only for FUSE filesystems |
 
 ---
 
@@ -74,18 +79,15 @@ simple_chaos_test --weak /mnt/ext4
 
 ### ZFS Testing
 
-**ZFS tools NOT included (suggests only)!**
+**ZFS tools NOW INCLUDED! (moved to recommends)**
 
 ```bash
 # Create VM
 bazel run //vm:create_vm -- --name zfs-test
 
-# Deploy Xibalba
+# Deploy Xibalba (use apt install!)
 ssh root@zfs-test
-apt install ./xibalba_0.1.0_amd64.deb
-
-# Install ZFS manually (suggests doesn't auto-install)
-apt install zfsutils-linux
+apt install ./xibalba_0.1.0_amd64.deb  # Installs zfsutils-linux automatically!
 
 # Create ZFS pool
 dd if=/dev/zero of=/root/zfs.img bs=1M count=2000
@@ -115,13 +117,8 @@ scp $PACKAGE_PATH root@$VM_NAME:/tmp/
 # Install with apt (gets recommends!)
 ssh root@$VM_NAME "apt install -y /tmp/xibalba_0.1.0_amd64.deb"
 
-# Verify filesystem tools
-ssh root@$VM_NAME "which mkfs.ext4 mkfs.xfs mkfs.btrfs"
-
-# For ZFS, install manually
-if [[ "$VM_NAME" == *"zfs"* ]]; then
-    ssh root@$VM_NAME "apt install -y zfsutils-linux"
-fi
+# Verify filesystem tools (all auto-installed!)
+ssh root@$VM_NAME "which mkfs.ext4 mkfs.xfs mkfs.btrfs mkfs.exfat zpool"
 ```
 
 ---
@@ -138,14 +135,11 @@ bazel build //packaging:xibalba-deb
 bazel run //vm:create_vm -- --name ext4-test
 bazel run //vm:create_vm -- --name zfs-test
 
-# Deploy to both (~1 min each)
+# Deploy to both (~1 min each - filesystem tools auto-install!)
 bazel run //vm:deploy_xibalba -- ext4-test
 bazel run //vm:deploy_xibalba -- zfs-test
 
-# Install ZFS tools on ZFS VM
-ssh root@zfs-test "apt install -y zfsutils-linux"
-
-# Create filesystems and run tests
+# Create filesystems and run tests (tools already installed)
 ssh root@ext4-test << 'SCRIPT'
   # Setup ext4 (~30 sec)
   dd if=/dev/zero of=/root/ext4.img bs=1M count=1000
@@ -179,13 +173,23 @@ SCRIPT
 
 ## Summary
 
-**Answer**: The package has the right dependencies, but:
+**Answer**: YES! All major filesystem tools are auto-installed!
 
-1. ✅ **ext4, XFS, btrfs, F2FS, NILFS2, NFS** → Installed automatically with `apt install`
-2. ❌ **ZFS** → Must install manually (`apt install zfsutils-linux`)
-3. ⚠️  **Must use `apt install`, NOT `dpkg -i`** to get recommends
+When you deploy with `apt install`:
 
-**Next step**: Update `vm/deploy_xibalba.sh` to use `apt install` so filesystem tools are installed automatically!
+✅ **Auto-installed (recommends)**:
+- ext4, XFS, btrfs (enterprise filesystems)
+- ZFS (primary test target)
+- F2FS, NILFS2 (flash/log-structured)
+- NFS client (network filesystem)
+- exFAT, NTFS (removable media)
 
-Should I update the deploy script now?
+❌ **Manual install only (suggests)**:
+- NFS server (only for server testing)
+- CIFS/SMB (network filesystems)
+- FUSE (user-space filesystems)
+
+⚠️  **Critical**: Must use `apt install`, NOT `dpkg -i`, to get filesystem tools!
+
+**9 filesystems ready to test with a single `apt install` command!** 🎯
 
