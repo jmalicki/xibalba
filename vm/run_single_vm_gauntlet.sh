@@ -45,12 +45,13 @@ echo "Package: $PACKAGE"
 echo
 
 # Detect SSH key
+# Always bypass known_hosts (VMs reuse IPs, causing host key conflicts)
 if [ -f "/tmp/xibalba-ssh-keys/id_rsa" ]; then
-    SSH_OPTS="-i /tmp/xibalba-ssh-keys/id_rsa -o StrictHostKeyChecking=no -o ConnectTimeout=2"
+    SSH_OPTS="-i /tmp/xibalba-ssh-keys/id_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=2"
 elif [ -n "${HOME:-}" ] && [ -f "$HOME/.ssh/id_rsa" ]; then
-    SSH_OPTS="-i $HOME/.ssh/id_rsa -o StrictHostKeyChecking=no -o ConnectTimeout=2"
+    SSH_OPTS="-i $HOME/.ssh/id_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=2"
 else
-    SSH_OPTS="-o StrictHostKeyChecking=no -o ConnectTimeout=2"
+    SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=2"
 fi
 
 # Cleanup on exit (hermetic: remove all test artifacts)
