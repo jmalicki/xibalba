@@ -7,6 +7,13 @@ package(default_visibility = ["//visibility:public"])
 
 load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
 
+# Automated test runner (gets installed in VMs as /usr/bin/xibalba-test-runner)
+sh_binary(
+    name = "test_runner_script",
+    srcs = ["test-runner.sh"],
+    data = [],
+)
+
 # Check if host has required VM tools (QEMU/KVM, libvirt, etc.)
 sh_binary(
     name = "check_prerequisites",

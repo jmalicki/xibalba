@@ -14,10 +14,16 @@ pkg_tar(
         "//chaos:pause_controller",
         "//chaos:simple_chaos_test",
         "//chaos:pause_injector_bpf",
+        "//vm:test_runner_script",
     ],
     mode = "0755",
     package_dir = "/usr/bin",
-    strip_prefix = "/chaos",
+    strip_prefix = ".",
+    remap_paths = {
+        "/chaos/pause_controller": "/usr/bin/pause_controller",
+        "/chaos/simple_chaos_test": "/usr/bin/simple_chaos_test",
+        "/vm/test-runner.sh": "/usr/bin/xibalba-test-runner",
+    },
 )
 
 # Tar archive of data files (eBPF bytecode)
