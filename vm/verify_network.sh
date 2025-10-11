@@ -1,49 +1,53 @@
 #!/bin/bash
-# Verify libvirt network is ready for VM creation
-# This is a READ-ONLY check - does not modify system state
+# Ensure libvirt network is ready (IDEMPOTENT)
+# Starts network if inactive, succeeds if already active
 set -euo pipefail
 
 # Always use system libvirt (not session)
 VIRSH="virsh --connect qemu:///system"
 
-echo "Verifying libvirt network..."
+echo "Ensuring libvirt network is active..."
 echo
 
 # Check if default network exists
 if ! $VIRSH net-list --all 2>/dev/null | grep -q "default"; then
-    echo "✗ libvirt default network not found"
-    echo
-    echo "ERROR: Default network doesn't exist."
-    echo "This should be auto-created by libvirt-daemon-system."
-    echo
-    echo "Fix:"
-    echo "  sudo systemctl restart libvirtd"
+    echo "✗ Default network not found"
+    echo "ERROR: libvirt-daemon-system should create it automatically"
+    echo "Fix: sudo systemctl restart libvirtd"
     exit 1
 fi
 
-# Check if it's active
+# Ensure it's active (idempotent)
 if $VIRSH net-list 2>/dev/null | grep -q "default.*active"; then
-    echo "✓ libvirt default network is active"
-elif $VIRSH net-list --all 2>/dev/null | grep "default" | grep -q "inactive"; then
-    echo "✗ libvirt default network is inactive"
-    echo
-    echo "ERROR: Network must be started before creating VMs."
-    echo
-    echo "Fix:"
-    echo "  virsh --connect qemu:///system net-start default"
-    echo "  virsh --connect qemu:///system net-autostart default"
-    echo
-    echo "Or let libvirtd manage it:"
-    echo "  sudo systemctl restart libvirtd"
-    exit 1
+    echo "✓ Network already active"
 else
-    # Unexpected state - show debug info
-    echo "⚠ Unexpected network state:"
-    $VIRSH net-list --all 2>&1
-    exit 1
+    echo "⚠ Network inactive, starting..."
+    if $VIRSH net-start default 2>&1; then
+        echo "✓ Network started successfully"
+    else
+        # Check if it's actually already active (race condition)
+        if $VIRSH net-list 2>/dev/null | grep -q "default.*active"; then
+            echo "✓ Network is now active (started by another process)"
+        else
+            echo "❌ Failed to start network"
+            echo
+            echo "Ensure you're in libvirt group:"
+            echo "  groups | grep libvirt"
+            echo
+            echo "If not, run and re-login:"
+            echo "  sudo usermod -aG libvirt \$USER"
+            exit 1
+        fi
+    fi
+fi
+
+# Enable autostart for future reboots
+if ! $VIRSH net-info default 2>/dev/null | grep -q "Autostart:.*yes"; then
+    echo "Enabling autostart..."
+    $VIRSH net-autostart default 2>/dev/null || true
 fi
 
 echo
-echo "✅ Network is ready for VM creation"
+echo "✅ Network is ready (idempotent success)"
 exit 0
 
