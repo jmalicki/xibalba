@@ -2,11 +2,14 @@
 
 package(default_visibility = ["//visibility:public"])
 
-# Simple chaos test - multi-threaded directory reading
+# Simple chaos test - multi-threaded directory reading with validation
 cc_binary(
     name = "simple_chaos_test",
     srcs = ["simple_chaos_test.c"],
-    deps = ["//common:dir_reader"],
+    deps = [
+        "//common:dir_reader",
+        "//common:state_tracker",  # Ground truth validation
+    ],
     linkopts = ["-pthread"],
 )
 

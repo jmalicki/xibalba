@@ -20,6 +20,13 @@
 
 #define MAX_ENTRIES 10000
 
+/* Consistency models for validation */
+typedef enum {
+    CONSISTENCY_STRICT,       // Linearizable: all ops instantly visible (strict ordering)
+    CONSISTENCY_WEAK_POSIX,   // POSIX weak: snapshot at read start, ops during read may/may not appear
+    CONSISTENCY_EVENTUAL,     // Eventual: operations may take time to appear
+} consistency_model_t;
+
 /* Operation types for history tracking */
 typedef enum {
     OP_CREATE,
@@ -79,11 +86,31 @@ void tracker_record_read_end(state_tracker_t *tracker, uint64_t thread_id);
 int tracker_get_expected_entries(state_tracker_t *tracker, uint64_t timestamp_ns, 
                                    char **entries, int max_entries);
 
-/* Validate a directory read against expected state */
+/* Validate a directory read against expected state
+ * 
+ * model: Consistency model to use for validation
+ * read_start_ns: When read started (snapshot point)
+ * read_end_ns: When read completed
+ * 
+ * Consistency models:
+ *   STRICT: All operations before read_end MUST be visible
+ *           (Linearizable - strictest, catches most bugs)
+ *   
+ *   WEAK_POSIX: Snapshot at read_start
+ *           - Created BEFORE read: MUST appear (if not deleted)
+ *           - Deleted BEFORE read: MUST NOT appear  
+ *           - Created/deleted DURING: MAY appear (either valid)
+ *           
+ *   EVENTUAL: Operations may take time to propagate
+ *           - Only duplicates are bugs
+ *           - Missing/phantom entries may be propagation delays
+ */
 validation_result_t tracker_validate_read(state_tracker_t *tracker,
                                            char **actual_entries,
                                            int num_actual,
-                                           uint64_t read_timestamp_ns);
+                                           uint64_t read_start_ns,
+                                           uint64_t read_end_ns,
+                                           consistency_model_t model);
 
 /* Check for duplicate entries in a single read */
 bool tracker_has_duplicates(char **entries, int num_entries);

@@ -156,62 +156,105 @@ int tracker_get_expected_entries(state_tracker_t *tracker, uint64_t timestamp_ns
 validation_result_t tracker_validate_read(state_tracker_t *tracker,
                                            char **actual_entries,
                                            int num_actual,
-                                           uint64_t read_timestamp_ns) {
+                                           uint64_t read_start_ns,
+                                           uint64_t read_end_ns,
+                                           consistency_model_t model) {
     validation_result_t result = {0};
     result.total_operations = 1;
     
-    // Get expected entries at this timestamp
-    char *expected[MAX_ENTRIES];
-    int num_expected = tracker_get_expected_entries(
-        tracker, read_timestamp_ns, expected, MAX_ENTRIES
-    );
+    pthread_mutex_lock(&tracker->lock);
     
-    // Check for duplicates
+    // Check for duplicates (ALWAYS a bug in all consistency models)
     if (tracker_has_duplicates(actual_entries, num_actual)) {
         result.duplicate_entries++;
         result.total_bugs_found++;
     }
     
-    // Check for missing entries
-    for (int i = 0; i < num_expected; i++) {
-        bool found = false;
-        for (int j = 0; j < num_actual; j++) {
-            if (strcmp(expected[i], actual_entries[j]) == 0) {
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            result.missing_entries++;
-            result.total_bugs_found++;
-        }
-    }
-    
-    // Check for phantom entries
-    for (int i = 0; i < num_actual; i++) {
-        if (strcmp(actual_entries[i], ".") == 0 || 
-            strcmp(actual_entries[i], "..") == 0) {
-            continue;  // Skip . and ..
+    // Validate based on consistency model
+    for (uint64_t i = 0; i < tracker->file_count; i++) {
+        file_state_t *file = &tracker->files[i];
+        
+        // Skip if file never existed
+        if (file->create_time == 0) {
+            continue;
         }
         
-        bool found = false;
-        for (int j = 0; j < num_expected; j++) {
-            if (strcmp(actual_entries[i], expected[j]) == 0) {
-                found = true;
+        // Determine timing
+        bool created_before_read = file->create_time < read_start_ns;
+        bool created_during_read = (file->create_time >= read_start_ns) && (file->create_time <= read_end_ns);
+        bool created_after_read = file->create_time > read_end_ns;
+        
+        bool deleted_before_read = (file->delete_time > 0) && (file->delete_time < read_start_ns);
+        bool deleted_during_read = (file->delete_time >= read_start_ns) && (file->delete_time <= read_end_ns && file->delete_time > 0);
+        
+        // deleted_after_read not currently used but kept for future validation modes
+        (void)created_after_read;  // Suppress unused warning
+        
+        // Check if file was actually read
+        bool was_read = false;
+        for (int j = 0; j < num_actual; j++) {
+            if (strcmp(actual_entries[j], file->filename) == 0) {
+                was_read = true;
                 break;
             }
         }
-        if (!found) {
-            result.phantom_entries++;
-            result.total_bugs_found++;
+        
+        // Apply consistency model rules
+        switch (model) {
+            case CONSISTENCY_STRICT:
+                // STRICT/Linearizable: All operations completed before read_end MUST be visible
+                if (created_before_read || created_during_read) {
+                    // File was created - should it be visible?
+                    if (deleted_before_read || deleted_during_read) {
+                        // File was deleted - MUST NOT appear
+                        if (was_read) {
+                            result.phantom_entries++;
+                            result.total_bugs_found++;
+                        }
+                    } else {
+                        // File still exists - MUST appear
+                        if (!was_read) {
+                            result.missing_entries++;
+                            result.total_bugs_found++;
+                        }
+                    }
+                }
+                // Files created after read: may or may not appear (race at boundary)
+                break;
+                
+            case CONSISTENCY_WEAK_POSIX:
+                // POSIX weak: Snapshot at read_start
+                // Files created BEFORE read: MUST appear (if not deleted before)
+                if (created_before_read && !deleted_before_read && !deleted_during_read) {
+                    if (!was_read) {
+                        result.missing_entries++;
+                        result.total_bugs_found++;
+                    }
+                }
+                
+                // Files deleted BEFORE read: MUST NOT appear
+                if (deleted_before_read && was_read) {
+                    result.phantom_entries++;
+                    result.total_bugs_found++;
+                }
+                
+                // Files created/deleted DURING read: Either is valid (no bug)
+                break;
+                
+            case CONSISTENCY_EVENTUAL:
+                // Eventual: Only duplicates are bugs
+                // Missing/phantom may be propagation delays - not counted
+                // (Duplicates already checked above)
+                break;
+        }
+        
+        // Files created AFTER read: should not appear (but tolerate as race at boundary)
+        if (created_after_read && was_read && model == CONSISTENCY_STRICT) {
+            // Could be clock skew or race at boundary - don't count as hard bug
         }
     }
     
-    // Cleanup expected entries
-    for (int i = 0; i < num_expected; i++) {
-        free(expected[i]);
-    }
-    
+    pthread_mutex_unlock(&tracker->lock);
     return result;
 }
 

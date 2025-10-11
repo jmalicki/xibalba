@@ -56,12 +56,28 @@ jobs:
           dpkg-deb --info bazel-bin/packaging/rudra_0.1.0_amd64.deb
           dpkg-deb --contents bazel-bin/packaging/rudra_0.1.0_amd64.deb
       
-      - name: Run chaos test (smoke test)
+      - name: Run chaos test with validation (on stable kernel)
         run: |
-          mkdir -p /tmp/rudra_test
-          touch /tmp/rudra_test/file{1..100}
-          timeout 3s bazel-bin/chaos/simple_chaos_test /tmp/rudra_test || true
-          echo "✓ Chaos test runs without crashing"
+          # Test on CI runner's filesystem (stable kernel)
+          # Should find ZERO bugs (proves validation logic works)
+          mkdir -p /tmp/xibalba_test
+          
+          echo "=== Running Xibalba chaos test with state tracking ==="
+          echo "Testing on stable kernel - should find 0 bugs"
+          echo ""
+          
+          # Run test (exits 0 if no bugs, 1 if bugs found)
+          if bazel-bin/chaos/simple_chaos_test /tmp/xibalba_test; then
+            echo ""
+            echo "✅ SUCCESS: Validation works correctly (0 bugs on stable kernel)"
+          else
+            echo ""
+            echo "⚠️  UNEXPECTED: Bugs found on stable kernel!"
+            echo "This could indicate:"
+            echo "  1. Actual race condition in kernel (unlikely on CI runner)"
+            echo "  2. Bug in validation logic (needs investigation)"
+            exit 1
+          fi
       
       # Upload Debian package as primary artifact
       - name: Upload Debian package
