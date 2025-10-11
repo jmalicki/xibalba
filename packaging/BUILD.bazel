@@ -35,6 +35,13 @@ genrule(
     cmd = "cp $< $@",
 )
 
+genrule(
+    name = "copy_smoke_test",
+    srcs = ["//vm:xibalba-smoke-test.sh"],
+    outs = ["xibalba-smoke-test"],
+    cmd = "cp $< $@",
+)
+
 # Tar archive of test runner script
 pkg_tar(
     name = "xibalba-test-runner-tar",
@@ -51,6 +58,13 @@ pkg_tar(
     package_dir = "/usr/bin",
 )
 
+pkg_tar(
+    name = "xibalba-smoke-test-tar",
+    srcs = [":copy_smoke_test"],
+    mode = "0755",
+    package_dir = "/usr/bin",
+)
+
 # Combined binaries
 pkg_tar(
     name = "xibalba-bin",
@@ -58,6 +72,7 @@ pkg_tar(
         ":xibalba-test-bins",
         ":xibalba-test-runner-tar",
         ":xibalba-gauntlet-tar",
+        ":xibalba-smoke-test-tar",
     ],
 )
 
