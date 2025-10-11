@@ -84,6 +84,29 @@ sh_binary(
 
 # Lightweight host dependency verification (Bazel test)
 # This runs automatically as a dependency of VM operations
+# Individual verification tests
+sh_test(
+    name = "verify_tools",
+    srcs = ["verify_tools.sh"],
+    tags = ["manual", "local"],
+    size = "small",
+)
+
+sh_test(
+    name = "verify_permissions",
+    srcs = ["verify_permissions.sh"],
+    tags = ["manual", "local"],
+    size = "small",
+)
+
+sh_test(
+    name = "verify_network",
+    srcs = ["verify_network.sh"],
+    tags = ["manual", "local"],
+    size = "small",
+)
+
+# Combined verification (runs all checks)
 sh_test(
     name = "verify_host_deps",
     srcs = ["verify_host_deps.sh"],
