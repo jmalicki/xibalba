@@ -201,6 +201,9 @@ packages:
 runcmd:
   - mkdir -p /test
   - echo "Xibalba test VM ready" > /etc/motd
+  - echo "XIBALBA_BOOT_COMPLETE" > /dev/ttyS0  # Signal via serial console
+
+final_message: "XIBALBA_READY_$VM_NAME"
 
 power_state:
   mode: reboot

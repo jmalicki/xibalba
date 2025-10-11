@@ -75,44 +75,54 @@ trap cleanup EXIT
 echo "Step 1: Creating VM..."
 "$SCRIPT_DIR/create_test_vm.sh" --name "$VM_NAME" --filesystem "$FILESYSTEM"
 
-# Step 2: Wait for VM to be SSH-accessible
-echo "Step 2: Waiting for VM to be SSH-accessible (cloud-init takes 5-10 min)..."
-VM_IP=""
+# Step 2: Wait for cloud-init completion via console
+echo "Step 2: Waiting for cloud-init to complete (watching serial console)..."
 
-# Try for 10 minutes (cloud-init is slow)
+# Watch serial console for cloud-init's final_message (non-blocking)
+CONSOLE_LOG="/tmp/console-$VM_NAME-$$.log"
+timeout 600 virsh console "$VM_NAME" > "$CONSOLE_LOG" 2>&1 &
+CONSOLE_PID=$!
+
+# Wait for "XIBALBA_READY" marker from cloud-init
+VM_READY=""
 for attempt in $(seq 1 300); do
-    # Get IP from virsh (try ARP first, fallback to lease)
-    VM_IP=$(virsh domifaddr "$VM_NAME" --source arp 2>/dev/null | grep -oP '(\d+\.){3}\d+' | head -1 || true)
-    if [ -z "$VM_IP" ]; then
-        VM_IP=$(virsh domifaddr "$VM_NAME" --source lease 2>/dev/null | grep -oP '(\d+\.){3}\d+' | head -1 || true)
-    fi
-    
-    # Test if we can SSH
-    if [ -n "$VM_IP" ]; then
-        # shellcheck disable=SC2086
-        if timeout 2 ssh $SSH_OPTS -o ConnectTimeout=2 root@"$VM_IP" true 2>/dev/null; then
-            echo "  ✓ VM ready at $VM_IP (after $((attempt * 2))s)"
-            break
-        fi
-        VM_IP=""  # Reset if SSH failed
+    if grep -q "XIBALBA_READY" "$CONSOLE_LOG" 2>/dev/null; then
+        VM_READY="yes"
+        echo "  ✓ cloud-init finished (after $((attempt * 2))s)"
+        break
     fi
     
     # Show progress every 30 seconds
     remainder=$((attempt % 15))
     if [ "$remainder" -eq 0 ]; then
-        echo "  ...still waiting ($((attempt * 2))s elapsed)..."
+        echo "  ...waiting for cloud-init ($((attempt * 2))s elapsed)..."
     fi
     
     sleep 2
 done
 
-if [ -z "$VM_IP" ]; then
-    echo "❌ VM did not become SSH-accessible after $((300 * 2)) seconds (10 min)"
-    echo "   This is unusual - cloud-init should finish within 10 minutes"
+# Stop console watch
+kill "$CONSOLE_PID" 2>/dev/null || true
+rm -f "$CONSOLE_LOG"
+
+if [ -z "$VM_READY" ]; then
+    echo "❌ cloud-init did not complete after 10 minutes"
     echo "   Try: virsh console $VM_NAME"
-    echo "   Or:  virsh domifaddr $VM_NAME --source arp"
     exit 1
 fi
+
+# Step 3: Get VM IP (now it should be available immediately)
+echo "Step 3: Getting VM IP address..."
+VM_IP=$(virsh domifaddr "$VM_NAME" --source arp 2>/dev/null | grep -oP '(\d+\.){3}\d+' | head -1 || true)
+if [ -z "$VM_IP" ]; then
+    VM_IP=$(virsh domifaddr "$VM_NAME" --source lease 2>/dev/null | grep -oP '(\d+\.){3}\d+' | head -1 || true)
+fi
+
+if [ -z "$VM_IP" ]; then
+    echo "❌ Could not get VM IP after cloud-init completed"
+    exit 1
+fi
+echo "  ✓ VM IP: $VM_IP"
 
 # Step 4: Deploy package
 echo "Step 4: Deploying Xibalba..."
