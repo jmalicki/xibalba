@@ -15,23 +15,21 @@ if command -v pre-commit &> /dev/null; then
 else
     echo "Installing pre-commit..."
     
-    # Try pipx first (recommended), then pip
+    # Try pipx first (recommended for modern Python environments)
     if command -v pipx &> /dev/null; then
         echo "  Using pipx..."
         pipx install pre-commit
-    elif command -v pip3 &> /dev/null; then
-        echo "  Using pip3..."
-        pip3 install --user pre-commit
-    elif command -v pip &> /dev/null; then
-        echo "  Using pip..."
-        pip install --user pre-commit
     else
-        echo "❌ Error: Neither pipx nor pip found"
+        echo "❌ Error: pipx not found"
         echo
-        echo "Please install pipx or pip first:"
-        echo "  sudo apt install pipx  # Recommended"
-        echo "  # or"
-        echo "  sudo apt install python3-pip"
+        echo "Modern Python (3.11+) requires pipx for installing tools."
+        echo
+        echo "Install pipx first:"
+        echo "  sudo apt install pipx"
+        echo "  pipx ensurepath  # Add ~/.local/bin to PATH"
+        echo
+        echo "Then re-run this script:"
+        echo "  bazel run //tools:setup_precommits"
         exit 1
     fi
     
@@ -39,8 +37,9 @@ else
     if ! command -v pre-commit &> /dev/null; then
         echo "❌ Error: pre-commit installed but not in PATH"
         echo
-        echo "Try adding to PATH:"
-        echo "  export PATH=\"\$HOME/.local/bin:\$PATH\""
+        echo "Run pipx's PATH setup:"
+        echo "  pipx ensurepath"
+        echo "  source ~/.bashrc  # Or restart your shell"
         echo
         echo "Then re-run this script."
         exit 1

@@ -5,9 +5,8 @@ Developer tools and convenience scripts
 sh_binary(
     name = "setup_precommits",
     srcs = ["setup_precommits.sh"],
-    data = [
-        "//:.pre-commit-config.yaml",
-    ],
+    # pre-commit reads .pre-commit-config.yaml from git repo directly
+    # No need to include as data dependency
     visibility = ["//visibility:public"],
 )
 
