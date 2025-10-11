@@ -10,6 +10,9 @@ module(
     version = "0.1.0",
 )
 
+# C/C++ testing framework
+bazel_dep(name = "googletest", version = "1.14.0")
+
 # Rules for building OCI (Docker) images - used for hermetic build environment
 bazel_dep(name = "rules_oci", version = "1.7.4")
 

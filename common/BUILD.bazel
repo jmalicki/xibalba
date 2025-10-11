@@ -7,6 +7,7 @@ cc_library(
     name = "dir_reader",
     srcs = ["dir_reader.c"],
     hdrs = ["dir_reader.h"],
+    copts = ["-std=gnu11"],  # C11 with GNU extensions
     # linkopts will include -luring when we add io_uring support
 )
 
@@ -15,6 +16,7 @@ cc_library(
     name = "state_tracker",
     srcs = ["state_tracker.c"],
     hdrs = ["state_tracker.h"],
+    copts = ["-std=gnu11"],  # C11 with GNU extensions
     linkopts = ["-pthread"],
 )
 
@@ -23,4 +25,65 @@ exports_files([
     "dir_reader.h",
     "state_tracker.h",
 ])
+
+# ============================================================================
+# Unit tests for state tracker - THE MOST CRITICAL TESTS
+# ============================================================================
+# These tests verify the core validation logic is correct:
+# 1. Can detect real bugs (true positives)
+# 2. Doesn't report false bugs (no false positives)
+# 3. Consistency models work correctly (strict/weak/eventual)
+#
+# Linked requirements:
+# - Detect missing entries (file created but not visible)
+# - Detect duplicate entries (file appears twice in one read)
+# - Detect phantom entries (file visible but shouldn't exist)
+# - WEAK model: allows files created during read to be missing
+# - STRICT model: all operations before read_end must be visible
+# - EVENTUAL model: only duplicates are bugs
+#
+# ============================================================================
+# NOTE ON SANITIZERS:
+# ============================================================================
+# This test has UBSan DISABLED due to Bazel + googletest linking complexity:
+#
+# Problem:
+#   1. Our .bazelrc enables UBSan globally (--copt=-fsanitize=undefined)
+#   2. This instruments BOTH our code AND external deps (googletest)
+#   3. Googletest gets built as shared libraries (.so) with UBSan checks
+#   4. When linking the test, UBSan runtime symbols aren't resolved properly
+#   5. Error: "undefined reference to '__ubsan_handle_dynamic_type_cache_miss'"
+#
+# Why This Happens:
+#   - Bazel builds external deps in separate configurations
+#   - Our test's linkopts don't propagate to @googletest//:gtest_main
+#   - Googletest .so has UBSan instrumentation but no UBSan runtime linked
+#   - Adding -fsanitize to linkopts doesn't fix it (tried)
+#   - Using linkstatic=True doesn't fix it (tried)
+#
+# Acceptable Trade-off:
+#   - The C library under test (state_tracker.c) STILL has full UBSan coverage
+#   - Only the C++ test harness (googletest) and glue code lack UBSan
+#   - The actual filesystem validation logic gets full sanitizer checks
+#
+# If this becomes a problem:
+#   - Could patch googletest's BUILD file to disable UBSan
+#   - Could use a different test framework (criterion, etc)
+#   - Could write tests in pure C (more work, but fully sanitized)
+# ============================================================================
+cc_test(
+    name = "state_tracker_test",
+    size = "small",
+    srcs = ["state_tracker_test.cc"],
+    copts = [
+        "-std=c++20",  # C++20 for modern C++ features
+        "-Wno-c99-extensions",  # C library uses C99/C11 features (atomics, etc)
+    ],
+    deps = [
+        ":state_tracker",
+        "@googletest//:gtest_main",
+    ],
+    linkopts = ["-pthread"],
+    tags = ["cpptest"],  # Mark as C++ test
+)
 

@@ -32,6 +32,28 @@
 #include "../common/dir_reader.h"
 #include "../common/state_tracker.h"
 
+// Bug event for incremental logging
+typedef struct {
+    uint64_t timestamp_ns;
+    uint64_t thread_id;
+    uint64_t read_start_ns;
+    uint64_t read_end_ns;
+    const char *model_name;
+    uint64_t total_bugs;
+    uint64_t missing;
+    uint64_t duplicates;
+    uint64_t phantoms;
+    int files_read;
+} bug_event_t;
+
+// Simple lock-free ring buffer for bug events (single producer per reader thread, single consumer)
+#define BUG_QUEUE_SIZE 10000
+typedef struct {
+    bug_event_t events[BUG_QUEUE_SIZE];
+    _Atomic uint64_t write_idx;
+    _Atomic uint64_t read_idx;
+} bug_queue_t;
+
 /**
  * Xibalba Chaos Test - The Dark House Trial
  * 
@@ -63,6 +85,7 @@ struct test_state {
     _Atomic uint64_t operations;
     _Atomic uint64_t bugs_found;
     _Atomic uint64_t reads_completed;
+    bug_queue_t *bug_queue;  // Lock-free queue for bug events
 };
 
 /* Reader thread: Continuously scans directory and validates results */
@@ -134,6 +157,30 @@ static void *reader_thread(void *arg) {
             if (result.phantom_entries > 0) {
                 printf("   Phantom entries: %lu\n", result.phantom_entries);
             }
+            
+            // Send bug event to writer thread (lock-free queue push)
+            if (state->bug_queue) {
+                const char *model_name = 
+                    state->model == CONSISTENCY_STRICT ? "strict" :
+                    state->model == CONSISTENCY_WEAK_POSIX ? "weak" : "eventual";
+                
+                uint64_t write_pos = atomic_fetch_add(&state->bug_queue->write_idx, 1);
+                uint64_t slot = write_pos % BUG_QUEUE_SIZE;
+                
+                // Write to queue slot (lock-free!)
+                bug_event_t *event = &state->bug_queue->events[slot];
+                event->timestamp_ns = read_end_ns;
+                event->thread_id = thread_id;
+                event->read_start_ns = read_start_ns;
+                event->read_end_ns = read_end_ns;
+                event->model_name = model_name;
+                event->total_bugs = result.total_bugs_found;
+                event->missing = result.missing_entries;
+                event->duplicates = result.duplicate_entries;
+                event->phantoms = result.phantom_entries;
+                event->files_read = total_read;
+                // No mutex needed! Lock-free atomic increment + ring buffer
+            }
         }
         
         // Cleanup
@@ -149,6 +196,55 @@ static void *reader_thread(void *arg) {
     }
     
     dir_reader_destroy(reader);
+    return NULL;
+}
+
+/* Bug writer thread: Drains bug queue and writes to JSONL file (no mutex contention!) */
+static void *bug_writer_thread(void *arg) {
+    struct test_state *state = (struct test_state *)arg;
+    
+    // Open bugs JSONL file
+    char bugs_file[512];
+    snprintf(bugs_file, sizeof(bugs_file), "%s/xibalba-bugs.jsonl", state->test_dir);
+    FILE *bugs_fp = fopen(bugs_file, "w");
+    if (!bugs_fp) {
+        fprintf(stderr, "Warning: Could not open bugs file: %s\n", bugs_file);
+        return NULL;
+    }
+    
+    uint64_t last_read_idx = 0;
+    
+    while (!atomic_load(&state->stop) || 
+           atomic_load(&state->bug_queue->read_idx) < atomic_load(&state->bug_queue->write_idx)) {
+        
+        uint64_t write_idx = atomic_load(&state->bug_queue->write_idx);
+        
+        // Process all pending events
+        while (last_read_idx < write_idx) {
+            uint64_t slot = last_read_idx % BUG_QUEUE_SIZE;
+            bug_event_t *event = &state->bug_queue->events[slot];
+            
+            // Write bug event to JSONL
+            fprintf(bugs_fp,
+                "{\"ts\":%lu,\"thread\":%lu,\"read_start\":%lu,\"read_end\":%lu,"
+                "\"model\":\"%s\",\"total_bugs\":%lu,\"missing\":%lu,\"duplicates\":%lu,"
+                "\"phantoms\":%lu,\"files_read\":%d}\n",
+                event->timestamp_ns, event->thread_id, event->read_start_ns, event->read_end_ns,
+                event->model_name, event->total_bugs, event->missing,
+                event->duplicates, event->phantoms, event->files_read);
+            
+            last_read_idx++;
+            atomic_store(&state->bug_queue->read_idx, last_read_idx);
+        }
+        
+        // Flush periodically (every batch)
+        fflush(bugs_fp);
+        
+        // Brief sleep to avoid busy-waiting
+        usleep(10000);  // 10ms
+    }
+    
+    fclose(bugs_fp);
     return NULL;
 }
 
@@ -310,6 +406,15 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
+    // Initialize lock-free bug queue
+    bug_queue_t *bug_queue = malloc(sizeof(bug_queue_t));
+    if (!bug_queue) {
+        fprintf(stderr, "Failed to allocate bug queue\n");
+        return 1;
+    }
+    atomic_init(&bug_queue->write_idx, 0);
+    atomic_init(&bug_queue->read_idx, 0);
+    
     struct test_state state = {
         .test_dir = test_dir,
         .tracker = tracker,
@@ -318,6 +423,7 @@ int main(int argc, char *argv[]) {
         .operations = ATOMIC_VAR_INIT(0),
         .bugs_found = ATOMIC_VAR_INIT(0),
         .reads_completed = ATOMIC_VAR_INIT(0),
+        .bug_queue = bug_queue,
     };
     
     if (!json_output) {
@@ -328,9 +434,16 @@ int main(int argc, char *argv[]) {
     // Allocate thread arrays based on configuration
     pthread_t *reader_threads = malloc(sizeof(pthread_t) * (size_t)num_readers);
     pthread_t *writer_threads = malloc(sizeof(pthread_t) * (size_t)num_writers);
+    pthread_t bug_writer;
     
     if (!reader_threads || !writer_threads) {
         fprintf(stderr, "Failed to allocate thread arrays\n");
+        return 1;
+    }
+    
+    // Launch bug writer thread (handles all I/O, no mutex contention!)
+    if (pthread_create(&bug_writer, NULL, bug_writer_thread, &state) != 0) {
+        fprintf(stderr, "Failed to create bug writer thread\n");
         return 1;
     }
     
@@ -416,9 +529,13 @@ int main(int argc, char *argv[]) {
         pthread_join(writer_threads[i], NULL);
     }
     
-    // Free thread arrays
+    // Wait for bug writer to drain queue
+    pthread_join(bug_writer, NULL);
+    
+    // Free thread arrays and queue
     free(reader_threads);
     free(writer_threads);
+    free(bug_queue);
     
     // Print results
     uint64_t ops = atomic_load(&state.operations);
@@ -489,8 +606,13 @@ int main(int argc, char *argv[]) {
     snprintf(progress_file, sizeof(progress_file), "%s/xibalba-progress.jsonl", test_dir);
     
     tracker_export_history(tracker, history_file);
+    
+    char bugs_file[512];
+    snprintf(bugs_file, sizeof(bugs_file), "%s/xibalba-bugs.jsonl", test_dir);
+    
     printf("Results exported:\n");
     printf("  Progress (JSONL): %s (one line per 5-second period)\n", progress_file);
+    printf("  Detailed bugs (JSONL): %s (one line per bug with details)\n", bugs_file);
     printf("  Full history: %s (detailed operation log)\n", history_file);
     
     // Cleanup

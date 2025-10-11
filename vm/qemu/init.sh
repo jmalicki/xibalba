@@ -79,6 +79,23 @@ if [ -f /test/xibalba-progress.jsonl ]; then
     echo "=== END_XIBALBA_PROGRESS_JSONL ==="
 fi
 
+# Output bugs JSONL (one line per bug with details)
+if [ -f /test/xibalba-bugs.jsonl ]; then
+    echo ""
+    echo "=== XIBALBA_BUGS_JSONL ==="
+    # Show first 20 and last 20 bugs if file is large
+    TOTAL_BUGS=$(wc -l < /test/xibalba-bugs.jsonl)
+    echo "# Total bug events: $TOTAL_BUGS"
+    if [ "$TOTAL_BUGS" -gt 40 ]; then
+        head -20 /test/xibalba-bugs.jsonl
+        echo "# ... ($((TOTAL_BUGS - 40)) bug events omitted) ..."
+        tail -20 /test/xibalba-bugs.jsonl
+    else
+        cat /test/xibalba-bugs.jsonl
+    fi
+    echo "=== END_XIBALBA_BUGS_JSONL ==="
+fi
+
 # Output full history JSON if needed (can be very large)
 if [ -f /test/xibalba-history.json ]; then
     echo ""
