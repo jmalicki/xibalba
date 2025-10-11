@@ -32,28 +32,39 @@ check_tool qemu-system-x86_64 "qemu-system-x86"
 
 echo
 
+# Check libvirt permissions
+if ! groups 2>/dev/null | grep -q libvirt; then
+    echo "✗ User not in libvirt group"
+    echo
+    echo "ERROR: You must be in the 'libvirt' group to run VM tests"
+    echo
+    echo "Fix:"
+    echo "  sudo usermod -aG libvirt,kvm \$USER"
+    echo "  # Then log out and back in"
+    echo
+    echo "Verify after login:"
+    echo "  groups | grep libvirt"
+    echo
+    exit 1
+fi
+echo "✓ User in libvirt group"
+
 # Check and auto-start libvirt default network
-# Assumes user is in libvirt group - fails if not
 if command -v virsh &> /dev/null; then
     if ! virsh net-list --all 2>/dev/null | grep -q "default"; then
         echo "✗ libvirt default network not found"
         echo
-        echo "ERROR: Default network doesn't exist (should be auto-created by libvirt-daemon-system)"
-        echo "Try: sudo systemctl restart libvirtd"
+        echo "ERROR: Default network doesn't exist"
+        echo "This should be auto-created by libvirt-daemon-system."
+        echo
+        echo "Fix: sudo systemctl restart libvirtd"
         exit 1
     fi
     
     if ! virsh net-list 2>/dev/null | grep -q "default.*active"; then
-        echo "⚠ libvirt default network not active, starting..."
-        if ! virsh net-start default 2>&1; then
-            echo
-            echo "ERROR: Failed to start network. Are you in the libvirt group?"
-            echo
-            echo "Check: groups | grep libvirt"
-            echo "If not: sudo usermod -aG libvirt \$USER"
-            echo "Then: Log out and back in"
-            exit 1
-        fi
+        echo "⚠ Default network inactive, starting..."
+        # User is in libvirt group, so this should work
+        virsh net-start default
     fi
     echo "✓ libvirt default network (active)"
 fi
