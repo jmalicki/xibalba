@@ -20,24 +20,53 @@
 
 ## The Name: Xibalba
 
-**Xibalba** - From Maya mythology, literally "Place of Fear":
+**Xibalba** (shee-bahl-BAH) — literally **"Place of Fear"** or **"Place of Phantoms"** — is the Maya underworld from the *Popol Vuh*, the sacred K'iche' Maya text. Far below the surface world, Xibalba is a realm of darkness ruled by the **Ajawab' Xib'alb'a** (Lords of Xibalba), death gods who delight in tormenting souls through elaborate trials and deadly games.
 
-In the Popol Vuh (the Maya creation epic), Xibalba was the underworld ruled by the Lords of Death. To reach the surface world, the Hero Twins had to survive a gauntlet of deadly trials in the Houses of Xibalba:
+### The Myth: The Hero Twins' Descent
 
-- **The Dark House** - Absolute darkness where they could not see
-- **The Razor House** - Filled with obsidian blades that moved on their own
-- **The Cold House** - Freezing temperatures that could kill
-- **The Jaguar House** - Hungry jaguars prowling in the shadows
-- **The Fire House** - Unbearable heat and flames
-- **The Bat House** - Giant death bats with razor wings
+The most famous story of Xibalba tells of the Hero Twins—**Hunahpu** and **Xbalanque**—who were summoned to the underworld by its jealous lords. Their father and uncle had been killed there before them, defeated by the trials. The twins descended knowing they faced almost certain death, but they were clever, brave, and determined to avenge their ancestors.
 
-Only by passing **all** the trials could they prove their worthiness and emerge victorious.
+To escape Xibalba alive, they had to survive the **Six Houses of Xibalba**, each a deadly ordeal designed by the Lords of Death:
 
-**The Metaphor**: Like the Hero Twins, your code must survive Xibalba's gauntlet of chaos tests to prove it's worthy of production. Each test is a trial - race conditions, fault injection, concurrent operations, timing attacks. Code that survives Xibalba has been hardened through the most brutal testing imaginable.
+- 🌑 **The Dark House** (*Ch'umil Ha*) — Absolute darkness where you cannot see the dangers that surround you
+- ❄️  **The Cold House** (*Shiqiripat*) — Freezing winds and icy hail that drain all warmth and will
+- 🐆 **The Jaguar House** (*Balam Ha*) — Prowling jaguars with razor fangs, hungry and waiting
+- 🦇 **The Bat House** (*Sotz' Ha*) — Giant death bats with obsidian wings that decapitate victims
+- 🗡️  **The Razor House** (*Chamiabak*) — Rooms filled with moving blades of obsidian and flint
+- 🔥 **The Fire House** (*Kaqix Ha*) — Unbearable flames that consume everything within
 
-**Acronym**: **X**treme **I**njection for **B**reaking **A**ll **L**atent **B**ugs **A**ggresively
+Each house represented a different form of death—darkness, cold, beasts, blades, heat. The lords expected the twins to fail, as all others had. But through **cunning, resilience, and ingenuity**, Hunahpu and Xbalanque survived every trial. They eventually defeated the Lords of Death in a ritual ball game, died and were reborn, and ascended from Xibalba as gods—the Sun and the Moon.
 
-> *"In Xibalba, only the strong survive. Your code enters the underworld. Will it emerge victorious, or will the Lords of Chaos claim another victim?"*
+### The Metaphor: Your Code's Descent into Chaos
+
+Like the Hero Twins descending into Xibalba, **your code must face orchestrated chaos designed to expose every weakness.** Each test is a House of Xibalba—an ordeal that seems designed to make your code fail:
+
+- 🌑 **The Dark House** → Race conditions in darkness (timing you can't see)
+- ❄️  **The Cold House** → Delay injection (operations frozen at critical moments)
+- 🐆 **The Jaguar House** → Resource contention (threads competing like hungry jaguars)
+- 🦇 **The Bat House** → Concurrent modifications (sudden, deadly changes)
+- 🗡️  **The Razor House** → Edge cases (cuts that find every boundary condition)
+- 🔥 **The Fire House** → Stress testing (burning through resource limits)
+
+**Just as the Hero Twins couldn't see in the Dark House**, your code faces race conditions where timing is invisible. **Just as they shivered in the Cold House**, your operations are frozen by strategic delays. **Just as jaguars prowled**, your threads compete for scarce resources.
+
+But if your code survives—like the Hero Twins—it doesn't just work. It has been **battle-tested against chaos itself**. It emerges not as a fragile prototype, but as **hardened, production-ready software** worthy of the surface world.
+
+### The Six Houses: Chaos Test Categories
+
+| House | Trial | Test Category | What It Finds |
+|-------|-------|---------------|---------------|
+| 🌑 Dark House | Darkness | Race conditions | Timing bugs invisible in normal testing |
+| ❄️ Cold House | Freezing | Delay injection | Timeout handling, deadlocks |
+| 🐆 Jaguar House | Beasts | Resource contention | Lock contention, starvation |
+| 🦇 Bat House | Decapitation | Concurrent modifications | Lost updates, torn reads |
+| 🗡️ Razor House | Blades | Edge cases | Boundary conditions, overflow |
+| 🔥 Fire House | Flames | Stress testing | Resource exhaustion, memory leaks |
+
+> *"Are they not merely wicked? They are evil, and great are their thoughts of deceit."*  
+> — Popol Vuh, describing the Lords of Xibalba
+
+**Your code enters Xibalba. Will it emerge victorious like the Hero Twins, or will the Lords of Chaos claim another victim?**
 
 ---
 
