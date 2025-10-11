@@ -282,80 +282,28 @@ bazel run //chaos:pause_controller -- 50 11
 
 ### VM Testing
 
-**Step 1 - One-Time System Setup** (install prerequisites):
+**One-time setup** (~5 minutes):
 ```bash
-# Install system services and tools
+# See docs/VM-SETUP.md for complete setup script
 sudo apt install -y libvirt-daemon-system qemu-kvm virtinst cloud-image-utils
-
-# Grant yourself VM permissions (no more sudo needed!)
-sudo usermod -aG libvirt,kvm $USER
-
-# Enable KVM module (for AMD CPUs)
-echo "kvm-amd" | sudo tee /etc/modules-load.d/kvm.conf
-sudo modprobe kvm-amd
-# For Intel CPUs use: kvm-intel
-
-# Fix Bazel cache permissions for libvirt
-sudo chmod o+x /home/$USER/.cache
-
-# Create libvirt network for user session
-virsh --connect qemu:///session net-define /dev/stdin <<'EOF'
-<network>
-  <name>default</name>
-  <forward mode='nat'/>
-  <bridge name='virbr1' stp='on' delay='0'/>
-  <ip address='192.168.124.1' netmask='255.255.255.0'>
-    <dhcp>
-      <range start='192.168.124.2' end='192.168.124.254'/>
-    </dhcp>
-  </ip>
-</network>
-EOF
-sudo virsh --connect qemu:///session net-start default
-virsh --connect qemu:///session net-autostart default
-
-# Log out and back in for group changes to take effect
+# ... additional setup required (see VM-SETUP.md)
 ```
 
-**Step 2 - Verify Setup**:
+**Run tests**:
 ```bash
-# Check all prerequisites are met
+# 1. Verify prerequisites
 bazel test //vm:verify_host_deps
 
-# If it fails, follow the instructions in the output
-```
-
-**Step 3 - Quick Smoke Test** (recommended first):
-```bash
-# Fast infrastructure validation (~2 minutes)
-# Validates: VM boot, package install, filesystem setup, test execution
+# 2. Quick smoke test (~2 min)
 bazel test //vm:vm_smoke_test
 
-# Perfect for testing setup or infrastructure changes!
-```
-
-**Step 4 - Full Gauntlet** (when ready):
-```bash
-# Run progressive gauntlet on ext4 and ZFS (parallel)
-# Automatically validates host dependencies first!
-# Tests with 3 consistency models: EVENTUAL → WEAK → STRICT
-bazel test //vm:parallel_vm_tests_validated
-
-# Results saved to: test-results/parallel-vm-tests-{timestamp}/
-# Duration: ~15 minutes with KVM acceleration
-```
-
-**Or validate separately first**:
-```bash
-# Optional: Check dependencies first
-bazel test //vm:verify_host_deps
-# If it fails, install missing packages (shown in test output)
-
-# Then run tests
+# 3. Full gauntlet (~15 min)
 bazel test //vm:parallel_vm_tests_validated
 ```
 
-**Or manual VM operations**:
+📖 **Detailed setup guide**: [`docs/VM-SETUP.md`](docs/VM-SETUP.md)
+
+**Manual VM operations**:
 ```bash
 # Create a test VM
 bazel run //vm:create_vm -- --name test-01
