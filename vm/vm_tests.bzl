@@ -16,6 +16,8 @@ def vm_gauntlet_test(name, filesystem, **kwargs):
     - Handle retries and caching
     - Show results in standard format
     
+    Each test gets a unique VM name to avoid conflicts.
+    
     Args:
         name: Test name (e.g., "ext4_gauntlet")
         filesystem: Filesystem type ("ext4", "zfs", etc.)
@@ -26,7 +28,7 @@ def vm_gauntlet_test(name, filesystem, **kwargs):
         srcs = ["run_single_vm_gauntlet.sh"],
         args = [
             "--filesystem=" + filesystem,
-            "--vm-name=xibalba-" + filesystem,
+            "--vm-name=" + name,  # Use test name (unique)
             "$(location //packaging:xibalba-deb)",
         ],
         data = [
