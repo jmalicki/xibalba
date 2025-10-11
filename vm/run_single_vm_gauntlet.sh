@@ -75,54 +75,45 @@ trap cleanup EXIT
 echo "Step 1: Creating VM..."
 "$SCRIPT_DIR/create_test_vm.sh" --name "$VM_NAME" --filesystem "$FILESYSTEM"
 
-# Step 2: Wait for cloud-init completion via console
-echo "Step 2: Waiting for cloud-init to complete (watching serial console)..."
+# Step 2: Wait for VM network and SSH (cloud-init takes 5-10 min)
+echo "Step 2: Waiting for VM network and SSH..."
+echo "  Note: Ubuntu cloud-init is slow. Install 'libnss-libvirt' for faster hostname resolution."
+VM_IP=""
 
-# Watch serial console for cloud-init's final_message (non-blocking)
-CONSOLE_LOG="/tmp/console-$VM_NAME-$$.log"
-timeout 600 virsh console "$VM_NAME" > "$CONSOLE_LOG" 2>&1 &
-CONSOLE_PID=$!
-
-# Wait for "XIBALBA_READY" marker from cloud-init
-VM_READY=""
+# Simple, reliable approach: poll ARP + test SSH
+# Accept reality: cloud-init takes time
 for attempt in $(seq 1 300); do
-    if grep -q "XIBALBA_READY" "$CONSOLE_LOG" 2>/dev/null; then
-        VM_READY="yes"
-        echo "  ✓ cloud-init finished (after $((attempt * 2))s)"
-        break
+    # Try ARP first (appears faster), fallback to DHCP lease
+    VM_IP=$(virsh domifaddr "$VM_NAME" --source arp 2>/dev/null | grep -oP '(\d+\.){3}\d+' | head -1 || true)
+    if [ -z "$VM_IP" ]; then
+        VM_IP=$(virsh domifaddr "$VM_NAME" --source lease 2>/dev/null | grep -oP '(\d+\.){3}\d+' | head -1 || true)
     fi
     
-    # Show progress every 30 seconds
-    remainder=$((attempt % 15))
+    # Test SSH connectivity (most reliable check)
+    if [ -n "$VM_IP" ]; then
+        # shellcheck disable=SC2086
+        if timeout 3 ssh $SSH_OPTS root@"$VM_IP" "cloud-init status --wait" 2>/dev/null; then
+            echo "  ✓ VM ready at $VM_IP (after $((attempt * 2))s)"
+            break
+        fi
+        VM_IP=""  # Reset if not ready
+    fi
+    
+    # Show progress every 60 seconds
+    remainder=$((attempt % 30))
     if [ "$remainder" -eq 0 ]; then
-        echo "  ...waiting for cloud-init ($((attempt * 2))s elapsed)..."
+        echo "  ...still waiting ($((attempt * 2))s / 600s)..."
     fi
     
     sleep 2
 done
 
-# Stop console watch
-kill "$CONSOLE_PID" 2>/dev/null || true
-rm -f "$CONSOLE_LOG"
-
-if [ -z "$VM_READY" ]; then
-    echo "❌ cloud-init did not complete after 10 minutes"
-    echo "   Try: virsh console $VM_NAME"
+if [ -z "$VM_IP" ]; then
+    echo "❌ VM not ready after 10 minutes"
+    echo "   Recommendation: sudo apt install libnss-libvirt"
+    echo "   Debug: virsh console $VM_NAME"
     exit 1
 fi
-
-# Step 3: Get VM IP (now it should be available immediately)
-echo "Step 3: Getting VM IP address..."
-VM_IP=$(virsh domifaddr "$VM_NAME" --source arp 2>/dev/null | grep -oP '(\d+\.){3}\d+' | head -1 || true)
-if [ -z "$VM_IP" ]; then
-    VM_IP=$(virsh domifaddr "$VM_NAME" --source lease 2>/dev/null | grep -oP '(\d+\.){3}\d+' | head -1 || true)
-fi
-
-if [ -z "$VM_IP" ]; then
-    echo "❌ Could not get VM IP after cloud-init completed"
-    exit 1
-fi
-echo "  ✓ VM IP: $VM_IP"
 
 # Step 4: Deploy package
 echo "Step 4: Deploying Xibalba..."
