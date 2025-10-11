@@ -66,19 +66,21 @@ echo "Step 1: Creating VM..."
 "$SCRIPT_DIR/create_test_vm.sh" --name "$VM_NAME" --filesystem "$FILESYSTEM"
 
 # Step 2: Get VM IP (hostnames don't resolve in libvirt)
-echo "Step 2: Getting VM IP address..."
+echo "Step 2: Getting VM IP address (may take 2-3 min for DHCP)..."
 VM_IP=""
-for _ in {1..30}; do
+for attempt in {1..90}; do
     VM_IP=$(virsh domifaddr "$VM_NAME" --source lease 2>/dev/null | grep -oP '(\d+\.){3}\d+' | head -1)
     if [ -n "$VM_IP" ]; then
-        echo "  ✓ VM IP: $VM_IP"
+        echo "  ✓ VM IP: $VM_IP (attempt $attempt)"
         break
     fi
     sleep 2
 done
 
 if [ -z "$VM_IP" ]; then
-    echo "❌ Failed to get VM IP address"
+    echo "❌ Failed to get VM IP address after 3 minutes"
+    echo "   Try: virsh domifaddr $VM_NAME --source lease"
+    echo "   Or:  virsh console $VM_NAME"
     exit 1
 fi
 
