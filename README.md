@@ -289,10 +289,43 @@ sudo apt install -y libvirt-daemon-system qemu-kvm virtinst cloud-image-utils
 
 # Grant yourself VM permissions (no more sudo needed!)
 sudo usermod -aG libvirt,kvm $USER
+
+# Enable KVM module (for AMD CPUs)
+echo "kvm-amd" | sudo tee /etc/modules-load.d/kvm.conf
+sudo modprobe kvm-amd
+# For Intel CPUs use: kvm-intel
+
+# Fix Bazel cache permissions for libvirt
+sudo chmod o+x /home/$USER/.cache
+
+# Create libvirt network for user session
+virsh --connect qemu:///session net-define /dev/stdin <<'EOF'
+<network>
+  <name>default</name>
+  <forward mode='nat'/>
+  <bridge name='virbr1' stp='on' delay='0'/>
+  <ip address='192.168.124.1' netmask='255.255.255.0'>
+    <dhcp>
+      <range start='192.168.124.2' end='192.168.124.254'/>
+    </dhcp>
+  </ip>
+</network>
+EOF
+sudo virsh --connect qemu:///session net-start default
+virsh --connect qemu:///session net-autostart default
+
 # Log out and back in for group changes to take effect
 ```
 
-**Step 2 - Quick Smoke Test** (recommended first):
+**Step 2 - Verify Setup**:
+```bash
+# Check all prerequisites are met
+bazel test //vm:verify_host_deps
+
+# If it fails, follow the instructions in the output
+```
+
+**Step 3 - Quick Smoke Test** (recommended first):
 ```bash
 # Fast infrastructure validation (~2 minutes)
 # Validates: VM boot, package install, filesystem setup, test execution
@@ -301,7 +334,7 @@ bazel test //vm:vm_smoke_test
 # Perfect for testing setup or infrastructure changes!
 ```
 
-**Step 3 - Full Gauntlet** (when ready):
+**Step 4 - Full Gauntlet** (when ready):
 ```bash
 # Run progressive gauntlet on ext4 and ZFS (parallel)
 # Automatically validates host dependencies first!
