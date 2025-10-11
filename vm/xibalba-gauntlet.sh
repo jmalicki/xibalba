@@ -43,7 +43,7 @@ echo "    XIBALBA GAUNTLET - The Six Houses of Testing"
 echo "════════════════════════════════════════════════════════════════"
 echo
 echo "Test Parameters (SAME FOR ALL):"
-echo "  Duration: $DURATION seconds ($(($DURATION / 60)) minutes)"
+echo "  Duration: $DURATION seconds ($((DURATION / 60)) minutes)"
 echo "  Readers: $READERS threads"
 echo "  Writers: $WRITERS threads"
 echo "  Filesystems: ${FILESYSTEMS[*]}"

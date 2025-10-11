@@ -6,6 +6,16 @@ set -euo pipefail
 # Script directory for relative paths
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Use project vm/images directory (not Bazel runfiles) for VM disks
+# This avoids Bazel cache permission issues with libvirt
+if [ -w "$SCRIPT_DIR/images" ] 2>/dev/null; then
+    IMAGES_DIR="$SCRIPT_DIR/images"
+else
+    # Fallback for Bazel runfiles: use /tmp (world-writable)
+    IMAGES_DIR="/tmp/xibalba-vm-images"
+    mkdir -p "$IMAGES_DIR"
+fi
+
 # Default values
 VM_NAME=""
 CUSTOM_KERNEL=""
@@ -69,7 +79,7 @@ mkdir -p "$SCRIPT_DIR/images"
 mkdir -p "$SCRIPT_DIR/configs"
 
 # Download Ubuntu cloud image if needed
-CLOUD_IMAGE="$SCRIPT_DIR/images/ubuntu-24.04-server-cloudimg-amd64.img"
+CLOUD_IMAGE="$IMAGES_DIR/ubuntu-24.04-server-cloudimg-amd64.img"
 if [ ! -f "$CLOUD_IMAGE" ]; then
     echo "Downloading Ubuntu 24.04 cloud image..."
     wget -O "$CLOUD_IMAGE" \
@@ -78,15 +88,30 @@ if [ ! -f "$CLOUD_IMAGE" ]; then
 fi
 
 # Create VM disk from cloud image
-VM_DISK="$SCRIPT_DIR/images/${VM_NAME}.qcow2"
+VM_DISK="$IMAGES_DIR/${VM_NAME}.qcow2"
 if [ -f "$VM_DISK" ]; then
-    echo "WARNING: $VM_DISK already exists"
-    read -p "Overwrite? (y/N) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    if [ -t 0 ]; then
+        # Interactive: ask for confirmation
+        echo "WARNING: $VM_DISK already exists"
+        read -p "Overwrite? (y/N) " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            exit 1
+        fi
+        rm "$VM_DISK"
+    else
+        # Non-interactive: FAIL SAFELY - never auto-destroy existing VMs
+        echo "ERROR: $VM_DISK already exists (non-interactive mode)"
+        echo
+        echo "To clean up before creating new VMs:"
+        echo "  virsh destroy $VM_NAME 2>/dev/null || true"
+        echo "  virsh undefine $VM_NAME 2>/dev/null || true"
+        echo "  rm -f $VM_DISK"
+        echo "  rm -f $IMAGES_DIR/${VM_NAME}-data.qcow2"
+        echo
+        echo "Or use: vm/destroy_vm.sh $VM_NAME"
         exit 1
     fi
-    rm "$VM_DISK"
 fi
 
 echo "Creating VM disk..."
@@ -94,7 +119,7 @@ qemu-img create -f qcow2 -F qcow2 -b "$CLOUD_IMAGE" "$VM_DISK" "${DISK_GB}G"
 echo "  ✓ Created $VM_DISK"
 
 # Create data disk for tests
-DATA_DISK="$SCRIPT_DIR/images/${VM_NAME}-data.qcow2"
+DATA_DISK="$IMAGES_DIR/${VM_NAME}-data.qcow2"
 if [ -f "$DATA_DISK" ]; then
     rm "$DATA_DISK"
 fi
@@ -107,18 +132,26 @@ CLOUD_INIT_DIR="$SCRIPT_DIR/configs/cloud-init-${VM_NAME}"
 mkdir -p "$CLOUD_INIT_DIR"
 
 # Generate SSH key if needed
-SSH_KEY="$HOME/.ssh/id_rsa.pub"
-if [ ! -f "$SSH_KEY" ]; then
-    echo "WARNING: No SSH key found at $SSH_KEY"
-    echo "Generate one with: ssh-keygen -t rsa"
-    SSH_PUBKEY=""
+# HOME may not be set in Bazel test environment
+if [ -n "${HOME:-}" ] && [ -f "$HOME/.ssh/id_rsa.pub" ]; then
+    SSH_PUBKEY=$(cat "$HOME/.ssh/id_rsa.pub")
 else
-    SSH_PUBKEY=$(cat "$SSH_KEY")
+    # No SSH key available - VM will use password auth (ubuntu/ubuntu)
+    echo "INFO: No SSH key found (HOME=${HOME:-unset}), using password auth"
+    SSH_PUBKEY=""
 fi
 
 # Create user-data
 cat > "$CLOUD_INIT_DIR/user-data" << EOF
 #cloud-config
+# Allow password auth for automated testing (when no SSH keys available)
+ssh_pwauth: true
+chpasswd:
+  expire: false
+  list: |
+    root:xibalba
+    ubuntu:xibalba
+
 users:
   - name: root
     ssh_authorized_keys:
@@ -161,7 +194,7 @@ ethernets:
 EOF
 
 # Create cloud-init ISO
-CLOUD_INIT_ISO="$SCRIPT_DIR/images/${VM_NAME}-cloud-init.iso"
+CLOUD_INIT_ISO="$IMAGES_DIR/${VM_NAME}-cloud-init.iso"
 if [ -f "$CLOUD_INIT_ISO" ]; then
     rm "$CLOUD_INIT_ISO"
 fi
@@ -174,8 +207,11 @@ cloud-localds "$CLOUD_INIT_ISO" \
 echo "  ✓ Created cloud-init ISO"
 
 # Install VM with virt-install
+# Explicitly use system libvirt (qemu:///system)
+# Without this, virt-install defaults to session mode when run as non-root
 echo "Installing VM..."
 virt-install \
+    --connect qemu:///system \
     --name "$VM_NAME" \
     --ram "$RAM_MB" \
     --vcpus 2 \

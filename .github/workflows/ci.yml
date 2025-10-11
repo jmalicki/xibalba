@@ -244,6 +244,7 @@ jobs:
 
 
   # Linting (runs in parallel with build)
+  # Uses Bazel-managed shellcheck (hermetic, no setup needed)
   shellcheck:
     name: Shell Script Linting
     runs-on: ubuntu-latest
@@ -251,9 +252,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Run shellcheck
-        uses: ludeeus/action-shellcheck@master
+      - name: Setup Bazel
+        uses: bazel-contrib/setup-bazel@0.8.1
         with:
-          scandir: '.'
-          ignore_paths: '.git bazel-*'
-          severity: warning
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}
+          repository-cache: true
+      
+      - name: Run hermetic shellcheck
+        run: bazel test //tools:shellcheck_test --test_output=all

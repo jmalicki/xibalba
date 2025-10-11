@@ -21,38 +21,105 @@ sh_binary(
     data = [],
 )
 
-# Parallel VM test runner - runs multiple VMs with different filesystems simultaneously
-# Automatically validates host dependencies before running
+# Parallel VM test runner with automatic validation
+# Validates host dependencies, then runs progressive gauntlet on multiple VMs
 #
 # Usage:
-#   bazel run //vm:parallel_vm_tests
-#
-# If host dependencies are missing, the test will fail with install instructions.
+#   bazel test //vm:parallel_vm_tests_validated  # Preferred: validation + execution
+#   bazel run //vm:parallel_vm_tests              # Direct execution (no validation)
+sh_test(
+    name = "parallel_vm_tests_validated",
+    srcs = ["run_vm_tests_validated.sh"],
+    args = ["$(location //packaging:xibalba-deb)"],
+    data = [
+        ":verify_host_deps.sh",
+        ":run-parallel-vm-tests-wrapper.sh",
+        ":run-parallel-vm-tests.sh",
+        ":create_test_vm.sh",
+        ":deploy_xibalba.sh",
+        ":run_tests.sh",
+        ":destroy_vm.sh",
+        "//packaging:xibalba-deb",
+    ],
+    tags = ["manual", "local", "requires-kvm"],
+    size = "large",  # VM tests take time
+    timeout = "long",  # 15+ minutes
+)
+
+# Quick smoke test for VM infrastructure (~2 minutes)
+# Validates: VM boot, package install, filesystem setup, test execution
+sh_test(
+    name = "vm_smoke_test",
+    srcs = ["run-vm-smoke-test.sh"],
+    args = ["$(location //packaging:xibalba-deb)"],
+    data = [
+        ":verify_host_deps.sh",
+        ":create_test_vm.sh",
+        ":deploy_xibalba.sh",
+        ":xibalba-smoke-test.sh",
+        ":destroy_vm.sh",
+        "//packaging:xibalba-deb",
+    ],
+    tags = ["manual", "local", "requires-kvm"],
+    size = "medium",
+    timeout = "moderate",  # ~2 minutes
+)
+
+# Direct VM test runner (no automatic validation)
+# Use parallel_vm_tests_validated instead for safety
 sh_binary(
     name = "parallel_vm_tests",
     srcs = ["run-parallel-vm-tests-wrapper.sh"],
     args = ["$(location //packaging:xibalba-deb)"],
     data = [
         ":run-parallel-vm-tests.sh",
-        ":verify_host_deps.sh",  # Validation runs automatically
         ":create_test_vm.sh",
         ":deploy_xibalba.sh",
         ":run_tests.sh",
         ":destroy_vm.sh",
-        ":check_prerequisites.sh",
         "//packaging:xibalba-deb",
     ],
     tags = ["manual", "local", "requires-kvm"],
 )
 
 # Lightweight host dependency verification (Bazel test)
-# Run FIRST to validate system prerequisites:
-#   bazel test //vm:verify_host_deps
+# This runs automatically as a dependency of VM operations
+# Individual verification tests
+sh_test(
+    name = "verify_tools",
+    srcs = ["verify_tools.sh"],
+    tags = ["manual", "local"],
+    size = "small",
+)
+
+sh_test(
+    name = "verify_permissions",
+    srcs = ["verify_permissions.sh"],
+    tags = ["manual", "local"],
+    size = "small",
+)
+
+sh_test(
+    name = "verify_network",
+    srcs = ["verify_network.sh"],
+    tags = ["manual", "local"],
+    size = "small",
+)
+
+# Combined verification (runs all checks)
 sh_test(
     name = "verify_host_deps",
     srcs = ["verify_host_deps.sh"],
     tags = ["manual", "local", "requires-host-tools"],
     size = "small",
+)
+
+# Test suite that validates host first, then allows VM tests
+# This ensures verify_host_deps passes before VM operations
+test_suite(
+    name = "vm_prerequisites",
+    tests = [":verify_host_deps"],
+    tags = ["manual", "local"],
 )
 
 # Check if host has required VM tools (QEMU/KVM, libvirt, etc.)

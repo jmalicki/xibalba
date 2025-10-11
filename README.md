@@ -242,10 +242,7 @@ sudo apt install -y libvirt-daemon-system qemu-kvm virtinst cloud-image-utils
 sudo usermod -aG libvirt,kvm $USER  # No more sudo needed after this!
 ```
 
-**Validate** before testing:
-```bash
-bazel test //vm:verify_host_deps  # Bazel ensures environment is ready
-```
+**Bazel validates automatically** when you run VM tests (no separate step needed!)
 
 **Kernel Development**:
 - Kernel source tree (with your patches or baseline)
@@ -264,9 +261,8 @@ git clone https://github.com/your-org/xibalba.git
 cd xibalba
 
 # (Optional but recommended) Setup pre-commit hooks for local linting
-# Requires: pipx or pip install pre-commit
-# pre-commit install  # Catches shellcheck/formatting issues before commit
-# Note: CI runs shellcheck anyway, so this is optional
+bazel run //tools:setup_precommits  # Installs pre-commit and git hooks
+# Note: CI enforces all checks anyway, so this is optional but convenient
 
 # Build everything
 bazel build //...
@@ -285,35 +281,28 @@ bazel run //chaos:pause_controller -- 50 11
 
 ### VM Testing
 
-**Step 1 - One-Time System Setup** (install prerequisites):
+**One-time setup** (~5 minutes):
 ```bash
-# Install system services and tools
+# See docs/VM-SETUP.md for complete setup script
 sudo apt install -y libvirt-daemon-system qemu-kvm virtinst cloud-image-utils
-
-# Grant yourself VM permissions (no more sudo needed!)
-sudo usermod -aG libvirt,kvm $USER
-# Log out and back in for group changes to take effect
+# ... additional setup required (see VM-SETUP.md)
 ```
 
-**Step 2 - Validate Host** (Bazel ensures environment is ready):
+**Run tests**:
 ```bash
-# Bazel test validates all dependencies are met
+# 1. Verify prerequisites
 bazel test //vm:verify_host_deps
 
-# If it fails, install missing packages (shown in test output)
-# If it passes, you're ready for VM testing!
+# 2. Quick smoke test (~2 min)
+bazel test //vm:vm_smoke_test
+
+# 3. Full gauntlet (~15 min)
+bazel test //vm:parallel_vm_tests_validated
 ```
 
-**Step 3 - Run VM Tests**:
-```bash
-# Run progressive gauntlet on ext4 and ZFS (parallel)
-# Tests with 3 consistency models: EVENTUAL → WEAK → STRICT
-bazel run //vm:parallel_vm_tests
+📖 **Detailed setup guide**: [`docs/VM-SETUP.md`](docs/VM-SETUP.md)
 
-# Results saved to: test-results/parallel-vm-tests-{timestamp}/
-```
-
-**Or manual VM operations**:
+**Manual VM operations**:
 ```bash
 # Create a test VM
 bazel run //vm:create_vm -- --name test-01
@@ -541,6 +530,18 @@ Every PR automatically faces the trials:
 ## Contributing
 
 Xibalba is actively developed. Want to help strengthen the trials?
+
+**Development setup**:
+```bash
+# Run shellcheck on all scripts (hermetic, no install needed)
+bazel test //tools:shellcheck_test
+
+# (Optional) Setup pre-commit git hooks for commit-time checks
+# Requires: sudo apt install pipx (one-time)
+bazel run //tools:setup_precommits
+
+# CI uses Bazel shellcheck test regardless of local setup
+```
 
 **How to contribute**:
 1. Add new fault injection modes
