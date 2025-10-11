@@ -107,13 +107,13 @@ CLOUD_INIT_DIR="$SCRIPT_DIR/configs/cloud-init-${VM_NAME}"
 mkdir -p "$CLOUD_INIT_DIR"
 
 # Generate SSH key if needed
-SSH_KEY="$HOME/.ssh/id_rsa.pub"
-if [ ! -f "$SSH_KEY" ]; then
-    echo "WARNING: No SSH key found at $SSH_KEY"
-    echo "Generate one with: ssh-keygen -t rsa"
-    SSH_PUBKEY=""
+# HOME may not be set in Bazel test environment
+if [ -n "${HOME:-}" ] && [ -f "$HOME/.ssh/id_rsa.pub" ]; then
+    SSH_PUBKEY=$(cat "$HOME/.ssh/id_rsa.pub")
 else
-    SSH_PUBKEY=$(cat "$SSH_KEY")
+    # No SSH key available - VM will use password auth (ubuntu/ubuntu)
+    echo "INFO: No SSH key found (HOME=${HOME:-unset}), using password auth"
+    SSH_PUBKEY=""
 fi
 
 # Create user-data
