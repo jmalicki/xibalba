@@ -41,20 +41,20 @@ pkg_deb(
         "libelf1",
     ],
     recommends = [
-        "e2fsprogs",      # ext4
-        "xfsprogs",       # XFS
-        "btrfs-progs",    # btrfs
-        "f2fs-tools",     # F2FS
-        "nilfs-tools",    # NILFS2
-        "nfs-common",     # NFS client
+        "e2fsprogs",       # ext4
+        "xfsprogs",        # XFS
+        "btrfs-progs",     # btrfs
+        "zfsutils-linux",  # ZFS (primary test target with ext4)
+        "f2fs-tools",      # F2FS
+        "nilfs-tools",     # NILFS2
+        "nfs-common",      # NFS client
     ],
     suggests = [
-        "zfsutils-linux",  # ZFS (may need contrib repo)
         "nfs-kernel-server",  # NFS server
-        "exfatprogs",      # exFAT
-        "ntfs-3g",         # NTFS
-        "cifs-utils",      # CIFS/SMB
-        "fuse3",           # FUSE filesystems
+        "exfatprogs",         # exFAT
+        "ntfs-3g",            # NTFS
+        "cifs-utils",         # CIFS/SMB
+        "fuse3",              # FUSE filesystems
     ],
     description = """Xibalba: Chaos Testing Framework for Kernel Filesystems
  Xibalba is a Jepsen-inspired chaos testing framework for Linux kernel VFS
@@ -69,9 +69,9 @@ pkg_deb(
   - simple_chaos_test: Multi-threaded directory reading test
   - pause_injector.bpf.o: eBPF bytecode for fault injection
  .
- For comprehensive filesystem testing, install recommended packages for
- ext4, XFS, btrfs, F2FS, NILFS2, and NFS. ZFS testing requires zfsutils-linux
- from the contrib repository.""",
+ For comprehensive filesystem testing, recommended packages include tools
+ for ext4, XFS, btrfs, ZFS, F2FS, NILFS2, and NFS. These are automatically
+ installed when using 'apt install' (but not 'dpkg -i').""",
     homepage = "https://github.com/your-org/xibalba",
     maintainer = "Xibalba Developers <xibalba@example.com>",
     package = "xibalba",
