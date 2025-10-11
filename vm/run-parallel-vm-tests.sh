@@ -61,12 +61,38 @@ echo
 
 # Check prerequisites
 echo "Checking prerequisites..."
-if ! command -v virsh &> /dev/null; then
-    echo "❌ Error: libvirt not installed"
-    echo "Install: sudo apt install libvirt-daemon-system qemu-kvm"
-    exit 1
+
+# Find and run the prerequisite check script
+CHECK_PREREQ=""
+for loc in "$SCRIPT_DIR/check_prerequisites.sh" "$PROJECT_ROOT/vm/check_prerequisites.sh"; do
+    if [ -f "$loc" ]; then
+        CHECK_PREREQ="$loc"
+        break
+    fi
+done
+
+if [ -n "$CHECK_PREREQ" ]; then
+    echo "Running prerequisite check..."
+    if ! "$CHECK_PREREQ"; then
+        echo
+        echo "❌ Prerequisites not met. Please install missing packages."
+        exit 1
+    fi
+    echo "✓ All prerequisites OK"
+else
+    # Fallback: minimal manual checks
+    if ! command -v virsh &> /dev/null; then
+        echo "❌ Error: libvirt not installed"
+        echo "Install: sudo apt install libvirt-daemon-system qemu-kvm"
+        exit 1
+    fi
+    if ! command -v cloud-localds &> /dev/null; then
+        echo "❌ Error: cloud-image-utils not installed"
+        echo "Install: sudo apt install cloud-image-utils"
+        exit 1
+    fi
+    echo "✓ Basic prerequisites OK"
 fi
-echo "✓ Prerequisites OK"
 echo
 
 # Get package path (passed by Bazel as first argument or from environment)
