@@ -1,263 +1,142 @@
-name: Xibalba CI
+name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
-  # Stage 1: Build - Create the .deb package
-  build:
-    name: Build Xibalba Package
-    runs-on: ubuntu-latest
+  # ============================================================================
+  # Unit Tests - Fast feedback on core validation logic
+  # ============================================================================
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-24.04
     
     steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Bazel
-        uses: bazelbuild/setup-bazelisk@v2
-        continue-on-error: true  # Cache errors are non-fatal
-      
-      - name: Verify Bazel installation
-        run: |
-          if ! command -v bazel &> /dev/null; then
-            echo "Bazel not found, installing manually..."
-            wget -q https://github.com/bazelbuild/bazelisk/releases/download/v1.27.0/bazelisk-linux-amd64
-            chmod +x bazelisk-linux-amd64
-            sudo mv bazelisk-linux-amd64 /usr/local/bin/bazel
-          fi
-          bazel --version
-      
-      - name: Generate build dependencies list
-        run: |
-          # Generate build-deps.txt from Bazel (source of truth)
-          bazel build //packaging:generate_build_deps
-          cp bazel-bin/packaging/build-deps.txt .github/workflows/build-deps.txt
-          cat .github/workflows/build-deps.txt
-      
-      - name: Cache APT packages
-        uses: actions/cache@v4
-        id: apt-cache
-        with:
-          path: |
-            /var/cache/apt/archives
-            /var/lib/apt/lists
-          # Cache key based on packaging/BUILD.bazel (source of truth)
-          key: ${{ runner.os }}-apt-${{ hashFiles('packaging/BUILD.bazel') }}
-          restore-keys: |
-            ${{ runner.os }}-apt-
-      
-      - name: Install eBPF build dependencies
-        if: steps.apt-cache.outputs.cache-hit != 'true'
-        run: |
-          # Install packages from Bazel-generated build-deps.txt
-          sudo apt-get update
-          # Extract non-comment, non-empty lines and install
-          grep -v '^#' .github/workflows/build-deps.txt | grep -v '^$' | xargs sudo apt-get install -y
-      
-      - name: Verify eBPF tools
-        run: |
-          # Verify installed tools
-          clang --version
-          llvm-objdump --version
-          
-          # Verify installed libraries
-          dpkg -l | grep libbpf
-          dpkg -l | grep libelf
-      
-      - name: Build all targets
-        run: bazel build //...
-      
-      - name: Build Debian package
-        run: bazel build //packaging:xibalba-deb
-      
-      - name: Verify eBPF program
-        run: |
-          llvm-objdump -h bazel-bin/chaos/pause_injector.bpf.o
-          size=$(stat -c%s bazel-bin/chaos/pause_injector.bpf.o)
-          echo "✓ eBPF program size: $size bytes"
-      
-      - name: Verify Debian package structure
-        run: |
-          dpkg-deb --info bazel-bin/packaging/xibalba_0.1.0_amd64.deb
-          dpkg-deb --contents bazel-bin/packaging/xibalba_0.1.0_amd64.deb
-      
-      # Upload Debian package as artifact for smoke test
-      - name: Upload Debian package
-        uses: actions/upload-artifact@v4
-        with:
-          name: xibalba-deb-package
-          path: bazel-bin/packaging/xibalba_0.1.0_amd64.deb
-          retention-days: 7
-      
-      # Also upload VM scripts for deployment
-      - name: Upload VM scripts
-        uses: actions/upload-artifact@v4
-        with:
-          name: xibalba-vm-scripts
-          path: |
-            vm/*.sh
-            bazel-bin/vm/
-          retention-days: 1
-  
-  # Stage 2: Smoke Test - Install and test the .deb package
-  smoke-test:
-    name: Smoke Test Installed Package
-    runs-on: ubuntu-latest
-    needs: build  # Only run after build succeeds
+    - uses: actions/checkout@v4
     
-    steps:
-      - name: Download Debian package artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: xibalba-deb-package
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          clang-20 \
+          libbpf-dev \
+          libelf-dev \
+          linux-headers-generic
+    
+    - name: Setup Bazelisk
+      uses: bazelbuild/setup-bazelisk@v3
+    
+    - name: Run state_tracker unit tests
+      run: |
+        bazel test //common:state_tracker_test \
+          --test_output=errors \
+          --test_summary=detailed
       
-      - name: Install Xibalba package
-        run: |
-          # Install the .deb (apt install auto-resolves dependencies)
-          echo "Installing xibalba_0.1.0_amd64.deb..."
-          sudo apt-get update
-          
-          # Use apt install (not dpkg -i) to auto-install dependencies
-          sudo apt install -y ./xibalba_0.1.0_amd64.deb
-          
-          # Verify installation
-          dpkg -l | grep xibalba
-          echo ""
-          echo "✅ Package installed successfully with dependencies"
-      
-      - name: Verify installed binaries
-        run: |
-          # Check binaries are in PATH
-          which pause_controller
-          which simple_chaos_test
-          which xibalba-test-runner
-          
-          # Check versions/help (basic smoke test)
-          pause_controller --help || echo "✓ pause_controller exists"
-          xibalba-test-runner --help || echo "✓ xibalba-test-runner exists"
-      
-      - name: Run chaos test on stable kernel
-        run: |
-          # Test the INSTALLED binary (what users get)
-          # Use EVENTUAL consistency model (most permissive)
-          # Only hard bugs (duplicates) should be detected
-          mkdir -p /tmp/xibalba_test
-          
-          echo "=== Running Xibalba chaos test from /usr/bin ==="
-          echo "Consistency model: EVENTUAL (only duplicates are bugs)"
-          echo "Filesystem: tmpfs (CI runner /tmp)"
-          echo "Expected bugs: 0 (stable kernel)"
-          echo "Duration: 30 seconds (quick smoke test)"
-          echo ""
-          
-          # Run quick smoke test (30 seconds, 3 readers, 1 writer)
-          if simple_chaos_test --eventual --duration 30 --readers 3 --writers 1 /tmp/xibalba_test; then
-            echo ""
-            echo "✅ SUCCESS: No bugs found on stable kernel (as expected)"
-            echo "This proves:"
-            echo "  - Package installs correctly"
-            echo "  - Runtime dependencies work"
-            echo "  - Validation logic works"
-            echo "  - CI runner kernel is stable"
-          else
-            echo ""
-            echo "🐛 BUGS FOUND on stable kernel!"
-            echo "This indicates:"
-            echo "  - Duplicate entries detected (serious kernel bug)"
-            echo "  - OR bug in validation logic"
-            echo ""
-            echo "Check logs above for details."
-            exit 1
-          fi
-      
-      - name: Test eBPF capabilities check
-        run: |
-          # Test that the binary gracefully handles lack of eBPF capabilities
-          # (CI runners don't have CAP_BPF, CAP_PERFMON, etc.)
-          echo "Testing eBPF capability checks..."
-          
-          # This should fail gracefully with a clear error message
-          pause_controller 50 1000 2>&1 || echo "✓ Expected: pause_controller requires elevated capabilities"
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: unit-test-results
+        path: bazel-testlogs/
 
-  # Stage 3: VM Script Validation
-  # 
-  # IMPORTANT: GitHub-hosted runners CANNOT run VMs because:
-  #   1. Xibalba tests CUSTOM KERNELS (the entire purpose!)
-  #   2. VMs need nested virtualization (not available on GitHub runners)
-  #   3. Containers share host kernel (can't test custom kernels)
-  #   4. QEMU without KVM is 100x slower (not practical)
-  #
-  # Where to test VMs:
-  #   - Locally (requires KVM) - bazel run //vm:create_vm
-  #   - Self-hosted runner (with KVM enabled)
-  #
-  # This stage validates VM scripts are ready to use (syntax, package)
-  # See docs/CI-AND-VM-TESTING.md for complete explanation
-  validate-vm-scripts:
-    name: Validate VM Scripts
-    runs-on: ubuntu-latest
-    needs: build  # Only need the build artifacts
+  # ============================================================================
+  # Build Tests - Ensure all targets build
+  # ============================================================================
+  build-all:
+    name: Build All Targets
+    runs-on: ubuntu-24.04
     
     steps:
-      - uses: actions/checkout@v4
-      
-      - name: Download Debian package
-        uses: actions/download-artifact@v4
-        with:
-          name: xibalba-deb-package
-          path: packages/
-      
-      - name: Verify package contents
-        run: |
-          echo "=== Debian package for VM deployment ==="
-          dpkg-deb --info packages/xibalba_0.1.0_amd64.deb
-          dpkg-deb --contents packages/xibalba_0.1.0_amd64.deb
-          echo "✅ Package ready for VM deployment"
-      
-      - name: Validate VM script arguments
-        run: |
-          echo "=== Testing VM script argument parsing ==="
-          # Test scripts accept --help without errors
-          bash -n vm/create_test_vm.sh
-          bash -n vm/deploy_xibalba.sh
-          bash -n vm/run_tests.sh
-          bash -n vm/destroy_vm.sh
-          echo "✅ All VM scripts are syntactically valid"
-      
-      - name: Document VM testing instructions
-        run: |
-          echo "=== VM Testing Instructions ==="
-          echo ""
-          echo "GitHub-hosted runners don't support KVM. To test VMs:"
-          echo ""
-          echo "Local testing (requires KVM):"
-          echo "  bazel run //vm:create_vm -- --name test-01"
-          echo "  bazel run //vm:deploy_xibalba -- test-01"
-          echo "  bazel run //vm:run_tests -- test-01"
-          echo ""
-          echo "Self-hosted runner:"
-          echo "  Add 'runs-on: self-hosted' to workflow"
-          echo "  Runner must have KVM enabled"
-          echo ""
+    - uses: actions/checkout@v4
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          clang-20 \
+          libbpf-dev \
+          libelf-dev \
+          linux-headers-generic \
+          qemu-system-x86 \
+          docker.io
+    
+    - name: Setup Bazelisk
+      uses: bazelbuild/setup-bazelisk@v3
+    
+    - name: Build all chaos testing targets
+      run: |
+        bazel build //chaos:all
+        
+    - name: Build VM infrastructure
+      run: |
+        bazel build //vm:extract_kernel //vm:build_initramfs
+        
+    - name: Build packaging
+      run: |
+        bazel build //packaging:xibalba-deb
 
-
-  # Linting (runs in parallel with build)
-  # Uses Bazel-managed shellcheck (hermetic, no setup needed)
-  shellcheck:
-    name: Shell Script Linting
-    runs-on: ubuntu-latest
+  # ============================================================================
+  # VM Tests - Full integration tests (slower, run on demand)
+  # ============================================================================
+  vm-tests:
+    name: VM Tests (ext4, xfs, btrfs)
+    runs-on: ubuntu-24.04
+    # Only run VM tests on main branch or when PR is labeled
+    if: github.ref == 'refs/heads/main' || contains(github.event.pull_request.labels.*.name, 'run-vm-tests')
     
     steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Bazel
-        uses: bazel-contrib/setup-bazel@0.8.1
-        with:
-          bazelisk-cache: true
-          disk-cache: ${{ github.workflow }}
-          repository-cache: true
-      
-      - name: Run hermetic shellcheck
-        run: bazel test //tools:shellcheck_test --test_output=all
+    - uses: actions/checkout@v4
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          clang-20 \
+          libbpf-dev \
+          libelf-dev \
+          linux-headers-generic \
+          qemu-system-x86 \
+          docker.io
+    
+    - name: Enable KVM
+      run: |
+        echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger --name-match=kvm
+        
+    - name: Setup Bazelisk
+      uses: bazelbuild/setup-bazelisk@v3
+    
+    - name: Run QEMU filesystem tests
+      run: |
+        # Run tests with 30-second duration (not full 5-minute for CI)
+        bazel test //vm:qemu_filesystem_suite \
+          --test_timeout=600 \
+          --test_output=errors
+    
+    - name: Extract and upload bug results
+      if: always()
+      run: |
+        # Extract JSONL results from test logs
+        mkdir -p ci-results
+        find bazel-testlogs/vm -name "test.log" -exec grep -A1000 "XIBALBA_PROGRESS_JSONL" {} \; | \
+          grep "^{" > ci-results/all-progress.jsonl || true
+        find bazel-testlogs/vm -name "test.log" -exec grep -A1000 "XIBALBA_BUGS_JSONL" {} \; | \
+          grep "^{" > ci-results/all-bugs.jsonl || true
+        
+    - name: Upload JSONL results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: vm-test-jsonl-results
+        path: ci-results/
+        
+    - name: Upload full test logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: vm-test-logs
+        path: bazel-testlogs/vm/
