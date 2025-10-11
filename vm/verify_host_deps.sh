@@ -32,11 +32,11 @@ check_tool qemu-system-x86_64 "qemu-system-x86"
 
 echo
 
-# Check for libvirt default network in user session
+# Check for libvirt default network (system libvirt)
 SETUP_NEEDED=()
 if command -v virsh &> /dev/null; then
-    if virsh --connect qemu:///session net-list --all 2>/dev/null | grep -q "default"; then
-        if virsh --connect qemu:///session net-list 2>/dev/null | grep -q "default.*active"; then
+    if virsh net-list --all 2>/dev/null | grep -q "default"; then
+        if virsh net-list 2>/dev/null | grep -q "default.*active"; then
             echo "✓ libvirt default network (active)"
         else
             echo "⚠ libvirt default network (not started)"
@@ -71,26 +71,16 @@ if [ ${#SETUP_NEEDED[@]} -gt 0 ]; then
     for item in "${SETUP_NEEDED[@]}"; do
         case $item in
             create-network)
-                echo "Create libvirt default network:"
-                echo "  virsh --connect qemu:///session net-define /dev/stdin <<'EOF'"
-                echo "  <network>"
-                echo "    <name>default</name>"
-                echo "    <forward mode='nat'/>"
-                echo "    <bridge name='virbr1' stp='on' delay='0'/>"
-                echo "    <ip address='192.168.124.1' netmask='255.255.255.0'>"
-                echo "      <dhcp>"
-                echo "        <range start='192.168.124.2' end='192.168.124.254'/>"
-                echo "      </dhcp>"
-                echo "    </ip>"
-                echo "  </network>"
-                echo "  EOF"
-                echo "  virsh --connect qemu:///session net-start default"
-                echo "  virsh --connect qemu:///session net-autostart default"
+                echo "ERROR: Default network not found!"
+                echo "This is usually auto-created by libvirt-daemon-system."
+                echo
+                echo "Try:"
+                echo "  sudo systemctl restart libvirtd"
                 echo
                 ;;
             start-network)
                 echo "Start libvirt default network:"
-                echo "  virsh --connect qemu:///session net-start default"
+                echo "  virsh net-start default"
                 echo
                 ;;
         esac
