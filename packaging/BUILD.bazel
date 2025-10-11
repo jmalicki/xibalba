@@ -61,7 +61,7 @@ pkg_deb(
     architecture = "amd64",
     data = ":xibalba-bin",
     depends = [
-        "libbpf0",
+        "libbpf1",  # Ubuntu 24.04+ uses libbpf1 (version 1.x)
         "libelf1",
     ],
     recommends = [
