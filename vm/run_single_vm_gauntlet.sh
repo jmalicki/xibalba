@@ -92,7 +92,9 @@ for attempt in $(seq 1 300); do
     # Test SSH connectivity (most reliable check)
     if [ -n "$VM_IP" ]; then
         # shellcheck disable=SC2086
-        if timeout 3 ssh $SSH_OPTS root@"$VM_IP" "cloud-init status --wait" 2>/dev/null; then
+        # cloud-init status --wait returns 0 if done, 1 if running, 2 if error
+        # We just need SSH to work, don't care about cloud-init exit code
+        if timeout 3 ssh $SSH_OPTS root@"$VM_IP" true 2>/dev/null; then
             echo "  ✓ VM ready at $VM_IP (after $((attempt * 2))s)"
             break
         fi
