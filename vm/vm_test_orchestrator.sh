@@ -8,27 +8,42 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Parse arguments
+# Parse arguments (handle both --key=value and --key value)
 VM_NAME=""
 FILESYSTEM=""
 PACKAGE=""
 
 while [[ $# -gt 0 ]]; do
     case $1 in
+        --vm-name=*)
+            VM_NAME="${1#*=}"
+            shift
+            ;;
         --vm-name)
             VM_NAME="$2"
             shift 2
             ;;
+        --filesystem=*)
+            FILESYSTEM="${1#*=}"
+            shift
+            ;;
         --filesystem)
             FILESYSTEM="$2"
             shift 2
+            ;;
+        --package=*)
+            PACKAGE="${1#*=}"
+            shift
             ;;
         --package)
             PACKAGE="$2"
             shift 2
             ;;
         *)
-            PACKAGE="$1"
+            # Positional argument (likely the package)
+            if [ -z "$PACKAGE" ]; then
+                PACKAGE="$1"
+            fi
             shift
             ;;
     esac
