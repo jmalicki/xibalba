@@ -242,10 +242,7 @@ sudo apt install -y libvirt-daemon-system qemu-kvm virtinst cloud-image-utils
 sudo usermod -aG libvirt,kvm $USER  # No more sudo needed after this!
 ```
 
-**Validate** before testing:
-```bash
-bazel test //vm:verify_host_deps  # Bazel ensures environment is ready
-```
+**Bazel validates automatically** when you run VM tests (no separate step needed!)
 
 **Kernel Development**:
 - Kernel source tree (with your patches or baseline)
@@ -295,22 +292,24 @@ sudo usermod -aG libvirt,kvm $USER
 # Log out and back in for group changes to take effect
 ```
 
-**Step 2 - Validate Host** (Bazel ensures environment is ready):
-```bash
-# Bazel test validates all dependencies are met
-bazel test //vm:verify_host_deps
-
-# If it fails, install missing packages (shown in test output)
-# If it passes, you're ready for VM testing!
-```
-
-**Step 3 - Run VM Tests**:
+**Step 2 - Run VM Tests** (Bazel validates automatically):
 ```bash
 # Run progressive gauntlet on ext4 and ZFS (parallel)
+# Automatically validates host dependencies first!
 # Tests with 3 consistency models: EVENTUAL → WEAK → STRICT
-bazel run //vm:parallel_vm_tests
+bazel test //vm:parallel_vm_tests_validated
 
 # Results saved to: test-results/parallel-vm-tests-{timestamp}/
+```
+
+**Or validate separately first**:
+```bash
+# Optional: Check dependencies first
+bazel test //vm:verify_host_deps
+# If it fails, install missing packages (shown in test output)
+
+# Then run tests
+bazel test //vm:parallel_vm_tests_validated
 ```
 
 **Or manual VM operations**:
