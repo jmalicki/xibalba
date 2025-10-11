@@ -98,14 +98,26 @@ VM_IP=""
 # Accept reality: cloud-init takes time
 for attempt in $(seq 1 300); do
     # Try ARP first (appears faster), fallback to DHCP lease
+    # Capture full output to see what's happening
+    if [ "$attempt" -le 5 ]; then
+        echo "  [DEBUG #$attempt] Running: virsh domifaddr $VM_NAME --source arp"
+        ARP_OUTPUT=$(virsh domifaddr "$VM_NAME" --source arp 2>&1)
+        echo "  [DEBUG #$attempt] ARP output: '$ARP_OUTPUT'"
+    fi
+    
     VM_IP=$(virsh domifaddr "$VM_NAME" --source arp 2>/dev/null | grep -oP '(\d+\.){3}\d+' | head -1 || true)
     if [ -z "$VM_IP" ]; then
+        if [ "$attempt" -le 5 ]; then
+            echo "  [DEBUG #$attempt] ARP empty, trying lease"
+            LEASE_OUTPUT=$(virsh domifaddr "$VM_NAME" --source lease 2>&1)
+            echo "  [DEBUG #$attempt] LEASE output: '$LEASE_OUTPUT'"
+        fi
         VM_IP=$(virsh domifaddr "$VM_NAME" --source lease 2>/dev/null | grep -oP '(\d+\.){3}\d+' | head -1 || true)
     fi
     
     # DEBUG for first few attempts
     if [ "$attempt" -le 5 ]; then
-        echo "  [DEBUG #$attempt] IP='$VM_IP', SSH_KEY='$SSH_KEY', SSH_OPTS='$SSH_OPTS'"
+        echo "  [DEBUG #$attempt] Final IP='$VM_IP', SSH_KEY='$SSH_KEY'"
     fi
     
     # Test SSH connectivity (most reliable check)
