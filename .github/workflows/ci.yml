@@ -261,4 +261,3 @@ jobs:
       
       - name: Run hermetic shellcheck
         run: bazel test //tools:shellcheck_test --test_output=all
-          severity: warning
