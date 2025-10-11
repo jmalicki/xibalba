@@ -54,6 +54,7 @@ else
 fi
 
 # Cleanup on exit
+# shellcheck disable=SC2317
 cleanup() {
     echo "Cleaning up VM: $VM_NAME"
     "$SCRIPT_DIR/destroy_vm.sh" "$VM_NAME" || true
@@ -93,7 +94,7 @@ timeout 120 bash -c "until ssh $SSH_OPTS root@$VM_IP true 2>/dev/null; do sleep 
 echo "Step 4: Deploying Xibalba..."
 # shellcheck disable=SC2086
 scp $SSH_OPTS "$PACKAGE" "root@${VM_IP}:/tmp/" || exit 1
-# shellcheck disable=SC2086
+# shellcheck disable=SC2086,SC2029
 ssh $SSH_OPTS "root@${VM_IP}" "apt update && apt install -y /tmp/$(basename "$PACKAGE")" || exit 1
 
 # Step 5: Run gauntlet

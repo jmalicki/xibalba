@@ -145,6 +145,7 @@ run_vm_test() {
     
     # Wait for VM to be ready
     echo "[${vm_name}] Waiting for SSH..."
+    # shellcheck disable=SC2086
     timeout 60 bash -c "until ssh $SSH_OPTS root@$vm_name true 2>/dev/null; do sleep 2; done" || {
         echo "[${vm_name}] ❌ Failed to connect via SSH"
         echo 1 > "$exit_code_file"
@@ -153,12 +154,14 @@ run_vm_test() {
     
     # Deploy package
     echo "[${vm_name}] Deploying Xibalba..."
+    # shellcheck disable=SC2086
     scp $SSH_OPTS "$PACKAGE_PATH" "root@${vm_name}:/tmp/" || {
         echo "[${vm_name}] ❌ Failed to copy package"
         echo 1 > "$exit_code_file"
         return 1
     }
     
+    # shellcheck disable=SC2086
     ssh $SSH_OPTS "root@${vm_name}" "apt update && apt install -y /tmp/xibalba_0.1.0_amd64.deb" || {
         echo "[${vm_name}] ❌ Failed to install package"
         echo 1 > "$exit_code_file"
@@ -171,13 +174,16 @@ run_vm_test() {
     echo "[${vm_name}]   2. WEAK (POSIX) - should PASS"
     echo "[${vm_name}]   3. STRICT (ideal) - quantify departures"
     
+    # shellcheck disable=SC2086,SC2029
     if ssh $SSH_OPTS "root@${vm_name}" \
         "XIBALBA_DURATION=$DURATION XIBALBA_READERS=$READERS XIBALBA_WRITERS=$WRITERS xibalba-gauntlet $filesystem"; then
         echo "[${vm_name}] ✅ TEST PASSED at $(date +%H:%M:%S)"
         
         # Get gauntlet results (comprehensive summary + individual model results)
+        # shellcheck disable=SC2086
         ssh $SSH_OPTS "root@${vm_name}" \
             "cat /var/log/xibalba/gauntlet/latest-gauntlet.json" > "$RESULTS_DIR/${vm_name}-gauntlet.json" 2>/dev/null || true
+        # shellcheck disable=SC2086
         ssh $SSH_OPTS "root@${vm_name}" \
             "cat /var/log/xibalba/gauntlet/latest-gauntlet.txt" > "$RESULTS_DIR/${vm_name}-gauntlet.txt" 2>/dev/null || true
         
@@ -187,8 +193,10 @@ run_vm_test() {
         echo "[${vm_name}] ❌ TEST FAILED at $(date +%H:%M:%S)"
         
         # Get gauntlet failure details
+        # shellcheck disable=SC2086
         ssh $SSH_OPTS "root@${vm_name}" \
             "cat /var/log/xibalba/gauntlet/latest-gauntlet.json" > "$RESULTS_DIR/${vm_name}-gauntlet.json" 2>/dev/null || true
+        # shellcheck disable=SC2086
         ssh $SSH_OPTS "root@${vm_name}" \
             "cat /var/log/xibalba/gauntlet/latest-gauntlet.txt" > "$RESULTS_DIR/${vm_name}-gauntlet.txt" 2>/dev/null || true
         
