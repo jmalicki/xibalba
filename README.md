@@ -440,7 +440,9 @@ RUDRA is currently in design phase. Implementation is starting soon.
 
 ## License
 
-TBD
+MIT License - see [LICENSE](LICENSE) file for details.
+
+**Summary**: Free to use, modify, and distribute. No warranty provided.
 
 ---
 
