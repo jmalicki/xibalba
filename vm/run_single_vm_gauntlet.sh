@@ -81,8 +81,11 @@ VM_IP=""
 
 # Try for 5 minutes
 for attempt in $(seq 1 150); do
-    # Get IP from virsh
-    VM_IP=$(virsh domifaddr "$VM_NAME" --source lease 2>/dev/null | grep -oP '(\d+\.){3}\d+' | head -1 || true)
+    # Get IP from virsh (try ARP first, fallback to lease)
+    VM_IP=$(virsh domifaddr "$VM_NAME" --source arp 2>/dev/null | grep -oP '(\d+\.){3}\d+' | head -1 || true)
+    if [ -z "$VM_IP" ]; then
+        VM_IP=$(virsh domifaddr "$VM_NAME" --source lease 2>/dev/null | grep -oP '(\d+\.){3}\d+' | head -1 || true)
+    fi
     
     # Test if we can SSH
     if [ -n "$VM_IP" ]; then
