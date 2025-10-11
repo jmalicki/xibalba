@@ -3,8 +3,6 @@ set -euo pipefail
 
 # Run RUDRA tests in a VM
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-
 AUTOMATED=false
 VM_NAME=""
 

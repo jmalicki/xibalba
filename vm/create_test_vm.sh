@@ -3,13 +3,10 @@ set -euo pipefail
 
 # Create a test VM configured for RUDRA testing
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-
 # Default values
 VM_NAME=""
 CUSTOM_KERNEL=""
-CUSTOM_INITRD=""
+CUSTOM_INITRD=""  # Reserved for future use
 FILESYSTEM="ext4"
 RAM_MB=2048
 DISK_GB=10
@@ -245,7 +242,7 @@ else
         
         # Format and mount data disk
         echo "Setting up filesystem: $FILESYSTEM..."
-        ssh root@"$VM_IP" bash << REMOTE_SCRIPT
+        ssh root@"$VM_IP" bash << 'REMOTE_SCRIPT'
 set -e
 # Format data disk
 case "$FILESYSTEM" in
