@@ -75,32 +75,44 @@ trap cleanup EXIT
 echo "Step 1: Creating VM..."
 "$SCRIPT_DIR/create_test_vm.sh" --name "$VM_NAME" --filesystem "$FILESYSTEM"
 
-# Step 2: Get VM IP (hostnames don't resolve in libvirt)
-echo "Step 2: Getting VM IP address (may take 2-3 min for DHCP)..."
+# Step 2: Wait for SSH using nmap to find VM (faster than waiting for DHCP lease)
+echo "Step 2: Waiting for VM to be SSH-accessible (up to 5 min)..."
 VM_IP=""
-for attempt in {1..90}; do
+
+# Try for 5 minutes (150 attempts × 2s)
+for attempt in {1..150}; do
+    # First try virsh (fast when it works)
     VM_IP=$(virsh domifaddr "$VM_NAME" --source lease 2>/dev/null | grep -oP '(\d+\.){3}\d+' | head -1)
-    if [ -n "$VM_IP" ]; then
-        echo "  ✓ VM IP: $VM_IP (attempt $attempt)"
-        break
+    
+    # If no IP yet, scan the network for SSH on libvirt subnet
+    if [ -z "$VM_IP" ] && command -v nmap >/dev/null; then
+        # Scan for SSH on port 22 in libvirt's default subnet
+        VM_IP=$(nmap -p 22 --open 192.168.122.0/24 2>/dev/null | grep -B4 "22/tcp open" | grep "Nmap scan report" | tail -1 | grep -oP '(\d+\.){3}\d+')
     fi
+    
+    # Test if we can actually SSH (most reliable check)
+    if [ -n "$VM_IP" ]; then
+        # shellcheck disable=SC2086
+        if ssh $SSH_OPTS -o ConnectTimeout=2 root@$VM_IP true 2>/dev/null; then
+            echo "  ✓ VM ready at $VM_IP (attempt $attempt)"
+            break
+        fi
+    fi
+    
+    # Show progress every 30 seconds
+    if [ $((attempt % 15)) -eq 0 ]; then
+        echo "  ...still waiting ($((attempt * 2))s elapsed)..."
+    fi
+    
+    VM_IP=""  # Reset if SSH failed
     sleep 2
 done
 
 if [ -z "$VM_IP" ]; then
-    echo "❌ Failed to get VM IP address after 3 minutes"
-    echo "   Try: virsh domifaddr $VM_NAME --source lease"
-    echo "   Or:  virsh console $VM_NAME"
+    echo "❌ VM did not become SSH-accessible after 5 minutes"
+    echo "   Try: virsh console $VM_NAME"
     exit 1
 fi
-
-# Step 3: Wait for SSH
-echo "Step 3: Waiting for SSH..."
-# shellcheck disable=SC2086
-timeout 120 bash -c "until ssh $SSH_OPTS root@$VM_IP true 2>/dev/null; do sleep 2; done" || {
-    echo "❌ Failed to connect to VM at $VM_IP"
-    exit 1
-}
 
 # Step 4: Deploy package
 echo "Step 4: Deploying Xibalba..."
