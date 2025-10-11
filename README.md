@@ -311,25 +311,25 @@ bazel build //packaging:xibalba-deb
 │                    Xibalba Controller                           │
 │                    (The Lords of Chaos)                         │
 │                                                                 │
-│  ┌───────────────┐   ┌──────────────┐    ┌──────────────┐     │
-│  │DirectoryReader│   │   Nemesis    │    │   Checker    │     │
-│  │  Abstraction  │   │(eBPF Faults) │    │ (Invariants) │     │
-│  └───────┬───────┘   └───────┬──────┘    └───────┬──────┘     │
-│          │                   │                    │            │
-│          ▼                   ▼                    ▼            │
-│     Operations            Faults             Validation        │
-└──────────┬───────────────────┬────────────────────┬────────────┘
+│  ┌───────────────┐   ┌──────────────┐    ┌──────────────┐       │
+│  │DirectoryReader│   │   Nemesis    │    │   Checker    │       │
+│  │  Abstraction  │   │(eBPF Faults) │    │ (Invariants) │       │
+│  └───────┬───────┘   └───────┬──────┘    └───────┬──────┘       │
+│          │                   │                    │             │
+│          ▼                   ▼                    ▼             │
+│     Operations            Faults             Validation         │
+└──────────┬───────────────────┬────────────────────┬─────────────┘
            │                   │                    │
            ▼                   ▼                    ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │              The Houses of Xibalba (Test VMs)                   │
 │                                                                 │
-│        ┌────┐      ┌────┐      ┌─────┐      ┌─────┐           │
-│        │ext4│      │xfs │      │btrfs│      │tmpfs│           │
-│        └────┘      └────┘      └─────┘      └─────┘           │
+│        ┌────┐      ┌────┐      ┌─────┐      ┌─────┐             │
+│        │ext4│      │xfs │      │btrfs│      │tmpfs│             │
+│        └────┘      └────┘      └─────┘      └─────┘             │
 │                                                                 │
-│     Each with: custom kernel + test data + eBPF                │
-│     Your code must survive ALL trials to pass                  │
+│     Each with: custom kernel + test data + eBPF                 │
+│     Your code must survive ALL trials to pass                   │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
