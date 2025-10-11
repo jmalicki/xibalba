@@ -21,9 +21,24 @@ http_archive(
 load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 bazel_skylib_workspace()
 
+# Rules for packaging (tar, deb, rpm)
+http_archive(
+    name = "rules_pkg",
+    urls = [
+        "https://github.com/bazelbuild/rules_pkg/releases/download/0.9.1/rules_pkg-0.9.1.tar.gz",
+    ],
+    sha256 = "8f9ee2dc10c1ae514ee599a8b42ed99fa262b757058f65ad3c384289ff70c4b8",
+)
+
+load("@rules_pkg//pkg:deps.bzl", "rules_pkg_dependencies")
+rules_pkg_dependencies()
+
 # System libraries (liburing, libbpf)
 # These must be installed on the system
 # Bazel will link against them
 
 # For eBPF compilation, we'll use clang directly with custom rules
+
+
+
 

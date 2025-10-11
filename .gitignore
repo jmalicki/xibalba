@@ -4,6 +4,10 @@
 *.so
 *.bpf.o
 
+# Bazel artifacts
+bazel-*
+bin/
+
 # Compiled tests
 test_*
 chaos_*
@@ -40,4 +44,7 @@ venv/
 # OS
 .DS_Store
 Thumbs.db
+
+
+
 

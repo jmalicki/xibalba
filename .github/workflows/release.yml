@@ -25,24 +25,29 @@ jobs:
             libelf-dev \
             zlib1g-dev
       
-      - name: Setup Bazelisk
-        uses: bazelbuild/setup-bazelisk@v3
-      
       - name: Build release binaries
-        run: bazel build --config=release //...
+        run: |
+          # Build C programs
+          gcc -o simple_chaos_test chaos/simple_chaos_test.c common/dir_reader.c -I. -pthread
+          gcc -o pause_controller chaos/pause_controller.c -lbpf -lelf
+          
+          # Build eBPF
+          clang -g -O2 -target bpf -D__TARGET_ARCH_x86_64 \
+            -I/usr/include/x86_64-linux-gnu \
+            -c chaos/pause_injector.bpf.c -o pause_injector.bpf.o
       
       - name: Package binaries
         run: |
           mkdir -p release/bin
-          cp bazel-bin/chaos/chaos_rapid_modifications release/bin/
-          cp bazel-bin/chaos/ebpf_injector_load release/bin/
-          cp bazel-bin/chaos/ptrace_injector release/bin/
-          cp bazel-bin/chaos/ultimate_stress_test release/bin/
-          cp bazel-bin/chaos/ebpf_injector.bpf.o release/bin/
+          cp simple_chaos_test release/bin/
+          cp pause_controller release/bin/
+          cp pause_injector.bpf.o release/bin/
           
           mkdir -p release/scripts
-          cp -r vms/*.sh release/scripts/
-          cp -r helpers/*.sh release/scripts/
+          cp *.sh release/scripts/ || true
+          
+          mkdir -p release/docs
+          cp -r docs/* release/docs/
           
           tar czf rudra-${{ github.ref_name }}.tar.gz release/
       
@@ -54,4 +59,7 @@ jobs:
           draft: false
           prerelease: false
           generate_release_notes: true
+
+
+
 

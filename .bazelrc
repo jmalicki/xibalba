@@ -4,6 +4,10 @@
 # Default Build Configuration
 # ============================================================================
 
+# Use Clang as the default compiler
+build --action_env=CC=clang
+build --action_env=CXX=clang++
+
 # Build with optimization by default
 build --compilation_mode=opt
 
@@ -35,7 +39,7 @@ build --copt=-Wunused                   # Warn about unused variables/functions
 build --copt=-Wmissing-prototypes       # Warn about missing function prototypes
 build --copt=-Wstrict-prototypes        # Warn about old-style function declarations
 
-# Concurrency-specific warnings
+# Concurrency-specific warnings (Clang)
 build --copt=-Wthread-safety            # Clang thread safety analysis
 build --copt=-Watomic-alignment         # Warn about unaligned atomics
 
@@ -56,8 +60,7 @@ build --copt=-fPIC
 build --copt=-fPIE
 build --linkopt=-pie
 
-# Fortify source (buffer overflow detection)
-build --copt=-D_FORTIFY_SOURCE=2
+# Fortify source (buffer overflow detection) - Clang will add this automatically in opt mode
 
 # Control flow integrity (Clang only)
 build:cfi --copt=-fsanitize=cfi

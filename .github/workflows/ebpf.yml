@@ -25,32 +25,29 @@ jobs:
             llvm \
             libbpf-dev \
             linux-headers-$(uname -r) \
-            bpftool
+            linux-tools-common \
+            linux-tools-generic
       
-      - name: Install Bazel
-        uses: bazel-contrib/setup-bazel@0.8.1
-        with:
-          bazelisk-cache: true
-      
-      - name: Build eBPF programs
-        run: bazel build //chaos:ebpf_injector_bpf
-      
-      - name: Verify eBPF programs
+      - name: Compile eBPF program directly
         run: |
-          # Check eBPF object files are valid
-          if [ -f bazel-bin/chaos/ebpf_injector.bpf.o ]; then
-            llvm-objdump -h bazel-bin/chaos/ebpf_injector.bpf.o
-            echo "✓ eBPF program compiled successfully"
-          else
-            echo "✗ eBPF program not found"
-            exit 1
-          fi
+          # For now, compile directly with clang (Bazel eBPF support coming later)
+          clang -g -O2 -target bpf \
+            -D__TARGET_ARCH_x86_64 \
+            -I/usr/include/x86_64-linux-gnu \
+            -c chaos/pause_injector.bpf.c \
+            -o pause_injector.bpf.o
+          echo "✓ eBPF program compiled"
       
-      - name: Check eBPF program size
+      - name: Verify eBPF program
         run: |
-          size=$(stat -f%z bazel-bin/chaos/ebpf_injector.bpf.o 2>/dev/null || stat -c%s bazel-bin/chaos/ebpf_injector.bpf.o)
+          llvm-objdump -h pause_injector.bpf.o
+          size=$(stat -c%s pause_injector.bpf.o)
           echo "eBPF program size: $size bytes"
           if [ $size -gt 1000000 ]; then
             echo "⚠️  Warning: eBPF program is very large"
           fi
+          echo "✓ eBPF verification complete"
+
+
+
 

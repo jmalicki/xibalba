@@ -1,20 +1,83 @@
-# Chaos Testing Framework & VM Infrastructure: Implementation Plan
+# RUDRA: Chaos Testing Framework & VM Infrastructure Implementation Plan
 
-*Phase: Test-First Development*
+*Framework: Standalone Testing for Linux Kernel VFS Changes*
 *Timeline: 8-12 weeks*
 *Date: October 10, 2025*
 
 ## Overview
 
+**RUDRA** is a standalone chaos testing framework designed to test Linux kernel VFS changes (async getdents, io_uring operations, etc.) using Jepsen-inspired techniques.
+
+**What this framework does**:
+- Tests kernel VFS changes in isolation (VMs with custom kernels)
+- Applies chaos engineering to find race conditions
+- Uses eBPF/ptrace for deep fault injection
+- Validates across multiple filesystems
+
+**What this framework is NOT**:
+- Not part of the Linux kernel tree
+- Not kernel code itself
+- Not integrated into kernel CI (though it could be)
+
 This is a **step-by-step implementation plan** for building:
-1. DirectoryReader abstraction layer
+1. DirectoryReader abstraction layer (C library)
 2. Chaos testing framework (Jepsen-style)
-3. eBPF/ptrace fault injection
+3. eBPF fault injection (primary mechanism for kernel-level faults)
 4. VM infrastructure for 5 filesystems
-5. Test data generation
-6. Automated orchestration
+5. Test data generation helpers
+6. Automated orchestration (Bazel + shell scripts)
+
+**Build system**: Bazel (hermetic, reproducible)
+
+**Fault injection strategy**: eBPF only. While ptrace could theoretically be used for fault injection, eBPF is strictly superior:
+- **Lower overhead**: No process stops/starts (ptrace requires SIGSTOP/waitpid loops)
+- **Kernel-level hooks**: Can intercept at any kernel function (not just syscall boundaries)
+- **Production-like**: Tests run at normal speed with minimal perturbation
+- **Modern**: Better tooling, wider kernel support (5.10+)
+- **Scalable**: Can inject faults across all VMs simultaneously
 
 **Every checkbox is a discrete task.** Complete them in order for a working test infrastructure.
+
+---
+
+## ⚠️ IMPORTANT: Read First
+
+### Option 1: Tech De-Risking (RECOMMENDED) ⭐
+
+**Start here if**: You want to validate eBPF fault injection works before committing to full implementation
+
+**→ [Tech De-Risking Plan](TECH-DERISKING-PLAN.md)** - 2-3 week focused proof of concept
+
+**What it does**:
+- Builds minimal DirectoryReader (just classic readdir)
+- Creates simple chaos test
+- Implements basic eBPF pause injection
+- **Proves the approach works** by finding a race condition
+- No VMs needed (uses local filesystem)
+- ~500 lines of code vs ~15,000 for full implementation
+
+**After de-risking succeeds**: Return here and continue with full implementation
+
+---
+
+### Option 2: Full Implementation (This Document)
+
+**Start here if**: You're confident in eBPF approach and ready to commit 12-16 weeks
+
+**Prerequisites**:
+1. Read [`RISKS-AND-OPEN-QUESTIONS.md`](RISKS-AND-OPEN-QUESTIONS.md) first
+2. Ensure you have:
+   - 32GB+ RAM ✅ (confirmed)
+   - 500GB+ disk ✅ (confirmed)
+   - Kernel source tree with patches
+   - 12-16 weeks available
+3. Answer critical questions:
+   - Which kernel version are you testing?
+   - Does IORING_OP_GETDENTS exist in your kernel?
+   - MVP scope: 3 or 5 filesystems?
+   - Full-time or part-time effort?
+
+**Then**: Follow the checkboxes below sequentially
 
 ---
 
@@ -35,8 +98,10 @@ This is a **step-by-step implementation plan** for building:
 
 ### 0.2 Install Required Packages
 
+**Note**: RUDRA uses **QEMU/KVM** (hardware-accelerated virtualization) managed by **libvirt**.
+
 - [ ] Update package list: `sudo apt-get update`
-- [ ] Install virtualization packages:
+- [ ] Install QEMU/KVM and libvirt:
   ```bash
   sudo apt-get install -y \
     qemu-kvm \
@@ -47,6 +112,9 @@ This is a **step-by-step implementation plan** for building:
     virt-manager \
     cloud-image-utils
   ```
+  - **qemu-kvm**: Virtual machine emulator with KVM acceleration
+  - **libvirt**: VM management layer (provides virsh, virt-install)
+  - **cloud-image-utils**: For preparing cloud-init images
 - [ ] Install development tools:
   ```bash
   sudo apt-get install -y \
@@ -78,24 +146,38 @@ This is a **step-by-step implementation plan** for building:
 - [ ] If none, generate: `ssh-keygen -t rsa -b 4096 -C "test@async-getdents"`
 - [ ] Add key to ssh-agent: `eval $(ssh-agent) && ssh-add ~/.ssh/id_rsa`
 
-### 0.4 Create Project Directory Structure
+### 0.4 Verify Project Directory Structure
 
-- [ ] Navigate to test directory:
-  ```bash
-  cd /home/jmalicki/src/io-uring-enhancements
-  mkdir -p tools/testing/selftests/filesystems
-  cd tools/testing/selftests/filesystems
-  ```
-- [ ] Create subdirectories:
-  ```bash
-  mkdir -p common
-  mkdir -p chaos
-  mkdir -p vms
-  mkdir -p benchmarks
-  mkdir -p helpers
-  mkdir -p test-results
-  ```
-- [ ] Create initial README: `touch README.md`
+The RUDRA project structure should already exist:
+
+```bash
+cd /home/jmalicki/src/rudra
+tree -L 1
+```
+
+Expected structure:
+```
+rudra/
+├── BUILD.bazel          # Root build file
+├── WORKSPACE            # Bazel workspace
+├── common/              # DirectoryReader abstraction
+│   ├── BUILD.bazel
+│   └── README.md
+├── chaos/               # Chaos testing framework
+│   ├── BUILD.bazel
+│   └── README.md
+├── vms/                 # VM infrastructure scripts
+│   └── README.md
+├── benchmarks/          # Performance tests
+│   └── BUILD.bazel
+├── helpers/             # Test data generation
+├── test-results/        # Test output
+├── docs/                # Documentation (this file)
+└── README.md            # Project README
+```
+
+- [ ] Verify all directories exist: `ls -la`
+- [ ] If missing, create: `mkdir -p common chaos vms benchmarks helpers test-results`
 
 ---
 
@@ -242,24 +324,32 @@ This is a **step-by-step implementation plan** for building:
 
 ### 1.5 Build and Test Abstraction Layer
 
-- [ ] Create Makefile: `touch common/Makefile`
+- [ ] Create Bazel build file: `touch common/BUILD.bazel`
 - [ ] Add build rules:
-  ```makefile
-  CFLAGS = -Wall -Wextra -O2 -g
-  LDFLAGS = -luring
+  ```python
+  # common/BUILD.bazel
   
-  OBJS = dir_reader.o dir_reader_classic.o dir_reader_ioring.o
+  cc_library(
+      name = "dir_reader",
+      srcs = [
+          "dir_reader.c",
+          "dir_reader_classic.c",
+          "dir_reader_ioring.c",
+      ],
+      hdrs = ["dir_reader.h"],
+      deps = ["@liburing"],
+      copts = ["-Wall", "-Wextra", "-O2", "-g"],
+      visibility = ["//visibility:public"],
+  )
   
-  libdir_reader.a: $(OBJS)
-      ar rcs $@ $^
-  
-  %.o: %.c dir_reader.h
-      $(CC) $(CFLAGS) -c $<
-  
-  clean:
-      rm -f *.o libdir_reader.a
+  cc_test(
+      name = "test_dir_reader",
+      srcs = ["test_dir_reader.c"],
+      deps = [":dir_reader"],
+      data = glob(["testdata/**"]),
+  )
   ```
-- [ ] Build library: `cd common && make`
+- [ ] Build library: `bazel build //common:dir_reader`
 - [ ] Check for compilation errors
 - [ ] Fix any errors found
 - [ ] Create simple test program: `touch common/test_dir_reader.c`
@@ -268,14 +358,9 @@ This is a **step-by-step implementation plan** for building:
   - [ ] Reads with classic reader
   - [ ] Reads with io_uring reader
   - [ ] Compares results (should match)
-  - [ ] Prints "PASS" or "FAIL"
-- [ ] Add test to Makefile:
-  ```makefile
-  test_dir_reader: test_dir_reader.c libdir_reader.a
-      $(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
-  ```
-- [ ] Build test: `make test_dir_reader`
-- [ ] Run test: `./test_dir_reader`
+  - [ ] Returns 0 for PASS, 1 for FAIL
+- [ ] Build test: `bazel build //common:test_dir_reader`
+- [ ] Run test: `bazel test //common:test_dir_reader`
 - [ ] Verify test passes
 
 ---
@@ -395,22 +480,32 @@ This is a **step-by-step implementation plan** for building:
 
 ### 2.6 Build and Test Chaos Framework (Basic)
 
-- [ ] Create Makefile: `touch chaos/Makefile`
+- [ ] Create Bazel build file: `touch chaos/BUILD.bazel`
 - [ ] Add build rules:
-  ```makefile
-  CFLAGS = -Wall -Wextra -O2 -g -pthread
-  LDFLAGS = -luring -pthread -latomic
+  ```python
+  # chaos/BUILD.bazel
   
-  chaos_rapid_modifications: chaos_rapid_modifications.c chaos_utils.o ../common/libdir_reader.a
-      $(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+  cc_library(
+      name = "chaos_utils",
+      srcs = ["chaos_utils.c"],
+      hdrs = ["chaos_framework.h"],
+      copts = ["-Wall", "-Wextra", "-O2", "-g"],
+  )
   
-  chaos_utils.o: chaos_utils.c chaos_framework.h
-      $(CC) $(CFLAGS) -c $<
+  cc_binary(
+      name = "chaos_rapid_modifications",
+      srcs = ["chaos_rapid_modifications.c"],
+      deps = [
+          ":chaos_utils",
+          "//common:dir_reader",
+      ],
+      linkopts = ["-pthread", "-latomic"],
+  )
   ```
-- [ ] Build: `cd chaos && make`
+- [ ] Build: `bazel build //chaos:chaos_rapid_modifications`
 - [ ] Fix compilation errors
 - [ ] Create test directory: `mkdir /tmp/chaos_test`
-- [ ] Run basic test: `./chaos_rapid_modifications /tmp/chaos_test`
+- [ ] Run basic test: `bazel run //chaos:chaos_rapid_modifications -- /tmp/chaos_test`
   - [ ] Let it run for 10 seconds
   - [ ] Verify no crashes
   - [ ] Check output makes sense
@@ -549,24 +644,33 @@ This is a **step-by-step implementation plan** for building:
 
 ### 3.5 Build eBPF Components
 
-- [ ] Add to chaos/Makefile:
-  ```makefile
-  # eBPF compilation
-  CLANG = clang
-  BPFTOOL = bpftool
+- [ ] Update chaos/BUILD.bazel:
+  ```python
+  # eBPF compilation requires special handling
   
-  ebpf_injector.bpf.o: ebpf_injector.bpf.c
-      $(CLANG) -g -O2 -target bpf -D__TARGET_ARCH_x86_64 \
-          -I/usr/include/x86_64-linux-gnu \
-          -c $< -o $@
+  # eBPF object file (compiled with clang)
+  genrule(
+      name = "ebpf_injector_bpf_obj",
+      srcs = ["ebpf_injector.bpf.c"],
+      outs = ["ebpf_injector.bpf.o"],
+      cmd = """
+          clang -g -O2 -target bpf -D__TARGET_ARCH_x86_64 \
+              -I/usr/include/x86_64-linux-gnu \
+              -c $(location ebpf_injector.bpf.c) -o $@
+      """,
+  )
   
-  ebpf_injector_load: ebpf_injector_load.c ebpf_injector.bpf.o
-      $(CC) $(CFLAGS) -o $@ $< -lbpf
+  cc_binary(
+      name = "ebpf_injector_load",
+      srcs = ["ebpf_injector_load.c"],
+      data = [":ebpf_injector_bpf_obj"],
+      linkopts = ["-lbpf"],
+  )
   ```
-- [ ] Build eBPF program: `make ebpf_injector.bpf.o`
+- [ ] Build eBPF program: `bazel build //chaos:ebpf_injector_bpf_obj`
 - [ ] Fix any compilation errors
-- [ ] Build loader: `make ebpf_injector_load`
-- [ ] Test loader as root: `sudo ./ebpf_injector_load`
+- [ ] Build loader: `bazel build //chaos:ebpf_injector_load`
+- [ ] Test loader as root: `sudo bazel-bin/chaos/ebpf_injector_load`
 - [ ] Check /sys/kernel/debug/tracing/trace for output:
   ```bash
   sudo cat /sys/kernel/debug/tracing/trace_pipe
@@ -577,90 +681,17 @@ This is a **step-by-step implementation plan** for building:
 
 ---
 
-## Phase 4: ptrace Fault Injection
-
-**Timeline**: 1-2 weeks
-
-### 4.1 Create ptrace Injector
-
-- [ ] Create file: `touch chaos/ptrace_injector.c`
-- [ ] Add includes:
-  ```c
-  #include <sys/ptrace.h>
-  #include <sys/wait.h>
-  #include <sys/user.h>
-  #include <sys/syscall.h>
-  #include <unistd.h>
-  #include <stdio.h>
-  #include <stdlib.h>
-  #include <pthread.h>
-  ```
-- [ ] Define structure:
-  ```c
-  struct ptrace_injector {
-      pid_t target_pid;
-      double fault_prob;
-      double delay_prob;
-      int max_delay_us;
-      pthread_t thread;
-      volatile bool stop;
-  };
-  ```
-- [ ] Implement `ptrace_injector_thread()`:
-  - [ ] Attach to target: `ptrace(PTRACE_ATTACH, pid, ...)`
-  - [ ] Wait for stop: `waitpid()`
-  - [ ] Set options: `ptrace(PTRACE_SETOPTIONS, ..., PTRACE_O_TRACESYSGOOD)`
-  - [ ] Loop: `ptrace(PTRACE_SYSCALL, ...)` to catch each syscall
-  - [ ] Check if syscall is io_uring_enter
-  - [ ] Inject faults by modifying registers
-  - [ ] Inject delays with usleep
-  - [ ] Continue execution
-  - [ ] Detach when done
-- [ ] Save file
-
-### 4.2 Implement ptrace Control Functions
-
-- [ ] In same file
-- [ ] Implement `ptrace_injector_start()`:
-  - [ ] Allocate structure
-  - [ ] Set parameters
-  - [ ] Create thread
-  - [ ] Return handle
-- [ ] Implement `ptrace_injector_stop()`:
-  - [ ] Set stop flag
-  - [ ] Wait for thread
-  - [ ] Free structure
-- [ ] Add main() for testing
-- [ ] Save file
-
-### 4.3 Build and Test ptrace Injector
-
-- [ ] Add to Makefile:
-  ```makefile
-  ptrace_injector: ptrace_injector.c
-      $(CC) $(CFLAGS) -o $@ $< -lpthread
-  ```
-- [ ] Build: `make ptrace_injector`
-- [ ] Test:
-  - [ ] In terminal 1: Run a simple directory scanner
-  - [ ] Get its PID
-  - [ ] In terminal 2: `sudo ./ptrace_injector <PID>`
-  - [ ] Verify faults are injected (check output)
-- [ ] Fix any issues
-
----
-
-## Phase 5: VM Infrastructure - Base Image
+## Phase 4: VM Infrastructure - Base Image
 
 **Timeline**: 2-3 days
 
-### 5.1 Prepare VM Directory
+### 4.1 Prepare VM Directory
 
 - [ ] Create VM directory: `mkdir -p vms/images`
 - [ ] Navigate: `cd vms`
 - [ ] Create logs directory: `mkdir logs`
 
-### 5.2 Download Base Cloud Image
+### 4.2 Download Base Cloud Image
 
 - [ ] Download Ubuntu 24.04 cloud image:
   ```bash
@@ -669,7 +700,7 @@ This is a **step-by-step implementation plan** for building:
 - [ ] Verify download: `ls -lh ubuntu-24.04-server-cloudimg-amd64.img`
 - [ ] Check image format: `qemu-img info ubuntu-24.04-server-cloudimg-amd64.img`
 
-### 5.3 Create Base Image
+### 4.3 Create Base Image
 
 - [ ] Copy to base image:
   ```bash
@@ -681,7 +712,7 @@ This is a **step-by-step implementation plan** for building:
   ```
 - [ ] Verify resize: `qemu-img info images/async-getdents-base.qcow2`
 
-### 5.4 Create cloud-init Configuration
+### 4.4 Create cloud-init Configuration
 
 - [ ] Create cloud-init directory: `mkdir -p cloud-init`
 - [ ] Create user-data file: `touch cloud-init/user-data`
@@ -722,7 +753,7 @@ This is a **step-by-step implementation plan** for building:
   ```
 - [ ] Save files
 
-### 5.5 Create Base VM Script
+### 4.5 Create Base VM Script
 
 - [ ] Create script: `touch create_base_image.sh`
 - [ ] Make executable: `chmod +x create_base_image.sh`
@@ -740,7 +771,7 @@ This is a **step-by-step implementation plan** for building:
   - [ ] Shutdown VM
 - [ ] Save script
 
-### 5.6 Test Base Image Creation
+### 4.6 Test Base Image Creation
 
 - [ ] Run script: `./create_base_image.sh 2>&1 | tee logs/base-image-creation.log`
 - [ ] Watch for errors
@@ -762,11 +793,11 @@ This is a **step-by-step implementation plan** for building:
 
 ---
 
-## Phase 6: Filesystem-Specific VMs
+## Phase 5: Filesystem-Specific VMs
 
 **Timeline**: 3-5 days
 
-### 6.1 Create ext4 VM
+### 5.1 Create ext4 VM
 
 - [ ] Create script: `touch create_ext4_vm.sh`
 - [ ] Make executable: `chmod +x create_ext4_vm.sh`
@@ -790,7 +821,7 @@ This is a **step-by-step implementation plan** for building:
 - [ ] Exit SSH
 - [ ] Shutdown VM: `virsh shutdown async-getdents-ext4`
 
-### 6.2 Create XFS VM
+### 5.2 Create XFS VM
 
 - [ ] Create script: `touch create_xfs_vm.sh`
 - [ ] Make executable: `chmod +x create_xfs_vm.sh`
@@ -806,7 +837,7 @@ This is a **step-by-step implementation plan** for building:
 - [ ] Exit SSH
 - [ ] Shutdown VM: `virsh shutdown async-getdents-xfs`
 
-### 6.3 Create ZFS VM
+### 5.3 Create ZFS VM
 
 - [ ] Create script: `touch create_zfs_vm.sh`
 - [ ] Make executable: `chmod +x create_zfs_vm.sh`
@@ -824,7 +855,7 @@ This is a **step-by-step implementation plan** for building:
 - [ ] Exit SSH
 - [ ] Shutdown VM: `virsh shutdown async-getdents-zfs`
 
-### 6.4 Create btrfs VM
+### 5.4 Create btrfs VM
 
 - [ ] Create script: `touch create_btrfs_vm.sh`
 - [ ] Make executable: `chmod +x create_btrfs_vm.sh`
@@ -840,7 +871,7 @@ This is a **step-by-step implementation plan** for building:
 - [ ] Exit SSH
 - [ ] Shutdown VM: `virsh shutdown async-getdents-btrfs`
 
-### 6.5 Create tmpfs VM
+### 5.5 Create tmpfs VM
 
 - [ ] Create script: `touch create_tmpfs_vm.sh`
 - [ ] Make executable: `chmod +x create_tmpfs_vm.sh`
@@ -857,7 +888,7 @@ This is a **step-by-step implementation plan** for building:
 - [ ] Exit SSH
 - [ ] Shutdown VM: `virsh shutdown async-getdents-tmpfs`
 
-### 6.6 Create VM Inventory
+### 5.6 Create VM Inventory
 
 - [ ] Create inventory file: `touch vm_inventory.txt`
 - [ ] Add inventory content (see design doc)
@@ -872,16 +903,16 @@ This is a **step-by-step implementation plan** for building:
 
 ---
 
-## Phase 7: Test Data Generation
+## Phase 6: Test Data Generation
 
 **Timeline**: 2-3 days
 
-### 7.1 Create Helper Scripts
+### 6.1 Create Helper Scripts
 
 - [ ] Create helpers directory if not exists: `mkdir -p ../helpers`
 - [ ] Navigate: `cd ../helpers`
 
-### 7.2 Simple File Generator
+### 6.2 Simple File Generator
 
 - [ ] Create script: `touch create_test_files.sh`
 - [ ] Make executable: `chmod +x create_test_files.sh`
@@ -917,7 +948,7 @@ This is a **step-by-step implementation plan** for building:
 - [ ] Verify: `ls /tmp/testfiles | wc -l` (should be 100)
 - [ ] Clean up: `rm -rf /tmp/testfiles`
 
-### 7.3 Nested Directory Generator
+### 6.3 Nested Directory Generator
 
 - [ ] Create script: `touch create_nested_structure.sh`
 - [ ] Make executable: `chmod +x create_nested_structure.sh`
@@ -926,7 +957,7 @@ This is a **step-by-step implementation plan** for building:
 - [ ] Verify structure: `tree /tmp/nested` or `find /tmp/nested`
 - [ ] Clean up: `rm -rf /tmp/nested`
 
-### 7.4 Realistic File Distribution Generator
+### 6.4 Realistic File Distribution Generator
 
 - [ ] Create script: `touch create_realistic_data.sh`
 - [ ] Make executable: `chmod +x create_realistic_data.sh`
@@ -1276,16 +1307,16 @@ This is a **step-by-step implementation plan** for building:
 - [ ] Add content:
   ```bash
   #!/bin/bash
-  # Master setup script - run once to set up everything
+  # RUDRA Master setup script - run once to set up everything
   
   set -e  # Exit on error
   
-  echo "=== Async Getdents Test Infrastructure Setup ==="
+  echo "=== RUDRA Chaos Testing Framework Setup ==="
   echo ""
   echo "This will:"
-  echo "  1. Build test framework"
+  echo "  1. Build test framework (Bazel)"
   echo "  2. Create VMs (5 filesystems)"
-  echo "  3. Deploy test suite"
+  echo "  3. Deploy test suite to VMs"
   echo "  4. Populate test data"
   echo ""
   echo "Time required: 2-3 hours"
@@ -1300,12 +1331,8 @@ This is a **step-by-step implementation plan** for building:
   
   # Phase 1: Build framework
   echo ""
-  echo ">>> Phase 1: Building test framework..."
-  cd common
-  make clean && make
-  cd ../chaos
-  make clean && make
-  cd ..
+  echo ">>> Phase 1: Building test framework with Bazel..."
+  bazel build //...
   
   # Phase 2: Create VMs
   echo ""
@@ -1315,9 +1342,8 @@ This is a **step-by-step implementation plan** for building:
   
   # Phase 3: Deploy
   echo ""
-  echo ">>> Phase 3: Deploying test suite..."
-  # Copy built tests to VMs
-  # ... deployment logic ...
+  echo ">>> Phase 3: Deploying test suite to VMs..."
+  ./deploy_tests_to_vms.sh
   
   # Phase 4: Populate data
   echo ""
@@ -1325,7 +1351,7 @@ This is a **step-by-step implementation plan** for building:
   ./populate_test_data.sh
   
   echo ""
-  echo "=== Setup Complete ==="
+  echo "=== RUDRA Setup Complete ==="
   echo ""
   echo "To run tests:"
   echo "  cd vms"
@@ -1333,6 +1359,10 @@ This is a **step-by-step implementation plan** for building:
   echo ""
   echo "To manage VMs:"
   echo "  ./vm_control.sh start|stop|status"
+  echo ""
+  echo "To build components:"
+  echo "  bazel build //common:dir_reader"
+  echo "  bazel build //chaos:all"
   ```
 - [ ] Save file
 
@@ -1508,13 +1538,12 @@ This is a **step-by-step implementation plan** for building:
 - [ ] Phase 1: DirectoryReader abstraction ✓
 - [ ] Phase 2: Basic chaos framework ✓
 - [ ] Phase 3: eBPF fault injection ✓
-- [ ] Phase 4: ptrace fault injection ✓
-- [ ] Phase 5: Base VM image ✓
-- [ ] Phase 6: Filesystem VMs ✓
-- [ ] Phase 7: Test data generation ✓
-- [ ] Phase 8: Orchestration ✓
-- [ ] Phase 9: Integration ✓
-- [ ] Phase 10: Validation ✓
+- [ ] Phase 4: Base VM image ✓
+- [ ] Phase 5: Filesystem VMs ✓
+- [ ] Phase 6: Test data generation ✓
+- [ ] Phase 7: Orchestration ✓
+- [ ] Phase 8: Integration ✓
+- [ ] Phase 9: Validation ✓
 
 ### Deliverables Verified
 
@@ -1570,17 +1599,20 @@ This is a **step-by-step implementation plan** for building:
 
 ## Estimated Total Time
 
-| Phase | Time |
-|-------|------|
-| Prerequisites | 1-2 days |
-| DirectoryReader | 1 week |
-| Chaos framework | 1-2 weeks |
-| eBPF injection | 2-3 weeks |
-| ptrace injection | 1-2 weeks |
-| VMs | 1 week |
-| Orchestration | 1 week |
-| Integration | 3-5 days |
-| **TOTAL** | **8-12 weeks** |
+| Phase | Time | Notes |
+|-------|------|-------|
+| Prerequisites | 1-2 days | Environment setup |
+| DirectoryReader | 1 week | C library abstraction |
+| Chaos framework | 1-2 weeks | Basic concurrent tests |
+| eBPF injection | 2-3 weeks | ⚠️ Learning curve if new to eBPF |
+| VM base image | 2-3 days | Single base setup |
+| VM filesystems (5) | 3-5 days | ⚠️ Assumes no issues |
+| Test data generation | 2-3 days | Helper scripts |
+| Orchestration | 2-3 days | ⚠️ Integration always takes longer |
+| Integration & docs | 3-5 days | Polish and debugging |
+| Validation | 1-2 days | ⚠️ Will find issues |
+| **OPTIMISTIC TOTAL** | **8-10 weeks** | If everything goes smoothly |
+| **REALISTIC TOTAL** | **12-16 weeks** | Including debugging & iteration |
 
 ---
 
