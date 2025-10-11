@@ -6,12 +6,18 @@ set -euo pipefail
 # Script directory for relative paths
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Use project vm/images directory (not Bazel runfiles) for VM disks
-# This avoids Bazel cache permission issues with libvirt
-if [ -w "$SCRIPT_DIR/images" ] 2>/dev/null; then
+# Use /tmp for VM images when running via Bazel (avoids permission issues)
+# Use project directory when running manually
+if [ -n "${RUNFILES_DIR:-}" ]; then
+    # Running via Bazel - use /tmp (world-readable, libvirt-qemu can access)
+    IMAGES_DIR="/tmp/xibalba-vm-images"
+    mkdir -p "$IMAGES_DIR"
+    echo "INFO: Using /tmp for VM images (Bazel mode)"
+elif [ -w "$SCRIPT_DIR/images" ] 2>/dev/null; then
+    # Manual run - use project directory
     IMAGES_DIR="$SCRIPT_DIR/images"
 else
-    # Fallback for Bazel runfiles: use /tmp (world-writable)
+    # Fallback
     IMAGES_DIR="/tmp/xibalba-vm-images"
     mkdir -p "$IMAGES_DIR"
 fi
