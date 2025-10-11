@@ -17,6 +17,17 @@ jobs:
       
       - name: Setup Bazel
         uses: bazelbuild/setup-bazelisk@v2
+        continue-on-error: true  # Cache errors are non-fatal
+      
+      - name: Verify Bazel installation
+        run: |
+          if ! command -v bazel &> /dev/null; then
+            echo "Bazel not found, installing manually..."
+            wget -q https://github.com/bazelbuild/bazelisk/releases/download/v1.27.0/bazelisk-linux-amd64
+            chmod +x bazelisk-linux-amd64
+            sudo mv bazelisk-linux-amd64 /usr/local/bin/bazel
+          fi
+          bazel --version
       
       - name: Install eBPF dependencies
         run: |
