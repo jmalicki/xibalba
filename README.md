@@ -311,10 +311,10 @@ bazel build //packaging:xibalba-deb
 │                   Xibalba Controller                          │
 │                   (The Lords of Chaos)                        │
 │                                                               │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐   │
+│  ┌───────────────┐   ┌──────────────┐    ┌──────────────┐   │
 │  │DirectoryReader│   │   Nemesis    │    │   Checker    │   │
-│  │  Abstraction │    │(eBPF Faults) │    │ (Invariants) │   │
-│  └───────┬──────┘    └───────┬──────┘    └───────┬──────┘   │
+│  │  Abstraction  │   │(eBPF Faults) │    │ (Invariants) │   │
+│  └───────┬───────┘   └───────┬──────┘    └───────┬──────┘   │
 │          │                   │                    │           │
 │          ▼                   ▼                    ▼           │
 │     Operations            Faults             Validation       │
