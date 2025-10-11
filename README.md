@@ -170,45 +170,87 @@
 - Fast, hardware-accelerated virtualization
 - Standard Linux VM tooling (virsh, virt-install)
 
-### Setup (When Implemented)
+### Quick Start
 
 ```bash
 # Clone repository
 git clone https://github.com/your-org/rudra.git
 cd rudra
 
-# Follow the implementation plan
-cat docs/IMPLEMENTATION-PLAN.md
+# Build everything
+bazel build //...
 
-# One-command setup (when complete)
-./SETUP_ALL.sh
+# Grant eBPF capabilities (one-time, requires sudo)
+sudo ./grant_caps.sh
+
+# Run chaos test
+mkdir -p /tmp/rudra_test
+touch /tmp/rudra_test/file{1..100}
+bazel run //chaos:simple_chaos_test -- /tmp/rudra_test
+
+# Run with eBPF fault injection (in separate terminal)
+bazel run //chaos:pause_controller -- 50 11
+```
+
+### VM Testing
+
+```bash
+# Check VM prerequisites
+bazel run //vm:check_prerequisites
+
+# Create a test VM
+bazel run //vm:create_vm -- --name test-01
+
+# Deploy RUDRA to VM
+bazel run //vm:deploy_rudra -- test-01
+
+# Run tests in VM
+bazel run //vm:run_tests -- test-01
+
+# Destroy VM when done
+bazel run //vm:destroy_vm -- test-01
 ```
 
 ### Running Tests
 
+**Terminal 1 - Start eBPF Fault Injector**:
 ```bash
-# Start VMs
-cd vms
-./vm_control.sh start
+# Build first
+bazel build //chaos:pause_controller
 
-# Run full test suite across all filesystems
-./run_all_tests.sh
+# Grant capabilities (one-time)
+sudo ./grant_caps.sh
 
-# View results
-firefox test-results/latest/summary.html
+# Run injector
+bazel run //chaos:pause_controller -- 50 11
+# Args: <probability%> <delay_iterations>
 ```
 
-### Running Specific Tests
+**Terminal 2 - Run Chaos Test**:
+```bash
+# Create test directory
+mkdir -p /tmp/rudra_test
+touch /tmp/rudra_test/file{1..100}
+
+# Run test
+bazel run //chaos:simple_chaos_test -- /tmp/rudra_test
+```
+
+### Building Individual Components
 
 ```bash
-# Test ext4 only
-./run_tests_on_vm.sh async-getdents-ext4 ext4 /test/ext4
+# Build directory reader library
+bazel build //common:dir_reader
 
-# Run chaos test with eBPF injection
-sudo rudra-chaos --fs ext4 --enable-ebpf --duration 60s
+# Build chaos test
+bazel build //chaos:simple_chaos_test
 
-# Quick comparison test (classic vs io_uring)
-./test_compare_implementations /test/ext4/small_dir
+# Build eBPF injector and controller
+bazel build //chaos:pause_controller
+bazel build //chaos:pause_injector_bpf
+
+# Build everything
+bazel build //...
 ```
 
 ---

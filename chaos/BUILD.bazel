@@ -2,17 +2,15 @@
 
 package(default_visibility = ["//visibility:public"])
 
-# Simple chaos test (skeleton implementation)
+# Simple chaos test - multi-threaded directory reading
 cc_binary(
     name = "simple_chaos_test",
     srcs = ["simple_chaos_test.c"],
     deps = ["//common:dir_reader"],
-    linkopts = [
-        "-lpthread",
-    ],
+    linkopts = ["-pthread"],
 )
 
-# eBPF pause injector (custom rule for eBPF compilation)
+# eBPF error/delay injector - compiled with clang for BPF target
 genrule(
     name = "pause_injector_bpf",
     srcs = ["pause_injector.bpf.c"],
@@ -22,12 +20,12 @@ genrule(
             -D__TARGET_ARCH_x86_64 \
             -I/usr/include/x86_64-linux-gnu \
             -c $(location pause_injector.bpf.c) \
-            -o $(location pause_injector.bpf.o)
+            -o $@
     """,
-    tools = [],
+    visibility = ["//visibility:public"],
 )
 
-# Pause controller (loads eBPF program)
+# Pause controller - userspace loader for eBPF program
 cc_binary(
     name = "pause_controller",
     srcs = ["pause_controller.c"],
@@ -36,7 +34,8 @@ cc_binary(
         "-lbpf",
         "-lelf",
         "-lz",
-        "-lpthread",
     ],
+    # Note: This binary needs Linux capabilities to run eBPF programs.
+    # After building, run: sudo ./grant_caps.sh
 )
 

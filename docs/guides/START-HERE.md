@@ -51,44 +51,27 @@ sudo ./setup_ebpf_permissions.sh
 
 ---
 
-### Step 2: Test eBPF Works (30 seconds)
+### Step 2: Test eBPF Works (2-minute test)
 
+**Terminal 1** - Start eBPF Injector:
 ```bash
-./test_ebpf_works.sh
-```
-
-**Expected output**:
-```
-=== Baseline (no eBPF) ===
-Operations/second: 38,000
-
-=== With eBPF pauses (20%, 5ms) ===
-✓ eBPF program loaded
-Operations/second: 25,000  (slower due to pauses)
-Pauses injected: 500+
-
-✅ SUCCESS: eBPF pause injection is working!
-```
-
-**If you see this**: ✅ **Technology validated!** Core approach works.
-
----
-
-### Step 3: Manual Verification (Optional, 5 minutes)
-
-**Terminal 1**: Start pause controller
-```bash
-./run_pause_controller.sh 20
-# Should show: "🚀 Pause controller active!"
+bazel run //chaos:pause_controller -- 50 11
+# Should show: "🚀 Monitoring getdents64() syscalls..."
 # Leave running...
 ```
 
-**Terminal 2**: Run chaos test
+**Terminal 2** - Run Chaos Test:
 ```bash
-./run_chaos_test.sh /tmp/rudra_test
-# Should be slower than baseline
-# Terminal 1 should show pause events
+mkdir -p /tmp/rudra_test
+touch /tmp/rudra_test/file{1..100}
+bazel run //chaos:simple_chaos_test -- /tmp/rudra_test
 ```
+
+**Expected Results**:
+- **Terminal 1**: Shows "Delays injected: 150" (and counting)
+- **Terminal 2**: Test completes successfully
+
+**If you see delays being injected**: ✅ **Technology validated!** Core approach works.
 
 **Terminal 1 output**:
 ```
@@ -205,12 +188,9 @@ rudra/
 # Setup (one-time, needs sudo)
 sudo ./setup_ebpf_permissions.sh
 
-# Automated test
-./test_ebpf_works.sh
-
-# Manual test (two terminals)
-./run_pause_controller.sh 20      # Terminal 1
-./run_chaos_test.sh /tmp/dir      # Terminal 2
+# Run tests (two terminals)
+bazel run //chaos:pause_controller -- 50 11        # Terminal 1
+bazel run //chaos:simple_chaos_test -- /tmp/dir    # Terminal 2
 
 # Check eBPF status
 sudo bpftool prog list | grep getdents

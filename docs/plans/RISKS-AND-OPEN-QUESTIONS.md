@@ -233,12 +233,12 @@ git commit -m "Add async getdents support"
 # 2. Build kernel with patches
 make -j$(nproc) bindeb-pkg
 
-# 3. Deploy to test VMs
-./deploy_kernel_to_vms.sh linux-image-*.deb
+# 3. Create VMs with custom kernel
+bazel run //vm:create_vm -- --name test-01 --kernel /path/to/vmlinuz
 
-# 4. Run RUDRA tests
-cd rudra
-./vms/run_all_tests.sh
+# 4. Deploy and run tests
+bazel run //vm:deploy_rudra -- test-01
+bazel run //vm:run_tests -- test-01
 
 # 5. Analyze results, iterate
 # If bugs found, fix patches, rebuild, redeploy, retest
@@ -700,12 +700,20 @@ These are **NOT risks** because you control the VM environment:
 **Shared machine considerations**:
 ```bash
 # Daytime development (low resource usage)
-./vm_control.sh start async-getdents-ext4  # Just one VM
-bazel test //common:test_dir_reader         # Quick tests
+bazel run //vm:create_vm -- --name test-ext4  # Just one VM
+bazel test //common:test_dir_reader           # Quick tests
 
 # Overnight comprehensive testing
-./vm_control.sh start                       # All 5 VMs
-./run_all_tests.sh --duration 8hours        # Long chaos runs
+# Create all VMs
+for fs in ext4 xfs btrfs tmpfs; do
+  bazel run //vm:create_vm -- --name test-$fs --filesystem $fs
+done
+
+# Run long tests in parallel
+for vm in test-{ext4,xfs,btrfs,tmpfs}; do
+  bazel run //vm:run_tests -- --duration 8hours $vm > results-$vm.txt &
+done
+
 # Come back in morning to results
 ```
 

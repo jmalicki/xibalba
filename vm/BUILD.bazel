@@ -1,0 +1,70 @@
+# VM Infrastructure for RUDRA Testing
+#
+# These scripts create, manage, and test VMs for kernel filesystem testing.
+# Run them via Bazel to ensure proper dependency tracking and hermetic execution.
+
+package(default_visibility = ["//visibility:public"])
+
+load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
+
+# Check if host has required VM tools (QEMU/KVM, libvirt, etc.)
+sh_binary(
+    name = "check_prerequisites",
+    srcs = ["check_prerequisites.sh"],
+    # This can run standalone, no dependencies
+)
+
+# Create a test VM
+# Usage: bazel run //vm:create_vm -- --name test-01 [--memory 4096] [--cpus 2]
+sh_binary(
+    name = "create_vm",
+    srcs = ["create_test_vm.sh"],
+    data = [
+        # Will need cloud-init configs, kernel images, etc.
+        # Add as we create them
+    ],
+)
+
+# Deploy RUDRA binaries to a running VM
+# Usage: bazel run //vm:deploy_rudra -- <vm-name>
+sh_binary(
+    name = "deploy_rudra",
+    srcs = ["deploy_rudra.sh"],
+    data = [
+        "//chaos:pause_controller",
+        "//chaos:pause_injector_bpf",
+        "//chaos:simple_chaos_test",
+    ],
+    # The script will copy binaries from bazel-bin/ to VM
+)
+
+# Run RUDRA tests inside a VM
+# Usage: bazel run //vm:run_tests -- <vm-name>
+sh_binary(
+    name = "run_tests",
+    srcs = ["run_tests.sh"],
+    # Depends on deploy_rudra being run first
+)
+
+# Destroy a test VM
+# Usage: bazel run //vm:destroy_vm -- <vm-name>
+sh_binary(
+    name = "destroy_vm",
+    srcs = ["destroy_vm.sh"],
+)
+
+# TODO: Add integration test when VM scripts are fully implemented
+# sh_test(
+#     name = "vm_integration_test",
+#     srcs = ["vm_integration_test.sh"],
+#     data = [
+#         ":check_prerequisites",
+#         ":create_vm",
+#         ":deploy_rudra",
+#         ":run_tests",
+#         ":destroy_vm",
+#     ],
+#     size = "large",
+#     tags = ["integration", "requires-kvm", "requires-sudo"],
+# )
+

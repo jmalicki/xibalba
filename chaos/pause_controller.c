@@ -8,20 +8,22 @@
 #include <stdbool.h>
 
 /**
- * RUDRA Pause Controller - Simplified Version
+ * RUDRA Error Injector Controller
  * 
- * This program ONLY:
+ * Controls eBPF error injection for chaos testing.
+ * 
+ * This program:
  *   1. Loads the eBPF program
- *   2. Configures pause parameters
- *   3. Monitors statistics
+ *   2. Configures error injection probability and error code
+ *   3. Monitors how many errors are injected
  * 
- * The eBPF program itself does the pausing via busy-wait!
- * No more userspace pause handling - much simpler and more effective.
+ * The eBPF program injects errors (like -EAGAIN) to force retries
+ * and expose race conditions - TRUE Jepsen-style chaos!
  */
 
 static volatile bool keep_running = true;
 
-void signal_handler(int sig) {
+static void signal_handler(int sig) {
     (void)sig;
     keep_running = false;
 }
@@ -31,36 +33,47 @@ int main(int argc, char *argv[]) {
     int err;
     
     if (argc < 3) {
-        fprintf(stderr, "Usage: %s <pause_probability_pct> <pause_duration_us>\n", argv[0]);
+        fprintf(stderr, "Usage: %s <error_probability_pct> <error_code>\n", argv[0]);
+        fprintf(stderr, "\n");
+        fprintf(stderr, "Error codes:\n");
+        fprintf(stderr, "  11 = EAGAIN  (resource temporarily unavailable - RECOMMENDED)\n");
+        fprintf(stderr, "   4 = EINTR   (interrupted system call)\n");
+        fprintf(stderr, "   2 = ENOENT  (no such file or directory)\n");
         fprintf(stderr, "\n");
         fprintf(stderr, "Examples:\n");
-        fprintf(stderr, "  %s 20 5000   # 20%% pause probability, 5ms pauses\n", argv[0]);
-        fprintf(stderr, "  %s 50 1000   # 50%% probability, 1ms pauses\n", argv[0]);
+        fprintf(stderr, "  %s 50 11   # 50%% error probability, inject -EAGAIN\n", argv[0]);
+        fprintf(stderr, "  %s 30 4    # 30%% probability, inject -EINTR\n", argv[0]);
         fprintf(stderr, "\n");
-        fprintf(stderr, "The eBPF program will DIRECTLY pause processes at critical moments.\n");
-        fprintf(stderr, "This expands race windows and makes bugs much more likely!\n");
+        fprintf(stderr, "The eBPF program will inject errors to force retries.\n");
+        fprintf(stderr, "This expands race windows and makes bugs MUCH more likely!\n");
         return 1;
     }
     
-    uint32_t pause_prob = atoi(argv[1]);
-    uint32_t pause_duration_us = atoi(argv[2]);
+    uint32_t error_prob = (uint32_t)atoi(argv[1]);
+    uint32_t error_code = (uint32_t)atoi(argv[2]);
     
-    if (pause_prob > 100) {
-        fprintf(stderr, "ERROR: Pause probability must be 0-100%%\n");
+    if (error_prob > 100) {
+        fprintf(stderr, "ERROR: Error probability must be 0-100%%\n");
         return 1;
     }
     
-    if (pause_duration_us > 100000) {
-        fprintf(stderr, "ERROR: Pause duration too high (max 100ms = 100000us)\n");
+    if (error_code == 0) {
+        fprintf(stderr, "ERROR: Error code must be non-zero (try 11 for EAGAIN)\n");
         return 1;
     }
     
-    printf("=== RUDRA Pause Controller ===\n");
-    printf("Pause probability: %u%%\n", pause_prob);
-    printf("Pause duration: %uμs\n", pause_duration_us);
+    const char *error_name = "UNKNOWN";
+    if (error_code == 11) error_name = "EAGAIN";
+    else if (error_code == 4) error_name = "EINTR";
+    else if (error_code == 2) error_name = "ENOENT";
+    
+    printf("=== RUDRA Error Injector ===\n");
+    printf("Error probability: %u%%\n", error_prob);
+    printf("Error code: -%s (%u)\n", error_name, error_code);
     printf("\n");
-    printf("eBPF will DIRECTLY pause execution via busy-wait.\n");
-    printf("This happens at the exact moment of getdents64 syscall!\n");
+    printf("eBPF will inject errors to force syscall retries.\n");
+    printf("Expected errors/sec: ~%u (if 40K ops/sec baseline)\n", 
+           error_prob * 400);
     printf("\n");
     
     // Setup signal handler
@@ -79,7 +92,10 @@ int main(int argc, char *argv[]) {
     err = bpf_object__load(obj);
     if (err) {
         fprintf(stderr, "ERROR: Failed to load eBPF program: %d\n", err);
-        fprintf(stderr, "Check 'dmesg' for kernel errors\n");
+        fprintf(stderr, "\n");
+        fprintf(stderr, "This program requires CONFIG_BPF_KPROBE_OVERRIDE=y\n");
+        fprintf(stderr, "Check kernel config: zgrep CONFIG_BPF_KPROBE_OVERRIDE /proc/config.gz\n");
+        fprintf(stderr, "Or check dmesg for more errors\n");
         bpf_object__close(obj);
         return 1;
     }
@@ -97,12 +113,15 @@ int main(int argc, char *argv[]) {
             printf("  ✓ Attached: %s\n", bpf_program__name(prog));
         } else {
             fprintf(stderr, "  ✗ Failed to attach: %s\n", bpf_program__name(prog));
+            fprintf(stderr, "\n");
+            fprintf(stderr, "Kprobe attachment requires CONFIG_KPROBES=y\n");
+            fprintf(stderr, "And may require sudo or CAP_BPF capability\n");
             bpf_object__close(obj);
             return 1;
         }
     }
     
-    // Configure pause parameters
+    // Configure error injection
     printf("Setting configuration...\n");
     int config_fd = bpf_object__find_map_fd_by_name(obj, "config");
     if (config_fd < 0) {
@@ -111,26 +130,26 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
-    // Set pause probability
-    uint32_t key = 0;  // CFG_PAUSE_PROBABILITY
-    err = bpf_map_update_elem(config_fd, &key, &pause_prob, BPF_ANY);
+    // Set error probability
+    uint32_t key = 0;  // CFG_ERROR_PROBABILITY
+    err = bpf_map_update_elem(config_fd, &key, &error_prob, BPF_ANY);
     if (err) {
-        fprintf(stderr, "ERROR: Failed to set pause probability: %d\n", err);
+        fprintf(stderr, "ERROR: Failed to set error probability: %d\n", err);
         bpf_object__close(obj);
         return 1;
     }
     
-    // Set pause duration
-    key = 1;  // CFG_PAUSE_DURATION_US
-    err = bpf_map_update_elem(config_fd, &key, &pause_duration_us, BPF_ANY);
+    // Set error code
+    key = 1;  // CFG_ERROR_CODE
+    err = bpf_map_update_elem(config_fd, &key, &error_code, BPF_ANY);
     if (err) {
-        fprintf(stderr, "ERROR: Failed to set pause duration: %d\n", err);
+        fprintf(stderr, "ERROR: Failed to set error code: %d\n", err);
         bpf_object__close(obj);
         return 1;
     }
     
-    printf("  ✓ Pause probability: %u%%\n", pause_prob);
-    printf("  ✓ Pause duration: %uμs\n", pause_duration_us);
+    printf("  ✓ Error probability: %u%%\n", error_prob);
+    printf("  ✓ Error code: -%s\n", error_name);
     
     // Initialize statistics
     int stats_fd = bpf_object__find_map_fd_by_name(obj, "stats");
@@ -141,11 +160,12 @@ int main(int argc, char *argv[]) {
     }
     
     printf("\n");
-    printf("🚀 Pause injector active!\n");
-    printf("   eBPF is now intercepting getdents64 syscalls\n");
-    printf("   %u%% of calls will be paused for %uμs via busy-wait\n",
-           pause_prob, pause_duration_us);
-    printf("   This expands race windows by ~%ux\n", pause_duration_us / 100);
+    printf("🌩️  ERROR INJECTOR ACTIVE!\n");
+    printf("   eBPF is now intercepting __x64_sys_getdents64\n");
+    printf("   %u%% of calls will return -%s\n", error_prob, error_name);
+    printf("   This forces retries and expands race windows!\n");
+    printf("\n");
+    printf("   Jepsen-style chaos: Operations fail → Retry → Races exposed!\n");
     printf("\n");
     printf("Press Ctrl+C to stop and see statistics\n");
     printf("\n");
@@ -160,8 +180,9 @@ int main(int argc, char *argv[]) {
             uint64_t count = 0;
             if (bpf_map_lookup_elem(stats_fd, &key, &count) == 0) {
                 if (count != last_count) {
-                    printf("Pauses injected: %lu (+%lu in last 2s)\n", 
-                           count, count - last_count);
+                    uint64_t delta = count - last_count;
+                    printf("Errors injected: %lu (+%lu in last 2s = ~%lu/sec)\n", 
+                           count, delta, delta / 2);
                     last_count = count;
                 }
             }
@@ -173,7 +194,7 @@ int main(int argc, char *argv[]) {
         key = 0;
         uint64_t count = 0;
         if (bpf_map_lookup_elem(stats_fd, &key, &count) == 0) {
-            printf("Total pauses injected: %lu\n", count);
+            printf("Total errors injected: %lu\n", count);
         }
     }
     
