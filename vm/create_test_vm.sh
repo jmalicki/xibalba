@@ -6,7 +6,6 @@ set -euo pipefail
 # Default values
 VM_NAME=""
 CUSTOM_KERNEL=""
-CUSTOM_INITRD=""  # Reserved for future use
 FILESYSTEM="ext4"
 RAM_MB=2048
 DISK_GB=10
@@ -21,10 +20,6 @@ while [[ $# -gt 0 ]]; do
             ;;
         --kernel)
             CUSTOM_KERNEL="$2"
-            shift 2
-            ;;
-        --initrd)
-            CUSTOM_INITRD="$2"
             shift 2
             ;;
         --filesystem)
