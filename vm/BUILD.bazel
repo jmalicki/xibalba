@@ -6,7 +6,139 @@
 package(default_visibility = ["//visibility:public"])
 
 load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
+load("@rules_oci//oci:defs.bzl", "oci_image")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
 load(":vm_tests.bzl", "vm_gauntlet_suite")
+load(":qemu_test.bzl", "qemu_filesystem_test", "qemu_filesystem_suite")
+
+# === Hermetic Build Environment (Docker Container) ===
+
+# Build tools container - provides all tools needed to build kernel/initramfs
+# Developers don't need these tools installed - they run in the container!
+oci_image(
+    name = "build_tools",
+    base = "@ubuntu_base",
+    cmd = ["/bin/bash"],
+    entrypoint = ["/bin/bash", "-c"],
+)
+
+# TODO: Install build tools in container (ar, tar, cpio, dpkg-deb, etc.)
+# Will add via apt install once we test basic setup
+
+# === Fast QEMU VM Testing Infrastructure ===
+
+# Extract kernel from Ubuntu package (runs in container - hermetic!)
+genrule(
+    name = "extract_kernel",
+    srcs = ["build-scripts/extract-kernel.sh"],
+    outs = ["vmlinuz"],
+    cmd = """
+        SCRIPT=$$(realpath $(location build-scripts/extract-kernel.sh))
+        OUTPUT=$$(realpath $(@D))
+        docker run --rm \
+            -v $$SCRIPT:/extract.sh:ro \
+            -v $$OUTPUT:/output \
+            -e HOST_UID=$$(id -u) \
+            -e HOST_GID=$$(id -g) \
+            ubuntu:24.04 \
+            bash -c 'apt-get update -qq && apt-get install -y -qq wget binutils xz-utils zstd && bash /extract.sh /output/vmlinuz && chown $$HOST_UID:$$HOST_GID /output/vmlinuz'
+    """,
+    tags = ["docker", "requires-network", "local", "no-sandbox"],
+)
+
+# Build minimal initramfs with filesystem tools and xibalba binaries
+genrule(
+    name = "build_initramfs",
+    srcs = [
+        "build-scripts/build-initramfs.sh",
+        "qemu/init.sh",
+        "//chaos:pause_controller",
+        "//chaos:simple_chaos_test",
+        ":xibalba-gauntlet.sh",
+    ],
+    outs = ["initramfs.img"],
+    cmd = """
+        SCRIPT=$$(realpath $(location build-scripts/build-initramfs.sh))
+        INIT=$$(realpath $(location qemu/init.sh))
+        PAUSE_CTRL=$$(realpath $(location //chaos:pause_controller))
+        CHAOS_TEST=$$(realpath $(location //chaos:simple_chaos_test))
+        GAUNTLET=$$(realpath $(location :xibalba-gauntlet.sh))
+        OUTPUT=$$(realpath $(@D))
+        docker run --rm \
+            -v $$SCRIPT:/build.sh:ro \
+            -v $$INIT:/input/init.sh:ro \
+            -v $$PAUSE_CTRL:/input/pause_controller:ro \
+            -v $$CHAOS_TEST:/input/simple_chaos_test:ro \
+            -v $$GAUNTLET:/input/xibalba-gauntlet:ro \
+            -v $$OUTPUT:/output \
+            -e HOST_UID=$$(id -u) \
+            -e HOST_GID=$$(id -g) \
+            ubuntu:24.04 \
+            bash -c 'apt-get update -qq && apt-get install -y -qq cpio gzip && bash /build.sh /input/init.sh /input/pause_controller /input/simple_chaos_test /input/xibalba-gauntlet /output/initramfs.img && chown $$HOST_UID:$$HOST_GID /output/initramfs.img'
+    """,
+    tags = ["docker", "requires-network", "local", "no-sandbox"],
+)
+
+# QEMU test runner - launches VM with xibalba tests
+# Binaries are embedded in initramfs, so we only need kernel + initramfs
+sh_binary(
+    name = "qemu_test_runner",
+    srcs = ["qemu/run-qemu-test.sh"],
+    data = [
+        ":extract_kernel",
+        ":build_initramfs",
+    ],
+)
+
+# === Fast QEMU Tests (NEW - replaces slow SSH-based tests) ===
+
+# Test suite - run all filesystems in parallel (Bazel handles parallelism)
+# Each test boots a fresh VM in ~1 second, runs for 60 seconds, total ~61 seconds per test
+# With Bazel parallelism, all tests run simultaneously!
+qemu_filesystem_suite(
+    name = "qemu_fast_tests",
+    filesystems = ["ext4", "xfs", "btrfs"],
+    duration = 60,
+)
+
+# === Pre-built VM Image (Xibalba already installed) - OLD APPROACH ===
+
+# Build a VM image with xibalba and all dependencies pre-installed
+# This makes testing MUCH faster - just boot and run, no installation needed
+genrule(
+    name = "xibalba_vm_image",
+    srcs = ["//packaging:xibalba-deb"],
+    outs = ["xibalba-ready.qcow2"],
+    cmd = """
+        set -e
+        
+        # Download base Ubuntu image
+        BASE_IMG=$$(mktemp)
+        wget -q -O $$BASE_IMG https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img
+        
+        # Copy to output
+        cp $$BASE_IMG $@
+        chmod 644 $@
+        
+        # Install xibalba and all dependencies using virt-customize
+        # This runs once at build time, not every test run!
+        virt-customize -a $@ \
+            --install libbpf1,libelf1,jq \
+            --install e2fsprogs,xfsprogs,btrfs-progs,zfsutils-linux \
+            --install f2fs-tools,nilfs-tools,nfs-common \
+            --copy-in $(location //packaging:xibalba-deb):/tmp \
+            --run-command 'dpkg -i /tmp/xibalba_0.1.0_amd64.deb' \
+            --run-command 'rm /tmp/xibalba_0.1.0_amd64.deb' \
+            --run-command 'systemctl disable snapd.service snapd.socket 2>/dev/null || true' \
+            --run-command 'systemctl mask snapd.service snapd.socket 2>/dev/null || true' \
+            --run-command 'apt-get clean' \
+            --run-command 'rm -rf /var/lib/apt/lists/*'
+        
+        rm $$BASE_IMG
+    """,
+    tags = ["manual", "local", "requires-virt-customize"],
+    message = "Building VM image with Xibalba pre-installed",
+)
 
 # === Gauntlet Tests (Bazel-native parallelism) ===
 
