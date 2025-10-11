@@ -31,11 +31,19 @@ jobs:
       - name: Build all targets
         run: bazel build //...
       
+      - name: Build Debian package
+        run: bazel build //packaging:rudra-deb
+      
       - name: Verify eBPF program
         run: |
           llvm-objdump -h bazel-bin/chaos/pause_injector.bpf.o
           size=$(stat -c%s bazel-bin/chaos/pause_injector.bpf.o)
           echo "✓ eBPF program size: $size bytes"
+      
+      - name: Verify Debian package
+        run: |
+          dpkg-deb --info bazel-bin/packaging/rudra_0.1.0_amd64.deb
+          dpkg-deb --contents bazel-bin/packaging/rudra_0.1.0_amd64.deb
       
       - name: Run chaos test (smoke test)
         run: |
@@ -44,15 +52,21 @@ jobs:
           timeout 3s bazel-bin/chaos/simple_chaos_test /tmp/rudra_test || true
           echo "✓ Chaos test runs without crashing"
       
-      # Upload all build artifacts for VM tests (preserve directory structure)
-      - name: Upload build artifacts
+      # Upload Debian package as primary artifact
+      - name: Upload Debian package
         uses: actions/upload-artifact@v4
         with:
-          name: rudra-build-artifacts
+          name: rudra-deb-package
+          path: bazel-bin/packaging/rudra_0.1.0_amd64.deb
+          retention-days: 7
+      
+      # Also upload VM scripts for deployment
+      - name: Upload VM scripts
+        uses: actions/upload-artifact@v4
+        with:
+          name: rudra-vm-scripts
           path: |
-            bazel-bin/chaos/pause_controller
-            bazel-bin/chaos/pause_injector.bpf.o
-            bazel-bin/chaos/simple_chaos_test
+            vm/*.sh
             bazel-bin/vm/
           retention-days: 1
 
@@ -80,23 +94,26 @@ jobs:
             virtinst \
             bridge-utils
       
-      - name: Download pre-built artifacts
+      - name: Download Debian package
         uses: actions/download-artifact@v4
         with:
-          name: rudra-build-artifacts
+          name: rudra-deb-package
+          path: packages/
+      
+      - name: Download VM scripts
+        uses: actions/download-artifact@v4
+        with:
+          name: rudra-vm-scripts
           path: .
       
-      - name: Make binaries executable
-        run: |
-          chmod +x bazel-bin/chaos/{pause_controller,simple_chaos_test}
-          chmod +x bazel-bin/vm/* || true
+      - name: Make scripts executable
+        run: chmod +x vm/*.sh
       
-      - name: Verify artifacts
+      - name: Verify package
         run: |
-          echo "=== Build artifacts downloaded ==="
-          ls -lh bazel-bin/chaos/
-          file bazel-bin/chaos/pause_controller
-          file bazel-bin/chaos/pause_injector.bpf.o
+          echo "=== Debian package downloaded ==="
+          ls -lh packages/
+          dpkg-deb --info packages/rudra_0.1.0_amd64.deb
       
       - name: Create test VM (${{ matrix.filesystem }})
         run: |
@@ -108,10 +125,13 @@ jobs:
             --disk 8
         timeout-minutes: 15
       
-      - name: Deploy RUDRA to VM (using pre-built binaries)
+      - name: Deploy RUDRA to VM (install .deb package)
         run: |
-          # Use pre-built script and binaries (no rebuild)
-          ./vm/deploy_rudra.sh ci-test-${{ matrix.filesystem }}-${{ github.run_id }}
+          # Install from Debian package (no rebuild!)
+          # Copy package to VM and install
+          VM_NAME="ci-test-${{ matrix.filesystem }}-${{ github.run_id }}"
+          scp packages/rudra_0.1.0_amd64.deb root@$VM_NAME:/tmp/
+          ssh root@$VM_NAME "dpkg -i /tmp/rudra_0.1.0_amd64.deb || apt-get install -f -y"
         timeout-minutes: 5
       
       - name: Run tests in VM

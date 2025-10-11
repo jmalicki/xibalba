@@ -14,3 +14,8 @@ alias(
     actual = "//common:dir_reader",
 )
 
+alias(
+    name = "package",
+    actual = "//packaging:rudra-deb",
+)
+
