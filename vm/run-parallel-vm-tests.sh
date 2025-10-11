@@ -103,8 +103,22 @@ run_vm_test() {
     # Check if VM exists, create if not
     if ! virsh list --all | grep -q "$vm_name"; then
         echo "[${vm_name}] Creating VM..."
-        # Call create_test_vm.sh directly (we're already in bazel context)
-        "$SCRIPT_DIR/create_test_vm.sh" --name "$vm_name" --ram 2048 --disk 10
+        # Find create_test_vm.sh (could be in runfiles or direct execution)
+        CREATE_VM_SCRIPT=""
+        for loc in "$SCRIPT_DIR/create_test_vm.sh" "$PROJECT_ROOT/vm/create_test_vm.sh"; do
+            if [ -f "$loc" ]; then
+                CREATE_VM_SCRIPT="$loc"
+                break
+            fi
+        done
+        
+        if [ -z "$CREATE_VM_SCRIPT" ]; then
+            echo "[${vm_name}] ❌ Error: create_test_vm.sh not found"
+            echo 1 > "$exit_code_file"
+            return 1
+        fi
+        
+        "$CREATE_VM_SCRIPT" --name "$vm_name" --ram 2048 --disk 10
     else
         echo "[${vm_name}] VM exists, starting..."
         virsh start "$vm_name" 2>/dev/null || true
