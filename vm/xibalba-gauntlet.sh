@@ -168,7 +168,8 @@ run_test() {
     echo "    Status: $status | Bugs: $bugs | Ops: $ops | Missing: $missing | Phantom: $phantom | Duplicate: $duplicate"
     
     # Append to summary
-    local temp_summary=$(mktemp)
+    local temp_summary
+    temp_summary=$(mktemp)
     jq --arg fs "$fs" \
        --arg model "$model" \
        --arg status "$status" \
