@@ -39,8 +39,14 @@ if command -v virsh &> /dev/null; then
         if virsh net-list 2>/dev/null | grep -q "default.*active"; then
             echo "✓ libvirt default network (active)"
         else
-            echo "⚠ libvirt default network (not started)"
-            SETUP_NEEDED+=("start-network")
+            # Try to start it automatically (works if user is in libvirt group)
+            echo "⚠ libvirt default network not started, attempting to start..."
+            if virsh net-start default 2>/dev/null; then
+                echo "✓ libvirt default network (started)"
+            else
+                echo "✗ Failed to start network (permission denied)"
+                SETUP_NEEDED+=("start-network")
+            fi
         fi
     else
         echo "✗ libvirt default network (not configured)"
@@ -81,6 +87,11 @@ if [ ${#SETUP_NEEDED[@]} -gt 0 ]; then
             start-network)
                 echo "Start libvirt default network:"
                 echo "  virsh net-start default"
+                echo
+                echo "If this fails with 'Operation not permitted':"
+                echo "  1. Ensure you're in the libvirt group: groups | grep libvirt"
+                echo "  2. Log out and back in if you just added the group"
+                echo "  3. Check libvirtd is running: systemctl status libvirtd"
                 echo
                 ;;
         esac
