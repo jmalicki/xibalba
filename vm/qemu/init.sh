@@ -70,6 +70,26 @@ echo ""
 echo "=== XIBALBA_TEST_COMPLETE ==="
 echo "EXIT_CODE=$EXIT_CODE"
 echo "FILESYSTEM=$FILESYSTEM"
+
+# Output progress JSONL (one line per 5-second period)
+if [ -f /test/xibalba-progress.jsonl ]; then
+    echo ""
+    echo "=== XIBALBA_PROGRESS_JSONL ==="
+    cat /test/xibalba-progress.jsonl
+    echo "=== END_XIBALBA_PROGRESS_JSONL ==="
+fi
+
+# Output full history JSON if needed (can be very large)
+if [ -f /test/xibalba-history.json ]; then
+    echo ""
+    echo "=== XIBALBA_HISTORY_JSON ==="
+    # Only output first/last parts to avoid huge logs
+    head -50 /test/xibalba-history.json
+    echo "  ... (truncated, full history in VM) ..."
+    tail -20 /test/xibalba-history.json
+    echo "=== END_XIBALBA_HISTORY_JSON ==="
+fi
+
 echo "=========================="
 
 # Sync and poweroff

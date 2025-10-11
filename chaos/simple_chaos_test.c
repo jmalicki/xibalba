@@ -350,8 +350,58 @@ int main(int argc, char *argv[]) {
         }
     }
     
-    // Run for duration
-    sleep((unsigned int)test_duration);
+    // Open incremental results file (JSONL - one line per time period)
+    char progress_file[512];
+    snprintf(progress_file, sizeof(progress_file), "%s/xibalba-progress.jsonl", test_dir);
+    FILE *progress_fp = fopen(progress_file, "w");
+    if (!progress_fp) {
+        fprintf(stderr, "Warning: Could not open progress file: %s\n", progress_file);
+    }
+    
+    // Run for duration with periodic reporting every 5 seconds
+    int elapsed = 0;
+    int report_interval = 5;  // Report every 5 seconds
+    uint64_t prev_ops = 0;
+    uint64_t prev_bugs = 0;
+    uint64_t prev_reads = 0;
+    
+    while (elapsed < test_duration) {
+        int sleep_time = (test_duration - elapsed) < report_interval ? (test_duration - elapsed) : report_interval;
+        sleep((unsigned int)sleep_time);
+        elapsed += sleep_time;
+        
+        // Get current stats
+        uint64_t curr_ops = atomic_load(&state.operations);
+        uint64_t curr_bugs = atomic_load(&state.bugs_found);
+        uint64_t curr_reads = atomic_load(&state.reads_completed);
+        
+        // Calculate period stats
+        uint64_t period_ops = curr_ops - prev_ops;
+        uint64_t period_bugs = curr_bugs - prev_bugs;
+        uint64_t period_reads = curr_reads - prev_reads;
+        double period_bug_rate = period_reads > 0 ? (double)period_bugs / (double)period_reads : 0.0;
+        
+        // Write JSONL entry (one line per period)
+        if (progress_fp) {
+            double period_ops_per_sec = (double)period_ops / (double)sleep_time;
+            fprintf(progress_fp, 
+                "{\"elapsed\":%d,\"ops\":%lu,\"reads\":%lu,\"bugs\":%lu,"
+                "\"period_ops\":%lu,\"period_reads\":%lu,\"period_bugs\":%lu,"
+                "\"period_bug_rate\":%.6f,\"ops_per_sec\":%.2f}\n",
+                elapsed, curr_ops, curr_reads, curr_bugs,
+                period_ops, period_reads, period_bugs, period_bug_rate,
+                period_ops_per_sec);
+            fflush(progress_fp);  // Flush immediately so data isn't lost on timeout
+        }
+        
+        prev_ops = curr_ops;
+        prev_bugs = curr_bugs;
+        prev_reads = curr_reads;
+    }
+    
+    if (progress_fp) {
+        fclose(progress_fp);
+    }
     
     // Stop all threads
     if (!json_output) {
@@ -433,11 +483,15 @@ int main(int argc, char *argv[]) {
     
     printf("\n");
     
-    // Export history for analysis
+    // Export results
     char history_file[512];
     snprintf(history_file, sizeof(history_file), "%s/xibalba-history.json", test_dir);
+    snprintf(progress_file, sizeof(progress_file), "%s/xibalba-progress.jsonl", test_dir);
+    
     tracker_export_history(tracker, history_file);
-    printf("Operation history exported to: %s\n", history_file);
+    printf("Results exported:\n");
+    printf("  Progress (JSONL): %s (one line per 5-second period)\n", progress_file);
+    printf("  Full history: %s (detailed operation log)\n", history_file);
     
     // Cleanup
     tracker_cleanup(tracker);
