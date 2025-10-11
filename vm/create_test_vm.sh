@@ -6,13 +6,21 @@ set -euo pipefail
 # Script directory for relative paths
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Use /tmp for VM images when running via Bazel (avoids permission issues)
-# Use project directory when running manually
-if [ -n "${RUNFILES_DIR:-}" ]; then
-    # Running via Bazel - use /tmp (world-readable, libvirt-qemu can access)
+# Use Bazel's TEST_TMPDIR when available (hermetic, auto-cleaned)
+# Otherwise use project directory for manual runs
+if [ -n "${TEST_TMPDIR:-}" ]; then
+    # Running via Bazel test - use TEST_TMPDIR (unique per test, auto-cleaned)
+    # But libvirt-qemu needs world-readable paths, so use /tmp with unique ID
+    TEST_ID="${TEST_TARGET##*/}"  # Extract test name from //vm:ext4_gauntlet
+    IMAGES_DIR="/tmp/xibalba-${TEST_ID}-$$"
+    mkdir -p "$IMAGES_DIR"
+    chmod 755 "$IMAGES_DIR"  # Let libvirt-qemu read it
+    echo "INFO: Using hermetic temp dir: $IMAGES_DIR"
+elif [ -n "${RUNFILES_DIR:-}" ]; then
+    # Running via Bazel run (not test) - use shared /tmp
     IMAGES_DIR="/tmp/xibalba-vm-images"
     mkdir -p "$IMAGES_DIR"
-    echo "INFO: Using /tmp for VM images (Bazel mode)"
+    echo "INFO: Using shared /tmp for VM images (Bazel run mode)"
 elif [ -w "$SCRIPT_DIR/images" ] 2>/dev/null; then
     # Manual run - use project directory
     IMAGES_DIR="$SCRIPT_DIR/images"
@@ -193,6 +201,9 @@ packages:
 runcmd:
   - mkdir -p /test
   - echo "Xibalba test VM ready" > /etc/motd
+  - echo "XIBALBA_BOOT_COMPLETE" > /dev/ttyS0  # Signal via serial console
+
+final_message: "XIBALBA_READY_$VM_NAME"
 
 power_state:
   mode: reboot

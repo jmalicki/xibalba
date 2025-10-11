@@ -8,33 +8,41 @@ This eliminates complex shell orchestration by letting Bazel handle:
 """
 
 def vm_gauntlet_test(name, filesystem, **kwargs):
-    """Create a single VM gauntlet test.
+    """Create a single VM gauntlet test (Bazel-native modular design).
     
-    Bazel will:
-    - Run tests in parallel automatically
-    - Collect outputs to bazel-testlogs/
-    - Handle retries and caching
-    - Show results in standard format
+    New architecture:
+    - Separate scripts for each step (create, wait, deploy, test, cleanup)
+    - Clear error codes (10=create, 20=ssh, 30=deploy, 40=test)
+    - Each component independently testable
+    - Better debugging (know exactly which step failed)
+    
+    Bazel benefits:
+    - Parallel execution across filesystems
+    - Standard test output format
+    - Automatic artifact collection
     
     Args:
-        name: Test name (e.g., "ext4_gauntlet")
+        name: Test name (e.g., "ext4_gauntlet") - used as unique VM name
         filesystem: Filesystem type ("ext4", "zfs", etc.)
         **kwargs: Additional sh_test arguments
     """
     native.sh_test(
         name = name,
-        srcs = ["run_single_vm_gauntlet.sh"],
+        srcs = ["vm_test_orchestrator.sh"],
         args = [
+            "--vm-name=" + name,
             "--filesystem=" + filesystem,
-            "--vm-name=xibalba-" + filesystem,
-            "$(location //packaging:xibalba-deb)",
+            "--package=$(location //packaging:xibalba-deb)",
         ],
         data = [
-            ":verify_host_deps.sh",
+            # Modular, testable components
             ":create_test_vm.sh",
+            ":wait_for_vm.sh",
             ":deploy_xibalba.sh",
+            ":run_gauntlet_tests.sh",
             ":destroy_vm.sh",
-            ":xibalba-gauntlet.sh",
+            # Dependencies
+            ":verify_host_deps.sh",
             "//packaging:xibalba-deb",
         ],
         tags = ["manual", "local", "requires-kvm"],

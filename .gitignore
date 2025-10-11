@@ -15,7 +15,11 @@ bench_*
 !*.c
 !*.h
 
-# VM images
+# VM test artifacts (runtime only, never commit)
+vm/images/*.qcow2
+vm/images/*.img
+vm/images/*.iso
+vm/configs/
 vms/images/*.qcow2
 vms/images/*.img
 vms/cloud-init/

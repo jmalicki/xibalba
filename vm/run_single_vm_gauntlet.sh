@@ -44,20 +44,21 @@ echo "VM: $VM_NAME"
 echo "Package: $PACKAGE"
 echo
 
-# Detect SSH key
-if [ -f "/tmp/xibalba-ssh-keys/id_rsa" ]; then
-    SSH_OPTS="-i /tmp/xibalba-ssh-keys/id_rsa -o StrictHostKeyChecking=no -o ConnectTimeout=2"
-elif [ -n "${HOME:-}" ] && [ -f "$HOME/.ssh/id_rsa" ]; then
-    SSH_OPTS="-i $HOME/.ssh/id_rsa -o StrictHostKeyChecking=no -o ConnectTimeout=2"
-else
-    SSH_OPTS="-o StrictHostKeyChecking=no -o ConnectTimeout=2"
-fi
-
-# Cleanup on exit
+# Cleanup on exit (hermetic: remove all test artifacts)
 # shellcheck disable=SC2317
 cleanup() {
     echo "Cleaning up VM: $VM_NAME"
     "$SCRIPT_DIR/destroy_vm.sh" "$VM_NAME" || true
+    
+    # Clean up test-specific image directory (hermetic cleanup)
+    if [ -n "${TEST_TMPDIR:-}" ]; then
+        TEST_ID="${TEST_TARGET##*/}"
+        IMAGES_DIR="/tmp/xibalba-${TEST_ID}-$$"
+        if [ -d "$IMAGES_DIR" ]; then
+            rm -rf "$IMAGES_DIR"
+            echo "  ✓ Removed hermetic temp dir: $IMAGES_DIR"
+        fi
+    fi
 }
 trap cleanup EXIT
 
@@ -65,30 +66,66 @@ trap cleanup EXIT
 echo "Step 1: Creating VM..."
 "$SCRIPT_DIR/create_test_vm.sh" --name "$VM_NAME" --filesystem "$FILESYSTEM"
 
-# Step 2: Get VM IP (hostnames don't resolve in libvirt)
-echo "Step 2: Getting VM IP address..."
+# Detect SSH key (AFTER create_test_vm.sh which generates it)
+# Always bypass known_hosts (VMs reuse IPs, causing host key conflicts)
+if [ -f "/tmp/xibalba-ssh-keys/id_rsa" ]; then
+    SSH_KEY="/tmp/xibalba-ssh-keys/id_rsa"
+    echo "INFO: Using temporary SSH key"
+elif [ -n "${HOME:-}" ] && [ -f "$HOME/.ssh/id_rsa" ]; then
+    SSH_KEY="$HOME/.ssh/id_rsa"
+    echo "INFO: Using user SSH key"
+else
+    SSH_KEY=""
+    echo "WARNING: No SSH key found"
+fi
+
+# Build SSH options
+if [ -n "$SSH_KEY" ]; then
+    SSH_OPTS="-i $SSH_KEY -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=2"
+else
+    SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=2"
+fi
+
+# Step 2: Wait for VM network and SSH (cloud-init takes 5-10 min)
+# NOTE: This is now delegated to wait_for_vm.sh in the modular design
+# This code remains for backwards compatibility with old run_single_vm_gauntlet.sh
+echo "Step 2: Waiting for VM network and SSH..."
+echo "  Note: Ubuntu cloud-init is slow. Install 'libnss-libvirt' for faster hostname resolution."
 VM_IP=""
-for _ in {1..30}; do
-    VM_IP=$(virsh domifaddr "$VM_NAME" --source lease 2>/dev/null | grep -oP '(\d+\.){3}\d+' | head -1)
-    if [ -n "$VM_IP" ]; then
-        echo "  ✓ VM IP: $VM_IP"
-        break
+
+# Simple, reliable approach: poll ARP + test SSH
+for attempt in $(seq 1 300); do
+    # Try ARP first (appears faster), fallback to DHCP lease
+    VM_IP=$(virsh domifaddr "$VM_NAME" --source arp 2>/dev/null | grep -oP '(\d+\.){3}\d+' | head -1 || true)
+    if [ -z "$VM_IP" ]; then
+        VM_IP=$(virsh domifaddr "$VM_NAME" --source lease 2>/dev/null | grep -oP '(\d+\.){3}\d+' | head -1 || true)
     fi
+    
+    # Test SSH connectivity
+    if [ -n "$VM_IP" ]; then
+        # shellcheck disable=SC2086
+        if timeout 3 ssh $SSH_OPTS root@"$VM_IP" true 2>/dev/null; then
+            echo "  ✓ VM ready at $VM_IP (after $((attempt * 2))s)"
+            break
+        fi
+        VM_IP=""  # Reset if not ready
+    fi
+    
+    # Show progress every 60 seconds
+    remainder=$((attempt % 30))
+    if [ "$remainder" -eq 0 ]; then
+        echo "  ...still waiting ($((attempt * 2))s / 600s)..."
+    fi
+    
     sleep 2
 done
 
 if [ -z "$VM_IP" ]; then
-    echo "❌ Failed to get VM IP address"
+    echo "❌ VM not ready after 10 minutes"
+    echo "   Recommendation: sudo apt install libnss-libvirt"
+    echo "   Debug: virsh console $VM_NAME"
     exit 1
 fi
-
-# Step 3: Wait for SSH
-echo "Step 3: Waiting for SSH..."
-# shellcheck disable=SC2086
-timeout 120 bash -c "until ssh $SSH_OPTS root@$VM_IP true 2>/dev/null; do sleep 2; done" || {
-    echo "❌ Failed to connect to VM at $VM_IP"
-    exit 1
-}
 
 # Step 4: Deploy package
 echo "Step 4: Deploying Xibalba..."
