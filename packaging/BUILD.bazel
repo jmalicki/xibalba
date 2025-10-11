@@ -55,12 +55,9 @@ pkg_deb(
     version = "0.1.0",
 )
 
-# Convenience target: build and output .deb to dist/
-genrule(
+# Convenience alias for building the package
+alias(
     name = "package",
-    srcs = [":rudra-deb"],
-    outs = ["rudra_0.1.0_amd64.deb"],
-    cmd = "cp $(location :rudra-deb) $@",
-    output_to_bindir = True,
+    actual = ":rudra-deb",
 )
 
