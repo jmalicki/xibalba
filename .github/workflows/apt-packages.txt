@@ -1,16 +1,11 @@
-# APT packages required for Xibalba CI builds
-# 
-# This file defines the eBPF dependencies needed for building.
-# Changing this file will invalidate the GitHub Actions cache and
-# trigger a fresh package installation.
+# DEPRECATED: This file is no longer used
 #
-# Pre-installed on ubuntu-latest (don't need to install):
-#   - clang
-#   - llvm
-#   - gcc
+# Build dependencies are now managed by Bazel as the single source of truth.
 #
-# Need to install:
-libbpf-dev
-libelf-dev
-linux-headers-generic
-
+# See: packaging/BUILD.bazel (BUILD_DEPS variable)
+#
+# To generate the build dependencies list:
+#   bazel build //packaging:generate_build_deps
+#   cat bazel-bin/packaging/build-deps.txt
+#
+# CI automatically generates and uses this file.

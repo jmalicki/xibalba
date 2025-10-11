@@ -22,9 +22,35 @@ The Debian package includes:
 
 ## Dependencies
 
+### Runtime Dependencies (in the .deb)
+
 The package depends on:
-- `libbpf0` - eBPF library
-- `libelf1` - ELF file handling
+- `libbpf0` - eBPF library (runtime)
+- `libelf1` - ELF file handling (runtime)
+
+Defined in `packaging/BUILD.bazel` → `pkg_deb.depends`
+
+### Build Dependencies (for compilation)
+
+To **build** Xibalba from source, you need:
+- `llvm` - For llvm-objdump (eBPF verification)
+- `libbpf-dev` - Development files for libbpf
+- `libelf-dev` - Development files for libelf  
+- `linux-headers-generic` - Kernel headers for eBPF compilation
+
+Defined in `packaging/BUILD.bazel` → `BUILD_DEPS` variable
+
+### Generating Build Dependencies List
+
+Bazel is the **single source of truth** for dependencies:
+
+```bash
+# Generate build-deps.txt
+bazel build //packaging:generate_build_deps
+cat bazel-bin/packaging/build-deps.txt
+```
+
+CI automatically uses this generated file to install build dependencies.
 
 ## Installation
 

@@ -102,6 +102,24 @@ pkg_deb(
     version = "0.1.0",
 )
 
+# Build dependencies (needed to compile Xibalba)
+# These are the -dev packages corresponding to the runtime depends
+BUILD_DEPS = [
+    "llvm",              # For llvm-objdump (eBPF verification)
+    "libbpf-dev",        # Development files for libbpf
+    "libelf-dev",        # Development files for libelf
+    "linux-headers-generic",  # Kernel headers for eBPF compilation
+]
+
+# Generate build-deps.txt for CI consumption
+genrule(
+    name = "generate_build_deps",
+    outs = ["build-deps.txt"],
+    cmd = "echo '# Xibalba build dependencies' > $@ && echo '# Generated from packaging/BUILD.bazel - DO NOT EDIT' >> $@ && echo '' >> $@ && " +
+          " && ".join(["echo '%s' >> $@" % dep for dep in BUILD_DEPS]),
+    visibility = ["//visibility:public"],
+)
+
 # Convenience alias for building the package
 alias(
     name = "package",

@@ -29,6 +29,13 @@ jobs:
           fi
           bazel --version
       
+      - name: Generate build dependencies list
+        run: |
+          # Generate build-deps.txt from Bazel (source of truth)
+          bazel build //packaging:generate_build_deps
+          cp bazel-bin/packaging/build-deps.txt .github/workflows/build-deps.txt
+          cat .github/workflows/build-deps.txt
+      
       - name: Cache APT packages
         uses: actions/cache@v4
         id: apt-cache
@@ -36,22 +43,18 @@ jobs:
           path: |
             /var/cache/apt/archives
             /var/lib/apt/lists
-          # Cache key based on packaging/BUILD.bazel (source of truth for deps)
-          key: ${{ runner.os }}-apt-ebpf-${{ hashFiles('packaging/BUILD.bazel') }}
+          # Cache key based on packaging/BUILD.bazel (source of truth)
+          key: ${{ runner.os }}-apt-${{ hashFiles('packaging/BUILD.bazel') }}
           restore-keys: |
-            ${{ runner.os }}-apt-ebpf-
+            ${{ runner.os }}-apt-
       
-      - name: Install eBPF dependencies
+      - name: Install eBPF build dependencies
         if: steps.apt-cache.outputs.cache-hit != 'true'
         run: |
-          # clang is pre-installed, but we need llvm for llvm-objdump
-          # Dependencies defined in packaging/BUILD.bazel (depends + recommends)
+          # Install packages from Bazel-generated build-deps.txt
           sudo apt-get update
-          sudo apt-get install -y \
-            llvm \
-            libbpf-dev \
-            libelf-dev \
-            linux-headers-$(uname -r)
+          # Extract non-comment, non-empty lines and install
+          grep -v '^#' .github/workflows/build-deps.txt | grep -v '^$' | xargs sudo apt-get install -y
       
       - name: Verify eBPF tools
         run: |
