@@ -7,23 +7,42 @@ package(default_visibility = ["//visibility:public"])
 load("@rules_pkg//pkg:deb.bzl", "pkg_deb")
 load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
 
-# Tar archive of binaries
+# Tar archive of test binaries
 pkg_tar(
-    name = "xibalba-bin",
+    name = "xibalba-test-bins",
     srcs = [
         "//chaos:pause_controller",
         "//chaos:simple_chaos_test",
-        "//chaos:pause_injector_bpf",
-        "//vm:test_runner_script",
     ],
     mode = "0755",
     package_dir = "/usr/bin",
-    strip_prefix = ".",
-    remap_paths = {
-        "/chaos/pause_controller": "/usr/bin/pause_controller",
-        "/chaos/simple_chaos_test": "/usr/bin/simple_chaos_test",
-        "/vm/test-runner.sh": "/usr/bin/xibalba-test-runner",
-    },
+    strip_prefix = "/chaos",
+)
+
+# Tar archive of test runner script  
+pkg_tar(
+    name = "xibalba-test-runner",
+    srcs = ["test-runner-renamed.sh"],
+    mode = "0755",
+    package_dir = "/usr/bin",
+)
+
+# Rename test-runner.sh to xibalba-test-runner for packaging
+genrule(
+    name = "rename_test_runner",
+    srcs = ["//vm:test_runner_script"],
+    outs = ["test-runner-renamed.sh"],
+    cmd = "cp $(location //vm:test_runner_script) $@ && chmod +x $@",
+    executable = True,
+)
+
+# Combined binaries
+pkg_tar(
+    name = "xibalba-bin",
+    deps = [
+        ":xibalba-test-bins",
+        ":xibalba-test-runner",
+    ],
 )
 
 # Tar archive of data files (eBPF bytecode)
