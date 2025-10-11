@@ -80,13 +80,28 @@ fi
 # Create VM disk from cloud image
 VM_DISK="$SCRIPT_DIR/images/${VM_NAME}.qcow2"
 if [ -f "$VM_DISK" ]; then
-    echo "WARNING: $VM_DISK already exists"
-    read -p "Overwrite? (y/N) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    if [ -t 0 ]; then
+        # Interactive: ask for confirmation
+        echo "WARNING: $VM_DISK already exists"
+        read -p "Overwrite? (y/N) " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            exit 1
+        fi
+        rm "$VM_DISK"
+    else
+        # Non-interactive: FAIL SAFELY - never auto-destroy existing VMs
+        echo "ERROR: $VM_DISK already exists (non-interactive mode)"
+        echo
+        echo "To clean up before creating new VMs:"
+        echo "  virsh destroy $VM_NAME 2>/dev/null || true"
+        echo "  virsh undefine $VM_NAME 2>/dev/null || true"
+        echo "  rm -f $VM_DISK"
+        echo "  rm -f $SCRIPT_DIR/images/${VM_NAME}-data.qcow2"
+        echo
+        echo "Or use: vm/destroy_vm.sh $VM_NAME"
         exit 1
     fi
-    rm "$VM_DISK"
 fi
 
 echo "Creating VM disk..."
