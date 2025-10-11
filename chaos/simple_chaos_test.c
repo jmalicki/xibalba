@@ -49,10 +49,11 @@
  * Without delays, stable kernels should show zero bugs (or few with strict model).
  */
 
-#define NUM_READER_THREADS 10
-#define NUM_WRITER_THREADS 3
-#define TEST_DURATION 5  // seconds
-#define FILES_PER_WRITER 50
+// Default configuration (can be overridden by command line args)
+#define DEFAULT_NUM_READER_THREADS 10
+#define DEFAULT_NUM_WRITER_THREADS 3
+#define DEFAULT_TEST_DURATION 300  // seconds (5 minutes - worth the VM overhead)
+#define FILES_PER_WRITER 50  // Files created per writer thread (not configurable)
 
 struct test_state {
     const char *test_dir;
@@ -232,6 +233,9 @@ int main(int argc, char *argv[]) {
     consistency_model_t model = CONSISTENCY_WEAK_POSIX;  // Default
     const char *test_dir = NULL;
     bool json_output = false;
+    int test_duration = DEFAULT_TEST_DURATION;
+    int num_readers = DEFAULT_NUM_READER_THREADS;
+    int num_writers = DEFAULT_NUM_WRITER_THREADS;
     
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--strict") == 0) {
@@ -242,6 +246,24 @@ int main(int argc, char *argv[]) {
             model = CONSISTENCY_EVENTUAL;
         } else if (strcmp(argv[i], "--json") == 0) {
             json_output = true;
+        } else if (strcmp(argv[i], "--duration") == 0 && i + 1 < argc) {
+            test_duration = atoi(argv[++i]);
+            if (test_duration < 1 || test_duration > 3600) {
+                fprintf(stderr, "Error: Duration must be 1-3600 seconds\n");
+                return 1;
+            }
+        } else if (strcmp(argv[i], "--readers") == 0 && i + 1 < argc) {
+            num_readers = atoi(argv[++i]);
+            if (num_readers < 1 || num_readers > 100) {
+                fprintf(stderr, "Error: Readers must be 1-100\n");
+                return 1;
+            }
+        } else if (strcmp(argv[i], "--writers") == 0 && i + 1 < argc) {
+            num_writers = atoi(argv[++i]);
+            if (num_writers < 1 || num_writers > 100) {
+                fprintf(stderr, "Error: Writers must be 1-100\n");
+                return 1;
+            }
         } else {
             test_dir = argv[i];
         }
@@ -275,9 +297,9 @@ int main(int argc, char *argv[]) {
         printf("\n");
         printf("Directory: %s\n", test_dir);
         printf("Consistency model: %s\n", model_name);
-        printf("Reader threads: %d\n", NUM_READER_THREADS);
-        printf("Writer threads: %d\n", NUM_WRITER_THREADS);
-        printf("Duration: %d seconds\n", TEST_DURATION);
+        printf("Reader threads: %d\n", num_readers);
+        printf("Writer threads: %d\n", num_writers);
+        printf("Duration: %d seconds\n", test_duration);
         printf("\n");
     }
     
@@ -303,11 +325,17 @@ int main(int argc, char *argv[]) {
         printf("\n");
     }
     
-    pthread_t reader_threads[NUM_READER_THREADS];
-    pthread_t writer_threads[NUM_WRITER_THREADS];
+    // Allocate thread arrays based on configuration
+    pthread_t *reader_threads = malloc(sizeof(pthread_t) * (size_t)num_readers);
+    pthread_t *writer_threads = malloc(sizeof(pthread_t) * (size_t)num_writers);
+    
+    if (!reader_threads || !writer_threads) {
+        fprintf(stderr, "Failed to allocate thread arrays\n");
+        return 1;
+    }
     
     // Launch reader threads
-    for (int i = 0; i < NUM_READER_THREADS; i++) {
+    for (int i = 0; i < num_readers; i++) {
         if (pthread_create(&reader_threads[i], NULL, reader_thread, &state) != 0) {
             fprintf(stderr, "Failed to create reader thread %d\n", i);
             return 1;
@@ -315,7 +343,7 @@ int main(int argc, char *argv[]) {
     }
     
     // Launch writer threads
-    for (int i = 0; i < NUM_WRITER_THREADS; i++) {
+    for (int i = 0; i < num_writers; i++) {
         if (pthread_create(&writer_threads[i], NULL, writer_thread, &state) != 0) {
             fprintf(stderr, "Failed to create writer thread %d\n", i);
             return 1;
@@ -323,7 +351,7 @@ int main(int argc, char *argv[]) {
     }
     
     // Run for duration
-    sleep(TEST_DURATION);
+    sleep((unsigned int)test_duration);
     
     // Stop all threads
     if (!json_output) {
@@ -331,19 +359,23 @@ int main(int argc, char *argv[]) {
     }
     atomic_store(&state.stop, true);
     
-    for (int i = 0; i < NUM_READER_THREADS; i++) {
+    for (int i = 0; i < num_readers; i++) {
         pthread_join(reader_threads[i], NULL);
     }
-    for (int i = 0; i < NUM_WRITER_THREADS; i++) {
+    for (int i = 0; i < num_writers; i++) {
         pthread_join(writer_threads[i], NULL);
     }
+    
+    // Free thread arrays
+    free(reader_threads);
+    free(writer_threads);
     
     // Print results
     uint64_t ops = atomic_load(&state.operations);
     uint64_t bugs = atomic_load(&state.bugs_found);
     uint64_t reads = atomic_load(&state.reads_completed);
     double bug_rate = reads > 0 ? (double)bugs / (double)reads : 0.0;
-    double ops_per_sec = (double)ops / (double)TEST_DURATION;
+    double ops_per_sec = (double)ops / (double)test_duration;
     
     if (json_output) {
         // Machine-readable JSON output for benchmarking
@@ -351,9 +383,9 @@ int main(int argc, char *argv[]) {
         printf("  \"test\": \"xibalba_chaos\",\n");
         printf("  \"directory\": \"%s\",\n", test_dir);
         printf("  \"consistency_model\": \"%s\",\n", model_short);
-        printf("  \"duration_seconds\": %d,\n", TEST_DURATION);
-        printf("  \"reader_threads\": %d,\n", NUM_READER_THREADS);
-        printf("  \"writer_threads\": %d,\n", NUM_WRITER_THREADS);
+        printf("  \"duration_seconds\": %d,\n", test_duration);
+        printf("  \"reader_threads\": %d,\n", num_readers);
+        printf("  \"writer_threads\": %d,\n", num_writers);
         printf("  \"results\": {\n");
         printf("    \"total_operations\": %lu,\n", ops);
         printf("    \"directory_scans\": %lu,\n", reads);
