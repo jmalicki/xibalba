@@ -533,17 +533,14 @@ Xibalba is actively developed. Want to help strengthen the trials?
 
 **Development setup**:
 ```bash
-# Setup local linting (optional but recommended)
-# First-time: sudo apt install pipx (if not already installed)
-bazel run //tools:setup_precommits  # Installs pre-commit and git hooks
+# Run shellcheck on all scripts (hermetic, no install needed)
+bazel test //tools:shellcheck_test
 
-# This enables automatic checks on commit:
-# - shellcheck (bash linting)
-# - shfmt (bash formatting)  
-# - YAML/JSON validation
-# - Trailing whitespace checks
+# (Optional) Setup pre-commit git hooks for commit-time checks
+# Requires: sudo apt install pipx (one-time)
+bazel run //tools:setup_precommits
 
-# CI enforces all checks regardless of local setup
+# CI uses Bazel shellcheck test regardless of local setup
 ```
 
 **How to contribute**:
