@@ -1,6 +1,8 @@
 # Pre-commit hooks for Xibalba
-# Install: pip install pre-commit && pre-commit install
+# Install: pipx install pre-commit && pre-commit install
 # Run manually: pre-commit run --all-files
+#
+# All checks run through Bazel for hermeticity and consistency with CI
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -14,18 +16,13 @@ repos:
       - id: check-merge-conflict
       - id: mixed-line-ending
 
-  - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.9.0.6
+  # Bazel-native linting (uses hermetic shellcheck from Bazel)
+  - repo: local
     hooks:
-      - id: shellcheck
-        args: ['--severity=warning']
-        files: \.(sh|bash)$
-        exclude: '^(bazel-|\.git/)'
-
-  - repo: https://github.com/jumanjihouse/pre-commit-hooks
-    rev: 3.0.0
-    hooks:
-      - id: shfmt
-        args: ['-i', '4', '-ci', '-sr', '-w']
-        files: \.(sh|bash)$
-        exclude: '^(bazel-|\.git/)'
+      - id: bazel-shellcheck
+        name: Shellcheck (via Bazel)
+        entry: bazel test //tools:shellcheck_test --test_output=errors
+        language: system
+        files: '^vm/.*\.sh$'
+        pass_filenames: false
+        always_run: false
