@@ -1,5 +1,9 @@
 # Xibalba: Chaos Testing Framework for Linux Kernel Filesystems
 
+[![Xibalba CI](https://github.com/jmalicki/rudra-chaos/actions/workflows/ci.yml/badge.svg)](https://github.com/jmalicki/rudra-chaos/actions/workflows/ci.yml)
+[![eBPF Build](https://github.com/jmalicki/rudra-chaos/actions/workflows/ebpf.yml/badge.svg)](https://github.com/jmalicki/rudra-chaos/actions/workflows/ebpf.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 *The Underworld of Trials*
 
 **Xibalba** (shee-BAHL-bah) - The Mayan underworld where code faces its darkest trials
