@@ -106,6 +106,15 @@ if [ ${#MISSING[@]} -gt 0 ]; then
     exit 1
 fi
 
+# Optional but recommended: libvirt NSS for hostname resolution
+if ! dpkg -l | grep -q libnss-libvirt; then
+    echo
+    echo "ℹ️  Optional: Install libvirt NSS for automatic VM hostname resolution"
+    echo "   sudo apt install libnss-libvirt"
+    echo "   This allows 'ssh root@ext4_gauntlet' without IP detection"
+    echo
+fi
+
 echo "✅ All host dependencies satisfied"
 exit 0
 
