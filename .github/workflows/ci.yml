@@ -44,17 +44,18 @@ jobs:
       - name: Install eBPF dependencies
         if: steps.apt-cache.outputs.cache-hit != 'true'
         run: |
-          # clang and llvm are pre-installed on ubuntu-latest
+          # clang is pre-installed, but we need llvm for llvm-objdump
           # Dependencies defined in packaging/BUILD.bazel (depends + recommends)
           sudo apt-get update
           sudo apt-get install -y \
+            llvm \
             libbpf-dev \
             libelf-dev \
             linux-headers-$(uname -r)
       
       - name: Verify eBPF tools
         run: |
-          # Verify pre-installed tools
+          # Verify installed tools
           clang --version
           llvm-objdump --version
           
