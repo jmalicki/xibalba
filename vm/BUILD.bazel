@@ -21,6 +21,16 @@ sh_binary(
     data = [],
 )
 
+# Parallel VM test runner - runs multiple VMs with different filesystems simultaneously
+sh_binary(
+    name = "parallel_vm_tests",
+    srcs = ["run-parallel-vm-tests.sh"],
+    data = [
+        ":create_vm",
+        "//packaging:xibalba-deb",
+    ],
+)
+
 # Check if host has required VM tools (QEMU/KVM, libvirt, etc.)
 sh_binary(
     name = "check_prerequisites",
