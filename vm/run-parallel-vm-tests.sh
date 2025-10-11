@@ -14,6 +14,12 @@ READERS="${XIBALBA_READERS:-10}"
 WRITERS="${XIBALBA_WRITERS:-3}"
 MODEL="${XIBALBA_MODEL:-weak}"
 
+# Results directory with timestamp
+TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+RESULTS_BASE="${XIBALBA_RESULTS_DIR:-$PROJECT_ROOT/test-results}"
+RESULTS_DIR="$RESULTS_BASE/parallel-vm-tests-$TIMESTAMP"
+mkdir -p "$RESULTS_DIR"
+
 # VMs to create (VM_NAME:FILESYSTEM)
 declare -a VMS=(
     "xibalba-ext4:ext4"
@@ -34,6 +40,9 @@ echo "  Duration: $DURATION seconds"
 echo "  Readers: $READERS threads"
 echo "  Writers: $WRITERS threads"
 echo "  Model: $MODEL"
+echo
+echo "Results will be saved to:"
+echo "  $RESULTS_DIR"
 echo
 echo "════════════════════════════════════════════════════════════════"
 echo
@@ -60,7 +69,7 @@ echo
 run_vm_test() {
     local vm_name=$1
     local filesystem=$2
-    local log_file="/tmp/xibalba-${vm_name}.log"
+    local log_file="$RESULTS_DIR/${vm_name}.log"
     
     {
         echo "[${vm_name}] Starting at $(date +%H:%M:%S)"
@@ -99,17 +108,21 @@ run_vm_test() {
             "XIBALBA_FILESYSTEM=$filesystem XIBALBA_DURATION=$DURATION XIBALBA_READERS=$READERS XIBALBA_WRITERS=$WRITERS XIBALBA_MODEL=$MODEL xibalba-test-runner"; then
             echo "[${vm_name}] ✅ TEST PASSED at $(date +%H:%M:%S)"
             
-            # Get results
+            # Get results (both JSON and text)
             ssh -o StrictHostKeyChecking=no "root@${vm_name}" \
-                "cat /var/log/xibalba/latest-${filesystem}.json" > "/tmp/xibalba-results-${vm_name}.json" 2>/dev/null || true
+                "cat /var/log/xibalba/latest-${filesystem}.json" > "$RESULTS_DIR/${vm_name}-results.json" 2>/dev/null || true
+            ssh -o StrictHostKeyChecking=no "root@${vm_name}" \
+                "cat /var/log/xibalba/latest-${filesystem}.txt" > "$RESULTS_DIR/${vm_name}-results.txt" 2>/dev/null || true
             
             return 0
         else
             echo "[${vm_name}] ❌ TEST FAILED at $(date +%H:%M:%S)"
             
-            # Get failure details
+            # Get failure details (both JSON and text)
             ssh -o StrictHostKeyChecking=no "root@${vm_name}" \
-                "cat /var/log/xibalba/latest-${filesystem}.txt" 2>/dev/null || true
+                "cat /var/log/xibalba/latest-${filesystem}.json" > "$RESULTS_DIR/${vm_name}-results.json" 2>/dev/null || true
+            ssh -o StrictHostKeyChecking=no "root@${vm_name}" \
+                "cat /var/log/xibalba/latest-${filesystem}.txt" > "$RESULTS_DIR/${vm_name}-results.txt" 2>/dev/null || true
             
             return 1
         fi
@@ -141,7 +154,7 @@ echo "All VM tests started!"
 echo "  PIDs: ${PIDS[*]}"
 echo
 echo "Watching logs..."
-echo "  Use 'tail -f /tmp/xibalba-*.log' to monitor progress"
+echo "  Use 'tail -f $RESULTS_DIR/*.log' to monitor progress"
 echo
 echo "Waiting for tests to complete..."
 echo
@@ -162,9 +175,68 @@ for i in "${!PIDS[@]}"; do
     echo "════════════════════════════════════════════════════════════════"
     echo "  ${vm_name} Log (last 20 lines):"
     echo "════════════════════════════════════════════════════════════════"
-    tail -20 "/tmp/xibalba-${vm_name}.log"
+    tail -20 "$RESULTS_DIR/${vm_name}.log"
     echo
 done
+
+# Create comprehensive summary JSON
+echo "Creating comprehensive summary..."
+cat > "$RESULTS_DIR/summary.json" <<EOF
+{
+  "timestamp": "$(date -Iseconds)",
+  "duration_seconds": $DURATION,
+  "readers": $READERS,
+  "writers": $WRITERS,
+  "model": "$MODEL",
+  "vms": [
+EOF
+
+first=true
+for i in "${!VM_NAMES[@]}"; do
+    vm_name=${VM_NAMES[$i]}
+    fs=${FILESYSTEMS[$i]}
+    exit_code=${EXIT_CODES[$i]}
+    
+    [ "$first" = false ] && echo "    ," >> "$RESULTS_DIR/summary.json"
+    first=false
+    
+    if [ -f "$RESULTS_DIR/${vm_name}-results.json" ]; then
+        # Extract metrics from individual result
+        ops=$(jq -r '.results.total_operations // 0' "$RESULTS_DIR/${vm_name}-results.json" 2>/dev/null || echo "0")
+        bugs=$(jq -r '.results.bugs_found // 0' "$RESULTS_DIR/${vm_name}-results.json" 2>/dev/null || echo "0")
+        missing=$(jq -r '.results.missing_entries // 0' "$RESULTS_DIR/${vm_name}-results.json" 2>/dev/null || echo "0")
+        phantom=$(jq -r '.results.phantom_entries // 0' "$RESULTS_DIR/${vm_name}-results.json" 2>/dev/null || echo "0")
+        duplicate=$(jq -r '.results.duplicate_entries // 0' "$RESULTS_DIR/${vm_name}-results.json" 2>/dev/null || echo "0")
+    else
+        ops=0
+        bugs=0
+        missing=0
+        phantom=0
+        duplicate=0
+    fi
+    
+    cat >> "$RESULTS_DIR/summary.json" <<EOF
+    {
+      "vm_name": "$vm_name",
+      "filesystem": "$fs",
+      "status": "$([ "$exit_code" -eq 0 ] && echo "PASS" || echo "FAIL")",
+      "exit_code": $exit_code,
+      "total_operations": $ops,
+      "bugs_found": $bugs,
+      "missing_entries": $missing,
+      "phantom_entries": $phantom,
+      "duplicate_entries": $duplicate,
+      "log_file": "${vm_name}.log",
+      "results_file": "${vm_name}-results.json"
+    }
+EOF
+done
+
+cat >> "$RESULTS_DIR/summary.json" <<EOF
+
+  ]
+}
+EOF
 
 # Summary
 echo
@@ -183,28 +255,52 @@ for i in "${!VM_NAMES[@]}"; do
         echo "✅ ${vm_name} ($fs): PASSED"
         
         # Show metrics if available
-        if [ -f "/tmp/xibalba-results-${vm_name}.json" ]; then
-            ops=$(jq -r '.results.total_operations // "N/A"' "/tmp/xibalba-results-${vm_name}.json" 2>/dev/null || echo "N/A")
-            echo "   Operations: $ops"
+        if [ -f "$RESULTS_DIR/${vm_name}-results.json" ]; then
+            ops=$(jq -r '.results.total_operations // "N/A"' "$RESULTS_DIR/${vm_name}-results.json" 2>/dev/null || echo "N/A")
+            missing=$(jq -r '.results.missing_entries // "N/A"' "$RESULTS_DIR/${vm_name}-results.json" 2>/dev/null || echo "N/A")
+            phantom=$(jq -r '.results.phantom_entries // "N/A"' "$RESULTS_DIR/${vm_name}-results.json" 2>/dev/null || echo "N/A")
+            duplicate=$(jq -r '.results.duplicate_entries // "N/A"' "$RESULTS_DIR/${vm_name}-results.json" 2>/dev/null || echo "N/A")
+            echo "   Operations: $ops | Missing: $missing | Phantom: $phantom | Duplicate: $duplicate"
         fi
     else
         echo "❌ ${vm_name} ($fs): FAILED (exit code: $exit_code)"
         all_passed=false
+        
+        # Show failure details if available
+        if [ -f "$RESULTS_DIR/${vm_name}-results.json" ]; then
+            bugs=$(jq -r '.results.bugs_found // "N/A"' "$RESULTS_DIR/${vm_name}-results.json" 2>/dev/null || echo "N/A")
+            echo "   Bugs found: $bugs"
+        fi
     fi
     
-    echo "   Full log: /tmp/xibalba-${vm_name}.log"
-    [ -f "/tmp/xibalba-results-${vm_name}.json" ] && echo "   Results: /tmp/xibalba-results-${vm_name}.json"
+    echo "   Log: $RESULTS_DIR/${vm_name}.log"
+    echo "   Results: $RESULTS_DIR/${vm_name}-results.json"
     echo
 done
+
+echo
+echo "All results saved to: $RESULTS_DIR"
+echo "  - summary.json: Comprehensive summary of all tests"
+echo "  - *.log: Individual VM logs"
+echo "  - *-results.json: Individual test results"
+echo
 
 echo "════════════════════════════════════════════════════════════════"
 echo
 
 if $all_passed; then
     echo "🎉 All VM tests PASSED!"
+    echo
+    echo "To analyze results:"
+    echo "  jq . $RESULTS_DIR/summary.json"
+    echo "  cat $RESULTS_DIR/*.log"
     exit 0
 else
     echo "⚠️  Some VM tests FAILED"
+    echo
+    echo "To analyze failures:"
+    echo "  jq . $RESULTS_DIR/summary.json"
+    echo "  cat $RESULTS_DIR/*.log"
     exit 1
 fi
 
