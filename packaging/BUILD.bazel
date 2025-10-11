@@ -48,13 +48,13 @@ pkg_deb(
         "f2fs-tools",      # F2FS
         "nilfs-tools",     # NILFS2
         "nfs-common",      # NFS client
+        "exfatprogs",      # exFAT (common on USB drives, SD cards)
+        "ntfs-3g",         # NTFS (common for dual-boot, external drives)
     ],
     suggests = [
-        "nfs-kernel-server",  # NFS server
-        "exfatprogs",         # exFAT
-        "ntfs-3g",            # NTFS
-        "cifs-utils",         # CIFS/SMB
-        "fuse3",              # FUSE filesystems
+        "nfs-kernel-server",  # NFS server (only for server testing)
+        "cifs-utils",         # CIFS/SMB (network filesystems)
+        "fuse3",              # FUSE filesystems (user-space implementations)
     ],
     description = """Xibalba: Chaos Testing Framework for Kernel Filesystems
  Xibalba is a Jepsen-inspired chaos testing framework for Linux kernel VFS
