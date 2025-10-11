@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-# Deploy RUDRA binaries to a test VM
+# Deploy Xibalba binaries to a test VM
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -13,7 +13,7 @@ fi
 
 VM_NAME="$1"
 
-echo "=== Deploying RUDRA to $VM_NAME ==="
+echo "=== Deploying Xibalba to $VM_NAME ==="
 echo
 
 # Check if VM exists and is running
@@ -33,8 +33,8 @@ if [ -z "$VM_IP" ]; then
 fi
 echo "  ✓ VM IP: $VM_IP"
 
-# Build RUDRA locally
-echo "Building RUDRA..."
+# Build Xibalba locally
+echo "Building Xibalba..."
 cd "$PROJECT_ROOT"
 if [ ! -f "./compile.sh" ]; then
     echo "ERROR: compile.sh not found in $PROJECT_ROOT"
@@ -51,19 +51,19 @@ fi
 
 # Create remote directory
 echo "Creating remote directory..."
-ssh -o StrictHostKeyChecking=no root@"$VM_IP" "mkdir -p /root/rudra/bin"
-echo "  ✓ Created /root/rudra/bin"
+ssh -o StrictHostKeyChecking=no root@"$VM_IP" "mkdir -p /root/xibalba/bin"
+echo "  ✓ Created /root/xibalba/bin"
 
 # Copy binaries
 echo "Copying binaries..."
-scp -o StrictHostKeyChecking=no -r ./bin/* root@"$VM_IP":/root/rudra/bin/
+scp -o StrictHostKeyChecking=no -r ./bin/* root@"$VM_IP":/root/xibalba/bin/
 echo "  ✓ Copied binaries"
 
 # Verify on remote
 echo "Verifying deployment..."
 ssh root@"$VM_IP" bash << 'REMOTE_VERIFY'
 set -e
-cd /root/rudra/bin
+cd /root/xibalba/bin
 echo "Files:"
 ls -lh
 echo
@@ -76,16 +76,16 @@ REMOTE_VERIFY
 echo
 echo "=== Deployment Complete ==="
 echo
-echo "Deployed to: root@$VM_IP:/root/rudra/"
+echo "Deployed to: root@$VM_IP:/root/xibalba/"
 echo
 echo "Next steps:"
 echo "  # SSH to VM"
 echo "  ssh root@$VM_IP"
 echo
 echo "  # Inside VM, run tests"
-echo "  cd /root/rudra/bin"
+echo "  cd /root/xibalba/bin"
 echo "  ./pause_controller 50 500 &"
-echo "  ./simple_chaos_test /test/rudra_test"
+echo "  ./simple_chaos_test /test/xibalba_test"
 echo
 echo "Or use automation:"
 echo "  $SCRIPT_DIR/run_tests.sh $VM_NAME"

@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Check if host system has required tools for VM testing
 
-echo "=== Checking RUDRA VM Prerequisites ==="
+echo "=== Checking Xibalba VM Prerequisites ==="
 echo
 
 MISSING=()
@@ -123,7 +123,7 @@ if [ ${#MISSING[@]} -eq 0 ]; then
     echo "✅ Ready to create VMs!"
     echo
     echo "Next steps:"
-    echo "   ./create_test_vm.sh --name rudra-test-01"
+    echo "   ./create_test_vm.sh --name xibalba-test-01"
     exit 0
 else
     echo "❌ Please install missing tools first"

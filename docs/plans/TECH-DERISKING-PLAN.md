@@ -1,4 +1,4 @@
-# RUDRA: Technology De-Risking Plan
+# Xibalba: Technology De-Risking Plan
 
 *Prove eBPF fault injection can find bugs BEFORE building full infrastructure*
 *Timeline: 2-3 weeks | Investment: ~500 lines of code | Risk reduction: 80%+*
@@ -6,7 +6,7 @@
 
 ## Why This Plan?
 
-**The problem**: Full RUDRA implementation is 12-16 weeks and ~15,000 lines of code. That's a big commitment!
+**The problem**: Full Xibalba implementation is 12-16 weeks and ~15,000 lines of code. That's a big commitment!
 
 **The risk**: What if eBPF fault injection doesn't work? What if it can't find bugs? We'd waste months.
 
@@ -325,9 +325,9 @@
 - [ ] Build: `bazel build //chaos:simple_chaos_test`
 - [ ] Test on local filesystem:
   ```bash
-  mkdir -p /tmp/rudra_test
-  touch /tmp/rudra_test/file{1..100}
-  bazel run //chaos:simple_chaos_test -- /tmp/rudra_test
+  mkdir -p /tmp/xibalba_test
+  touch /tmp/xibalba_test/file{1..100}
+  bazel run //chaos:simple_chaos_test -- /tmp/xibalba_test
   ```
 - [ ] Should complete without crashes (baseline)
 
@@ -401,7 +401,7 @@
   ```
 - [ ] Run test in another terminal:
   ```bash
-  ls /tmp/rudra_test
+  ls /tmp/xibalba_test
   ```
 - [ ] Check traces:
   ```bash
@@ -603,7 +603,7 @@
   sudo bazel-bin/chaos/pause_controller 20  # 20% pause probability
   
   # Terminal 2: Run simple chaos test
-  bazel run //chaos:simple_chaos_test -- /tmp/rudra_test
+  bazel run //chaos:simple_chaos_test -- /tmp/xibalba_test
   
   # Terminal 1 should show: "PAUSE REQUEST: pid=12345"
   ```
@@ -680,11 +680,11 @@
 - [ ] Run complete validation:
   ```bash
   # Create test directory with many files
-  mkdir -p /tmp/rudra_race_test
-  for i in {1..1000}; do touch /tmp/rudra_race_test/file$i; done
+  mkdir -p /tmp/xibalba_race_test
+  for i in {1..1000}; do touch /tmp/xibalba_race_test/file$i; done
   
   # Run race detector
-  bazel run //chaos:race_detector -- /tmp/rudra_race_test
+  bazel run //chaos:race_detector -- /tmp/xibalba_race_test
   ```
 - [ ] Expected output:
   ```
@@ -789,7 +789,7 @@
 - [ ] Build: `bazel build //chaos:comprehensive_test`
 - [ ] Run without eBPF (baseline):
   ```bash
-  bazel run //chaos:comprehensive_test -- /tmp/rudra_test
+  bazel run //chaos:comprehensive_test -- /tmp/xibalba_test
   # Should pass with no issues
   ```
 - [ ] Run WITH eBPF pauses:
@@ -798,7 +798,7 @@
   sudo bazel-bin/chaos/pause_controller 30  # 30% pause rate
   
   # Terminal 2: Run comprehensive test
-  bazel run //chaos:comprehensive_test -- /tmp/rudra_test
+  bazel run //chaos:comprehensive_test -- /tmp/xibalba_test
   
   # Check for:
   # - Increased race detection
@@ -962,7 +962,7 @@
 **Want to start immediately?**
 
 ```bash
-cd /home/jmalicki/src/rudra
+cd /home/jmalicki/src/xibalba
 
 # Day 1: Setup
 sudo apt-get install -y clang llvm libbpf-dev bpftool

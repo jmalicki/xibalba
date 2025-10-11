@@ -1,4 +1,4 @@
-name: RUDRA CI
+name: Xibalba CI
 
 on:
   push:
@@ -29,21 +29,44 @@ jobs:
           fi
           bazel --version
       
+      - name: Cache APT packages
+        uses: actions/cache@v4
+        id: apt-cache
+        with:
+          path: |
+            /var/cache/apt/archives
+            /var/lib/apt/lists
+          # Cache key based on packaging/BUILD.bazel (source of truth for deps)
+          key: ${{ runner.os }}-apt-ebpf-${{ hashFiles('packaging/BUILD.bazel') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-ebpf-
+      
       - name: Install eBPF dependencies
+        if: steps.apt-cache.outputs.cache-hit != 'true'
         run: |
+          # clang and llvm are pre-installed on ubuntu-latest
+          # Dependencies defined in packaging/BUILD.bazel (depends + recommends)
           sudo apt-get update
           sudo apt-get install -y \
-            clang \
-            llvm \
             libbpf-dev \
             libelf-dev \
             linux-headers-$(uname -r)
+      
+      - name: Verify eBPF tools
+        run: |
+          # Verify pre-installed tools
+          clang --version
+          llvm-objdump --version
+          
+          # Verify installed libraries
+          dpkg -l | grep libbpf
+          dpkg -l | grep libelf
       
       - name: Build all targets
         run: bazel build //...
       
       - name: Build Debian package
-        run: bazel build //packaging:rudra-deb
+        run: bazel build //packaging:xibalba-deb
       
       - name: Verify eBPF program
         run: |
@@ -53,8 +76,8 @@ jobs:
       
       - name: Verify Debian package
         run: |
-          dpkg-deb --info bazel-bin/packaging/rudra_0.1.0_amd64.deb
-          dpkg-deb --contents bazel-bin/packaging/rudra_0.1.0_amd64.deb
+          dpkg-deb --info bazel-bin/packaging/xibalba_0.1.0_amd64.deb
+          dpkg-deb --contents bazel-bin/packaging/xibalba_0.1.0_amd64.deb
       
       - name: Run chaos test with validation (on stable kernel)
         run: |
@@ -92,15 +115,15 @@ jobs:
       - name: Upload Debian package
         uses: actions/upload-artifact@v4
         with:
-          name: rudra-deb-package
-          path: bazel-bin/packaging/rudra_0.1.0_amd64.deb
+          name: xibalba-deb-package
+          path: bazel-bin/packaging/xibalba_0.1.0_amd64.deb
           retention-days: 7
       
       # Also upload VM scripts for deployment
       - name: Upload VM scripts
         uses: actions/upload-artifact@v4
         with:
-          name: rudra-vm-scripts
+          name: xibalba-vm-scripts
           path: |
             vm/*.sh
             bazel-bin/vm/
@@ -131,14 +154,14 @@ jobs:
       - name: Download Debian package
         uses: actions/download-artifact@v4
         with:
-          name: rudra-deb-package
+          name: xibalba-deb-package
           path: packages/
       
       - name: Verify package contents
         run: |
           echo "=== Debian package for VM deployment ==="
-          dpkg-deb --info packages/rudra_0.1.0_amd64.deb
-          dpkg-deb --contents packages/rudra_0.1.0_amd64.deb
+          dpkg-deb --info packages/xibalba_0.1.0_amd64.deb
+          dpkg-deb --contents packages/xibalba_0.1.0_amd64.deb
           echo "✅ Package ready for VM deployment"
       
       - name: Validate VM script arguments
@@ -146,7 +169,7 @@ jobs:
           echo "=== Testing VM script argument parsing ==="
           # Test scripts accept --help without errors
           bash -n vm/create_test_vm.sh
-          bash -n vm/deploy_rudra.sh
+          bash -n vm/deploy_xibalba.sh
           bash -n vm/run_tests.sh
           bash -n vm/destroy_vm.sh
           echo "✅ All VM scripts are syntactically valid"
@@ -159,7 +182,7 @@ jobs:
           echo ""
           echo "Local testing (requires KVM):"
           echo "  bazel run //vm:create_vm -- --name test-01"
-          echo "  bazel run //vm:deploy_rudra -- test-01"
+          echo "  bazel run //vm:deploy_xibalba -- test-01"
           echo "  bazel run //vm:run_tests -- test-01"
           echo ""
           echo "Self-hosted runner:"

@@ -18,8 +18,8 @@
 
 3. **Create test directory**:
    ```bash
-   mkdir -p /tmp/rudra_test
-   touch /tmp/rudra_test/file{1..100}
+   mkdir -p /tmp/xibalba_test
+   touch /tmp/xibalba_test/file{1..100}
    ```
 
 ---
@@ -36,7 +36,7 @@ bazel run //chaos:pause_controller -- 50 11
 
 **Expected output**:
 ```
-=== RUDRA Delay Injector ===
+=== Xibalba Delay Injector ===
 Delay probability: 50%
 Delay iterations: 11 (approx 0μs)
 
@@ -68,13 +68,13 @@ Delays injected: 152
 ## Terminal 2: Run Chaos Test
 
 ```bash
-bazel run //chaos:simple_chaos_test -- /tmp/rudra_test
+bazel run //chaos:simple_chaos_test -- /tmp/xibalba_test
 ```
 
 **Expected output**:
 ```
 === Simple Chaos Test ===
-Path: /tmp/rudra_test
+Path: /tmp/xibalba_test
 Threads: 10
 Duration: 5s
 
@@ -142,7 +142,7 @@ bazel-bin/chaos/pause_controller 50 11
 
 **Terminal 2**:
 ```bash
-bazel-bin/chaos/simple_chaos_test /tmp/rudra_test
+bazel-bin/chaos/simple_chaos_test /tmp/xibalba_test
 ```
 
 **Note**: After any code change and rebuild, you must re-run `sudo ./grant_caps.sh` because Bazel creates new binaries.
@@ -172,7 +172,7 @@ sudo ./grant_caps.sh
 
 1. **Test not using getdents64**:
    ```bash
-   strace -e getdents64 bazel-bin/chaos/simple_chaos_test /tmp/rudra_test 2>&1 | grep getdents64
+   strace -e getdents64 bazel-bin/chaos/simple_chaos_test /tmp/xibalba_test 2>&1 | grep getdents64
    # Should see multiple getdents64() calls
    ```
 
@@ -276,7 +276,7 @@ Once you see delays being injected:
 | `bazel build //...` | Build all code |
 | `sudo ./grant_caps.sh` | Grant eBPF capabilities (after build) |
 | `bazel run //chaos:pause_controller -- 50 11` | Run eBPF injector |
-| `bazel run //chaos:simple_chaos_test -- /tmp/rudra_test` | Run chaos test |
+| `bazel run //chaos:simple_chaos_test -- /tmp/xibalba_test` | Run chaos test |
 | `getcap bazel-bin/chaos/pause_controller` | Check capabilities |
 | `sudo bpftool prog list` | List loaded eBPF programs |
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-# Create a test VM configured for RUDRA testing
+# Create a test VM configured for Xibalba testing
 
 # Default values
 VM_NAME=""
@@ -48,7 +48,7 @@ if [ -z "$VM_NAME" ]; then
     exit 1
 fi
 
-echo "=== Creating RUDRA Test VM: $VM_NAME ==="
+echo "=== Creating Xibalba Test VM: $VM_NAME ==="
 echo
 echo "Configuration:"
 echo "  Name: $VM_NAME"
@@ -136,7 +136,7 @@ packages:
 
 runcmd:
   - mkdir -p /test
-  - echo "RUDRA test VM ready" > /etc/motd
+  - echo "Xibalba test VM ready" > /etc/motd
 
 power_state:
   mode: reboot
@@ -294,7 +294,7 @@ echo "  Console: virsh console $VM_NAME"
 echo "  Status: virsh dominfo $VM_NAME"
 echo
 echo "Next steps:"
-echo "  1. Deploy RUDRA: $SCRIPT_DIR/deploy_rudra.sh $VM_NAME"
+echo "  1. Deploy Xibalba: $SCRIPT_DIR/deploy_xibalba.sh $VM_NAME"
 echo "  2. Run tests: $SCRIPT_DIR/run_tests.sh $VM_NAME"
 echo
 

@@ -1,15 +1,15 @@
-# RUDRA Packaging
+# Xibalba Packaging
 
-Debian package creation for RUDRA using Bazel's `rules_pkg`.
+Debian package creation for Xibalba using Bazel's `rules_pkg`.
 
 ## Building the Package
 
 ```bash
 # Build the .deb package
-bazel build //packaging:rudra-deb
+bazel build //packaging:xibalba-deb
 
 # Output location
-bazel-bin/packaging/rudra_0.1.0_amd64.deb
+bazel-bin/packaging/xibalba_0.1.0_amd64.deb
 ```
 
 ## Package Contents
@@ -32,7 +32,7 @@ The package depends on:
 
 ```bash
 # Install the package
-sudo dpkg -i rudra_0.1.0_amd64.deb
+sudo dpkg -i xibalba_0.1.0_amd64.deb
 
 # If dependencies are missing, fix them
 sudo apt-get install -f
@@ -42,45 +42,45 @@ sudo apt-get install -f
 
 ```bash
 # Copy to VM
-scp rudra_0.1.0_amd64.deb root@vm:/tmp/
+scp xibalba_0.1.0_amd64.deb root@vm:/tmp/
 
 # Install in VM
-ssh root@vm "dpkg -i /tmp/rudra_0.1.0_amd64.deb && apt-get install -f -y"
+ssh root@vm "dpkg -i /tmp/xibalba_0.1.0_amd64.deb && apt-get install -f -y"
 ```
 
 ## Package Metadata
 
-- **Package Name**: rudra
+- **Package Name**: xibalba
 - **Version**: 0.1.0
 - **Architecture**: amd64
 - **Section**: contrib/devel
 - **Priority**: optional
-- **Maintainer**: RUDRA Developers
+- **Maintainer**: Xibalba Developers
 
 ## Inspect Package
 
 ```bash
 # Show package info
-dpkg-deb --info bazel-bin/packaging/rudra_0.1.0_amd64.deb
+dpkg-deb --info bazel-bin/packaging/xibalba_0.1.0_amd64.deb
 
 # List files in package
-dpkg-deb --contents bazel-bin/packaging/rudra_0.1.0_amd64.deb
+dpkg-deb --contents bazel-bin/packaging/xibalba_0.1.0_amd64.deb
 
 # Extract control files
-dpkg-deb --control bazel-bin/packaging/rudra_0.1.0_amd64.deb /tmp/control/
+dpkg-deb --control bazel-bin/packaging/xibalba_0.1.0_amd64.deb /tmp/control/
 ```
 
 ## Uninstall
 
 ```bash
-sudo dpkg -r rudra
+sudo dpkg -r xibalba
 ```
 
 ## CI Integration
 
 The CI automatically builds and uploads the .deb package as an artifact:
 
-1. **Build stage**: Creates `rudra_0.1.0_amd64.deb`
+1. **Build stage**: Creates `xibalba_0.1.0_amd64.deb`
 2. **Upload**: Stores as GitHub Actions artifact
 3. **VM tests**: Downloads and installs in test VMs
 

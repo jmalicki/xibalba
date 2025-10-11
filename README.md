@@ -1,39 +1,103 @@
-# RUDRA: Chaos Testing Framework for Kernel Filesystems
+# Xibalba: Chaos Testing Framework for Linux Kernel Filesystems
 
-*The Howling Storm of Testing*
+*The Underworld of Trials*
 
-**RUDRA** - Vedic storm god, fierce form of Shiva, "The Howler"
+**Xibalba** (shee-BAHL-bah) - The Mayan underworld where code faces its darkest trials
 
----
-
-## What is RUDRA?
-
-**RUDRA** is a Jepsen-inspired chaos testing framework specifically designed for testing concurrent filesystem operations in the Linux kernel using eBPF fault injection.
-
-**Purpose**: Find race conditions, concurrency bugs, and edge cases in kernel filesystem code **before** they reach production.
-
-**Inspired by**: Kyle Kingsbury's Jepsen framework for distributed systems
-
-**Novel approach**: Brings Jepsen-quality chaos engineering to kernel filesystem testing using eBPF
+**Linux-specific**: This framework uses Linux eBPF for fault injection, which is not available on other kernels (BSD, Windows, macOS)
 
 ---
 
-## The Name: RUDRA
+## What is Xibalba?
 
-**Rudra** (रुद्र) - From Vedic Hinduism:
-- **The Howler**: Storm god who roars
-- **The Destroyer**: Fierce aspect of Shiva
-- **The Healer**: Destroys disease (bugs) to bring health (robustness)
+**Xibalba** is a chaos testing framework that finds subtle bugs in **Linux kernel** filesystem code—the kind that only show up when many programs access files at the same time.
 
-**Acronym**: **R**ace **U**ncovering **D**irectory **R**ead **A**ssessment
+### Why This Matters
 
-**Metaphor**: Like the howling storm, RUDRA unleashes chaos on your code to reveal hidden weaknesses.
+**The Problem**: Imagine 100 programs all trying to list files in the same directory simultaneously. One program might see a file that doesn't exist, another might see the same file twice, and a third might miss files entirely. These bugs are **nearly impossible to find** with normal testing because they depend on exact timing—threads hitting the same code at just the right microsecond.
+
+**Real-world impact**:
+- Database corruption when `ls` misses transaction log files
+- Build failures when `make` doesn't see all source files
+- Backup tools skip files, leading to data loss
+- Package managers install incomplete software
+
+**Traditional testing fails** because running tests 1000 times might never hit the exact timing that triggers the bug. The bug might appear once per million operations—**in production**, not in testing.
+
+**Xibalba's solution**: Don't wait for luck. **Force** the timing bugs to appear by:
+1. Running many threads concurrently (amplify the chaos)
+2. Injecting strategic delays with eBPF (widen the narrow timing windows)
+3. Validating that every read operation is correct (catch the bugs)
+
+If your code passes Xibalba's tests, it can handle the chaos of real production systems.
+
+### Technical Details
+
+**Xibalba** is a [Jepsen](https://jepsen.io/)-inspired chaos testing framework specifically designed for testing concurrent filesystem operations in the **Linux kernel** using eBPF fault injection.
+
+**Linux-only**: eBPF is a Linux kernel feature. Other operating systems (FreeBSD, Windows, macOS) don't have equivalent fault injection capabilities at the kernel level.
+
+**Inspired by**: [Kyle Kingsbury](https://aphyr.com/)'s [Jepsen framework](https://github.com/jepsen-io/jepsen) for distributed systems
+
+**Novel approach**: Brings Jepsen-quality chaos engineering to Linux kernel filesystem testing using eBPF
+
+---
+
+## The Name: Xibalba
+
+**[Xibalba](https://en.wikipedia.org/wiki/Xibalba)** (shee-bahl-BAH) — literally **"Place of Fear"** or **"Place of Phantoms"** — is the Maya underworld from the *[Popol Vuh](https://en.wikipedia.org/wiki/Popol_Vuh)*, the sacred K'iche' Maya text. Far below the surface world, Xibalba is a realm of darkness ruled by the **Ajawab' Xib'alb'a** (Lords of Xibalba), death gods who delight in tormenting souls through elaborate trials and deadly games.
+
+### The Myth: The Hero Twins' Descent
+
+The most famous story of Xibalba tells of the Hero Twins—**Hunahpu** and **Xbalanque**—who were summoned to the underworld by its jealous lords. Their father and uncle had been killed there before them, defeated by the trials. The twins descended knowing they faced almost certain death, but they were clever, brave, and determined to avenge their ancestors.
+
+To escape Xibalba alive, they had to survive the **Six Houses of Xibalba**, each a deadly ordeal designed by the Lords of Death:
+
+- 🌑 **The Dark House** (*Ch'umil Ha*) — Absolute darkness where you cannot see the dangers that surround you
+- ❄️  **The Cold House** (*Shiqiripat*) — Freezing winds and icy hail that drain all warmth and will
+- 🐆 **The Jaguar House** (*Balam Ha*) — Prowling jaguars with razor fangs, hungry and waiting
+- 🦇 **The Bat House** (*Sotz' Ha*) — Giant death bats with obsidian wings that decapitate victims
+- 🗡️  **The Razor House** (*Chamiabak*) — Rooms filled with moving blades of obsidian and flint
+- 🔥 **The Fire House** (*Kaqix Ha*) — Unbearable flames that consume everything within
+
+Each house represented a different form of death—darkness, cold, beasts, blades, heat. The lords expected the twins to fail, as all others had. But through **cunning, resilience, and ingenuity**, Hunahpu and Xbalanque survived every trial. They eventually defeated the Lords of Death in a ritual ball game, died and were reborn, and ascended from Xibalba as gods—the Sun and the Moon.
+
+### The Metaphor: Your Code's Descent into Chaos
+
+Like the Hero Twins descending into Xibalba, **your code must face orchestrated chaos designed to expose every weakness.** Each test is a House of Xibalba—an ordeal that seems designed to make your code fail:
+
+- 🌑 **The Dark House** → Race conditions in darkness (timing you can't see)
+- ❄️  **The Cold House** → Delay injection (operations frozen at critical moments)
+- 🐆 **The Jaguar House** → Resource contention (threads competing like hungry jaguars)
+- 🦇 **The Bat House** → Concurrent modifications (sudden, deadly changes)
+- 🗡️  **The Razor House** → Edge cases (cuts that find every boundary condition)
+- 🔥 **The Fire House** → Stress testing (burning through resource limits)
+
+**Just as the Hero Twins couldn't see in the Dark House**, your code faces race conditions where timing is invisible. **Just as they shivered in the Cold House**, your operations are frozen by strategic delays. **Just as jaguars prowled**, your threads compete for scarce resources.
+
+But if your code survives—like the Hero Twins—it doesn't just work. It has been **battle-tested against chaos itself**. It emerges not as a fragile prototype, but as **hardened, production-ready software** worthy of the surface world.
+
+### The Six Houses: Chaos Test Categories
+
+| House | Trial | Test Category | What It Finds |
+|-------|-------|---------------|---------------|
+| 🌑 Dark House | Darkness | Race conditions | Timing bugs invisible in normal testing |
+| ❄️ Cold House | Freezing | Delay injection | Timeout handling, deadlocks |
+| 🐆 Jaguar House | Beasts | Resource contention | Lock contention, starvation |
+| 🦇 Bat House | Decapitation | Concurrent modifications | Lost updates, torn reads |
+| 🗡️ Razor House | Blades | Edge cases | Boundary conditions, overflow |
+| 🔥 Fire House | Flames | Stress testing | Resource exhaustion, memory leaks |
+
+> *"Are they not merely wicked? They are evil, and great are their thoughts of deceit."*  
+> — Popol Vuh, describing the Lords of Xibalba
+
+**Your code enters Xibalba. Will it emerge victorious like the Hero Twins, or will the Lords of Chaos claim another victim?**
 
 ---
 
 ## Key Features
 
-### 🌪️ **Jepsen-Style Chaos Engineering**
+### 🌪️ **[Jepsen](https://jepsen.io/)-Style Chaos Engineering**
 - Concurrent readers + writers
 - 60-second torture runs
 - Invariant checking
@@ -51,10 +115,10 @@
 - Statistics tracking
 
 ### 🖥️ **VM Infrastructure**
-- 5 filesystem VMs (ext4, XFS, ZFS, btrfs, tmpfs)
+- 4 filesystem VMs (ext4, xfs, btrfs, tmpfs)
 - Automated creation and orchestration
 - One-command setup and testing
-- HTML result reports
+- Detailed result reports
 
 ### 📊 **History & Analysis**
 - Complete operation logging
@@ -109,7 +173,7 @@
 
 **Choose this if**: You're already confident in eBPF and ready to commit 12-16 weeks
 
-**What you'll build**: Complete RUDRA with VMs, 5 filesystems, full automation
+**What you'll build**: Complete Xibalba with VMs, 5 filesystems, full automation
 
 **265 checkboxes** across 9 phases
 
@@ -151,7 +215,8 @@
 - **🔧 [Race Conditions & Fault Injection](docs/design/RACE-CONDITIONS-AND-FAULT-INJECTION.md)** - Technical details
 - **🎯 [Fault Injection Scope](docs/design/FAULT-INJECTION-SCOPE.md)** - What to test vs not test
 - **📊 [Testing Framework](docs/design/TESTING-FRAMEWORK.md)** - Complete specification
-- **📛 [Naming Options](docs/design/NAMING-OPTIONS.md)** - Why "RUDRA"
+- **🗂️ [Filesystem Consistency Models](docs/design/FILESYSTEM-CONSISTENCY-MODELS.md)** - 10+ filesystems documented
+- **📝 [State Tracking & Validation](docs/design/STATE-TRACKING-AND-VALIDATION.md)** - Ground truth approach
 
 **Status & Progress** (`docs/status/`):
 - **📈 [Tech De-Risking Status](docs/status/TECH-DERISKING-STATUS.md)** - Current progress
@@ -181,8 +246,8 @@
 
 ```bash
 # Clone repository
-git clone https://github.com/your-org/rudra.git
-cd rudra
+git clone https://github.com/your-org/xibalba.git
+cd xibalba
 
 # Build everything
 bazel build //...
@@ -191,9 +256,9 @@ bazel build //...
 sudo ./grant_caps.sh
 
 # Run chaos test
-mkdir -p /tmp/rudra_test
-touch /tmp/rudra_test/file{1..100}
-bazel run //chaos:simple_chaos_test -- /tmp/rudra_test
+mkdir -p /tmp/xibalba_test
+touch /tmp/xibalba_test/file{1..100}
+bazel run //chaos:simple_chaos_test -- /tmp/xibalba_test
 
 # Run with eBPF fault injection (in separate terminal)
 bazel run //chaos:pause_controller -- 50 11
@@ -208,19 +273,19 @@ bazel run //vm:check_prerequisites
 # Create a test VM
 bazel run //vm:create_vm -- --name test-01
 
-# Deploy RUDRA to VM
-bazel run //vm:deploy_rudra -- test-01
+# Deploy Xibalba to VM
+bazel run //vm:deploy_xibalba -- test-01
 
-# Run tests in VM
+# Run tests in VM (enter the trials!)
 bazel run //vm:run_tests -- test-01
 
 # Destroy VM when done
 bazel run //vm:destroy_vm -- test-01
 ```
 
-### Running Tests
+### The Trials (Running Tests)
 
-**Terminal 1 - Start eBPF Fault Injector**:
+**Terminal 1 - Activate the Lords of Chaos**:
 ```bash
 # Build first
 bazel build //chaos:pause_controller
@@ -228,19 +293,19 @@ bazel build //chaos:pause_controller
 # Grant capabilities (one-time)
 sudo ./grant_caps.sh
 
-# Run injector
+# Unleash chaos
 bazel run //chaos:pause_controller -- 50 11
 # Args: <probability%> <delay_iterations>
 ```
 
-**Terminal 2 - Run Chaos Test**:
+**Terminal 2 - Enter the Underworld**:
 ```bash
 # Create test directory
-mkdir -p /tmp/rudra_test
-touch /tmp/rudra_test/file{1..100}
+mkdir -p /tmp/xibalba_test
+touch /tmp/xibalba_test/file{1..100}
 
-# Run test
-bazel run //chaos:simple_chaos_test -- /tmp/rudra_test
+# Send your code into Xibalba
+bazel run //chaos:simple_chaos_test -- /tmp/xibalba_test
 ```
 
 ### Building Individual Components
@@ -258,6 +323,9 @@ bazel build //chaos:pause_injector_bpf
 
 # Build everything
 bazel build //...
+
+# Create Debian package
+bazel build //packaging:xibalba-deb
 ```
 
 ---
@@ -265,98 +333,59 @@ bazel build //...
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                  RUDRA Controller                        │
-│                                                          │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐ │
-│  │ DirectoryReader│ │    Nemesis   │  │   Checker    │ │
-│  │  Abstraction  │  │ (eBPF Faults)│  │ (Invariants) │ │
-│  └──────────────┘  └──────────────┘  └──────────────┘ │
-│         │                  │                 │          │
-│         ▼                  ▼                 ▼          │
-│    Operations          Faults           Validation      │
-└─────────────────────────────────────────────────────────┘
-         │                  │                 │
-         ▼                  ▼                 ▼
-  ┌─────────────────────────────────────────────────┐
-  │              Test VMs                            │
-  │  ┌────┐ ┌────┐ ┌────┐ ┌─────┐ ┌─────┐         │
-  │  │ext4│ │XFS │ │ZFS │ │btrfs│ │tmpfs│         │
-  │  └────┘ └────┘ └────┘ └─────┘ └─────┘         │
-  │  Each with: custom kernel + test data + eBPF   │
-  └─────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                    Xibalba Controller                           │
+│                    (The Lords of Chaos)                         │
+│                                                                 │
+│  ┌───────────────┐   ┌──────────────┐    ┌──────────────┐       │
+│  │DirectoryReader│   │   Nemesis    │    │   Checker    │       │
+│  │  Abstraction  │   │(eBPF Faults) │    │ (Invariants) │       │
+│  └───────┬───────┘   └───────┬──────┘    └───────┬──────┘       │
+│          │                   │                    │             │
+│          ▼                   ▼                    ▼             │
+│     Operations            Faults             Validation         │
+└──────────┬───────────────────┬────────────────────┬─────────────┘
+           │                   │                    │
+           ▼                   ▼                    ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              The Houses of Xibalba (Test VMs)                   │
+│                                                                 │
+│        ┌────┐      ┌────┐      ┌─────┐      ┌─────┐             │
+│        │ext4│      │xfs │      │btrfs│      │tmpfs│             │
+│        └────┘      └────┘      └─────┘      └─────┘             │
+│                                                                 │
+│     Each with: custom kernel + test data + eBPF                 │
+│     Your code must survive ALL trials to pass                   │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Components
+## The Trials (Test Categories)
 
-### 1. DirectoryReader Abstraction
-- Unified interface for classic `readdir()` and io_uring `getdents`
-- Write tests once, run against both implementations
-- Automatic validation they produce same results
+### Trial 1: The Dark House - Race Conditions
+Concurrent operations in complete chaos. Can your code maintain correctness when timing is unpredictable?
 
-### 2. Chaos Framework
-- Concurrent reader/writer threads (20 readers + 10 writers)
-- Rapid file creation/deletion
-- Random delay injection
-- 60-second stress runs
+### Trial 2: The Razor House - Edge Cases
+Sharp corner cases that slice through weak error handling. Directory boundaries, empty directories, massive directories.
 
-### 3. eBPF Nemesis (Fault Injector)
-- **4 operational modes**:
-  - Probabilistic (random exploration)
-  - Deterministic (reproducible scenarios)
-  - Adaptive (learns from bugs)
-  - Adversarial (targets specific invariants)
+### Trial 3: The Cold House - Resource Starvation
+Memory allocation failures, ENOMEM errors. Can your code survive with nothing?
 
-- **Injection types**:
-  - Pause injection (expand race windows)
-  - Fault injection (ENOMEM, EIO, EAGAIN)
-  - Timing manipulation
-  - Lock contention simulation
+### Trial 4: The Jaguar House - Timing Attacks
+Strategic delays injected via eBPF to widen race windows. The jaguars hunt for timing bugs.
 
-### 4. History Recorder
-- JSON operation log with nanosecond timestamps
-- Tracks all operations and faults
-- Enables post-mortem analysis
-- Supports replay and minimization
+### Trial 5: The Fire House - I/O Errors
+Simulated I/O failures, filesystem errors. Can your code handle when everything goes wrong?
 
-### 5. Invariant Checkers
-- No duplicate entries in single scan
-- Snapshot consistency (weak POSIX model)
-- Progress (liveness, no deadlocks)
-- Cursor validity
-
-### 6. VM Infrastructure
-- Automated VM creation for 5 filesystems
-- Test data generation and deployment
-- Orchestrated test execution
-- HTML reporting
+### Trial 6: The Bat House - Concurrent Mutations
+Multiple writers changing the directory while you read. The death bats of concurrency.
 
 ---
 
-## Documentation
+## What Xibalba Tests
 
-### Getting Started
-- `docs/IMPLEMENTATION-PLAN.md` - Step-by-step guide with 265 checkboxes
-
-### Conceptual Design
-- `docs/JEPSEN-INSPIRED-FILESYSTEM-TESTING.md` - Jepsen principles applied to filesystems
-- `docs/FAULT-INJECTION-SCOPE.md` - What to test vs not test
-
-### Technical Details
-- `docs/RACE-CONDITIONS-AND-FAULT-INJECTION.md` - Fault injection mechanics
-- `docs/TESTING-FRAMEWORK.md` - Complete framework specification
-
-### Reference
-- `docs/NAMING-OPTIONS.md` - Why "RUDRA"
-- `docs/CHAOS-TESTING-READY.md` - Implementation readiness
-
----
-
-## What RUDRA Tests
-
-### ✅ We Test (Our Code)
+### ✅ The Trials Your Code Faces
 
 - Concurrent directory iteration correctness
 - Race condition resistance
@@ -366,75 +395,112 @@ bazel build //...
 - Cursor validity under concurrent modifications
 - Recovery from failures
 
-### ❌ We Don't Test (Kernel Guarantees)
+### ❌ What We Don't Test (Kernel Guarantees)
 
 - Lock correctness (assume kernel locks work)
 - Data integrity (assume block layer is correct)
 - Atomic operations (assume kernel provides atomicity)
 - Memory safety (assume kernel doesn't corrupt memory)
 
-**Principle**: Test OUR code, assume kernel primitives work correctly.
+**Principle**: Test YOUR code, assume kernel primitives work correctly.
 
 ---
 
-## Timeline
+## How It Works (Simple Explanation)
 
-**Optimistic**: 8-10 weeks (if everything works smoothly)
+Think of it like stress-testing a bridge, but for filesystem code:
 
-**Realistic**: 12-16 weeks (including learning curve, debugging, iteration)
+**Step 1: Create Chaos**
+- Launch 10 threads all reading the same directory
+- Launch 3 threads creating/deleting files
+- Let them fight for 5 seconds
 
-**Phases**:
-- Week 1-2: DirectoryReader abstraction + basic chaos
-- Week 3-5: eBPF fault injection (⚠️ learning curve)
-- Week 6-8: VM infrastructure (base + 3 filesystems for MVP)
-- Week 9-12: Orchestration, automation, testing
-- Week 13-16: Polish, add remaining filesystems, documentation
+**Step 2: Make Bugs Appear**
+- Use eBPF to inject tiny delays (microseconds) at critical moments
+- These delays turn "might happen once in a million operations" into "happens every few seconds"
+- It's like slow-motion replay for race conditions
 
-**MVP** (6-8 weeks): DirectoryReader + basic chaos + eBPF + 3 filesystems (ext4, XFS, tmpfs)
+**Step 3: Check for Correctness**
+- Track every file that should exist
+- Validate every directory read
+- Catch bugs: missing files, duplicate files, phantom files
 
-**Full system** (12-16 weeks): All 5 filesystems, complete automation, production-ready
+**Real Example**:
+```
+Without Xibalba: Test passes 999,999 times, fails once (in production)
+With Xibalba:    Test fails in 30 seconds (before production)
+```
+
+**Result**: Bugs that would take months to find in production are caught in minutes during testing.
+
+---
+
+## Prerequisites
+
+**Host Machine**:
+- Linux host with KVM support (QEMU/KVM + libvirt)
+- 32GB+ RAM recommended
+- 500GB+ disk space
+- Ubuntu 22.04 or later
+- Shared dev machine OK (use overnight for long benchmarks)
+
+**Kernel Development**:
+- Kernel source tree (with your patches or baseline)
+- Build environment (gcc, make, pahole for BTF)
+- Will build custom kernels with eBPF support enabled
+
+**VM Technology**: QEMU/KVM managed via libvirt
+- Fast, hardware-accelerated virtualization
+- Standard Linux VM tooling (virsh, virt-install)
 
 ---
 
 ## Status
 
-**Current**: ✅ Design complete, ready to implement
+**Current**: ✅ Core implementation complete
 
-**Documents**: 8,251 lines of specifications
+- ✅ DirectoryReader abstraction
+- ✅ Multi-threaded chaos test
+- ✅ eBPF fault injection (delay + error modes)
+- ✅ Debian packaging (.deb)
+- ✅ VM infrastructure (scripts ready)
+- ✅ CI/CD pipeline (parallel testing across filesystems)
 
-**Checkboxes**: 265 implementation tasks
-
-**Next**: Follow `docs/IMPLEMENTATION-PLAN.md` and start checking boxes!
+**Next Steps**: 
+- Implement full VM automation
+- Add more sophisticated invariant checkers
+- Expand to test io_uring getdents
+- Add history recording and analysis
 
 ---
 
-## Why RUDRA?
+## CI/CD
 
-**Problem**: Concurrent filesystem code has subtle race conditions
+Every PR automatically faces the trials:
 
-**Traditional testing**: Doesn't find timing-dependent bugs
+1. **Build Stage** - Compile all binaries, create .deb package
+2. **Smoke Test** - Quick sanity check
+3. **Parallel VM Trials** - 4 VMs test simultaneously:
+   - ext4 filesystem
+   - xfs filesystem  
+   - btrfs filesystem
+   - tmpfs filesystem
+4. **Report** - Collect results from all trials
 
-**RUDRA approach**: 
-1. Run concurrent operations (readers + writers)
-2. Inject pauses at critical points (expand race windows)
-3. Inject faults (test error handling)
-4. Record complete history
-5. Validate invariants
-6. Find bugs that would take months to appear in production
-
-**Result**: Jepsen-quality confidence for kernel filesystem code
+**Time**: ~21 minutes (4x faster than sequential)
 
 ---
 
 ## Contributing
 
-RUDRA is currently in design phase. Implementation is starting soon.
+Xibalba is actively developed. Want to help strengthen the trials?
 
-**Want to help?**
-1. Review the design documents
-2. Implement components (see IMPLEMENTATION-PLAN.md)
-3. Run experiments (see JEPSEN-INSPIRED-FILESYSTEM-TESTING.md)
-4. Report findings
+**How to contribute**:
+1. Add new fault injection modes
+2. Implement additional invariant checkers
+3. Create new test scenarios
+4. Improve VM automation
+5. Add support for more filesystems
 
 ---
 
@@ -449,15 +515,16 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## Acknowledgments
 
 **Inspired by**:
-- Kyle Kingsbury's Jepsen framework
-- Aphyr's database testing methodology
-- Linux kernel testing community
+- [Kyle Kingsbury (Aphyr)](https://aphyr.com/)'s [Jepsen framework](https://github.com/jepsen-io/jepsen) - Chaos engineering for distributed systems
+- [Jepsen.io](https://jepsen.io/) database testing methodology - Rigorous invariant checking
+- Linux kernel testing community - eBPF-based testing approaches
 
 **Mythology**:
-- Rudra from Vedic Hinduism - The Howling Storm that destroys to transform
+- [Xibalba](https://en.wikipedia.org/wiki/Xibalba) from the [Popol Vuh](https://en.wikipedia.org/wiki/Popol_Vuh) - The Maya creation epic
+- The [Hero Twins](https://en.wikipedia.org/wiki/Maya_Hero_Twins)' trials - A metaphor for surviving through testing
 
 ---
 
-*RUDRA: Where kernel code faces the storm and emerges stronger*
+*Xibalba: Where code faces its darkest trials and emerges battle-tested*
 
-*"The Howler destroys bugs with fierce testing"*
+*"Only the strong survive the underworld. Will your code emerge victorious?"*

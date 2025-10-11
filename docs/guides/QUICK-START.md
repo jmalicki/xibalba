@@ -1,4 +1,4 @@
-# RUDRA Tech De-Risking: Quick Start
+# Xibalba Tech De-Risking: Quick Start
 
 *Get eBPF fault injection working in 5 minutes*
 
@@ -18,7 +18,7 @@
 ### Step 1: Build Everything
 
 ```bash
-cd rudra
+cd xibalba
 bazel build //...
 ```
 
@@ -51,7 +51,7 @@ sudo ./grant_caps.sh
 ```
 === Granting eBPF Capabilities ===
 
-Target: /home/.../rudra/bazel-bin/chaos/pause_controller
+Target: /home/.../xibalba/bazel-bin/chaos/pause_controller
 
 Capabilities:
   • CAP_BPF       : Load eBPF programs
@@ -83,7 +83,7 @@ bazel run //chaos:pause_controller -- 50 11
 
 **Expected output**:
 ```
-=== RUDRA Delay Injector ===
+=== Xibalba Delay Injector ===
 Delay probability: 50%
 Delay iterations: 11 (approx 0μs)
 
@@ -105,11 +105,11 @@ Delays injected: 0
 **Terminal 2 - Run Chaos Test**:
 ```bash
 # Create test directory
-mkdir -p /tmp/rudra_test
-touch /tmp/rudra_test/file{1..100}
+mkdir -p /tmp/xibalba_test
+touch /tmp/xibalba_test/file{1..100}
 
 # Run test
-bazel run //chaos:simple_chaos_test -- /tmp/rudra_test
+bazel run //chaos:simple_chaos_test -- /tmp/xibalba_test
 ```
 
 **What should happen**:
@@ -120,7 +120,7 @@ bazel run //chaos:simple_chaos_test -- /tmp/rudra_test
 **Expected output (Terminal 2)**:
 ```
 === Simple Chaos Test ===
-Path: /tmp/rudra_test
+Path: /tmp/xibalba_test
 Threads: 10
 Duration: 5s
 
@@ -229,7 +229,7 @@ sudo ./grant_caps.sh  # Grant capabilities again
 
 1. **Test not using getdents64**: Verify with strace
    ```bash
-   strace -e getdents64 bazel-bin/chaos/simple_chaos_test /tmp/rudra_test
+   strace -e getdents64 bazel-bin/chaos/simple_chaos_test /tmp/xibalba_test
    ```
 
 2. **Probability too low**: Try 100%
@@ -262,7 +262,7 @@ bazel build //common:dir_reader
 **Run without building**:
 ```bash
 # Run directly from bazel-bin
-bazel-bin/chaos/simple_chaos_test /tmp/rudra_test
+bazel-bin/chaos/simple_chaos_test /tmp/xibalba_test
 ```
 
 ---
@@ -294,7 +294,7 @@ Once you see delays being injected:
    
    # Create and test in VM
    bazel run //vm:create_vm -- --name test-01
-   bazel run //vm:deploy_rudra -- test-01
+   bazel run //vm:deploy_xibalba -- test-01
    bazel run //vm:run_tests -- test-01
    ```
 
@@ -303,7 +303,7 @@ Once you see delays being injected:
 ## Files Reference
 
 ```
-rudra/
+xibalba/
 ├── bazel-bin/                         (Bazel output)
 │   └── chaos/
 │       ├── pause_injector.bpf.o       eBPF bytecode
