@@ -100,7 +100,7 @@ run_vm_test() {
         # Check if VM exists, create if not
         if ! virsh list --all | grep -q "$vm_name"; then
             echo "[${vm_name}] Creating VM..."
-            bazel run //vm:create_vm -- --name "$vm_name" --memory 2048 --cpus 2
+            bazel run //vm:create_vm -- --name "$vm_name" --ram 2048 --disk 10
         else
             echo "[${vm_name}] VM exists, starting..."
             virsh start "$vm_name" 2>/dev/null || true
