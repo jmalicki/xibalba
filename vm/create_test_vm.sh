@@ -144,6 +144,14 @@ fi
 # Create user-data
 cat > "$CLOUD_INIT_DIR/user-data" << EOF
 #cloud-config
+# Allow password auth for automated testing (when no SSH keys available)
+ssh_pwauth: true
+chpasswd:
+  expire: false
+  list: |
+    root:xibalba
+    ubuntu:xibalba
+
 users:
   - name: root
     ssh_authorized_keys:
