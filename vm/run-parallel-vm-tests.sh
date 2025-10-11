@@ -146,27 +146,33 @@ run_vm_test() {
     # Wait for VM to be ready
     echo "[${vm_name}] Waiting for SSH..."
     # shellcheck disable=SC2086
-    timeout 60 bash -c "until ssh $SSH_OPTS root@$vm_name true 2>/dev/null; do sleep 2; done" || {
+    timeout 90 bash -c "until ssh $SSH_OPTS root@$vm_name true 2>/dev/null; do sleep 2; done" || {
         echo "[${vm_name}] ❌ Failed to connect via SSH"
         echo 1 > "$exit_code_file"
         return 1
     }
     
-    # Deploy package
-    echo "[${vm_name}] Deploying Xibalba..."
+    # Check if xibalba is already installed (pre-built image)
     # shellcheck disable=SC2086
-    scp $SSH_OPTS "$PACKAGE_PATH" "root@${vm_name}:/tmp/" || {
-        echo "[${vm_name}] ❌ Failed to copy package"
-        echo 1 > "$exit_code_file"
-        return 1
-    }
-    
-    # shellcheck disable=SC2086
-    ssh $SSH_OPTS "root@${vm_name}" "apt update && apt install -y /tmp/xibalba_0.1.0_amd64.deb" || {
-        echo "[${vm_name}] ❌ Failed to install package"
-        echo 1 > "$exit_code_file"
-        return 1
-    }
+    if ssh $SSH_OPTS "root@${vm_name}" "which xibalba-gauntlet >/dev/null 2>&1"; then
+        echo "[${vm_name}] ✓ Xibalba already installed (using pre-built image)"
+    else
+        echo "[${vm_name}] Deploying Xibalba..."
+        # shellcheck disable=SC2086
+        scp $SSH_OPTS "$PACKAGE_PATH" "root@${vm_name}:/tmp/" || {
+            echo "[${vm_name}] ❌ Failed to copy package"
+            echo 1 > "$exit_code_file"
+            return 1
+        }
+        
+        # Use dpkg -i (fast) - dependencies are pre-installed via cloud-init
+        # shellcheck disable=SC2086
+        ssh $SSH_OPTS "root@${vm_name}" "dpkg -i /tmp/xibalba_0.1.0_amd64.deb" || {
+            echo "[${vm_name}] ❌ Failed to install package"
+            echo 1 > "$exit_code_file"
+            return 1
+        }
+    fi
     
     # Run gauntlet (progressive testing: EVENTUAL → WEAK → STRICT)
     echo "[${vm_name}] Running progressive gauntlet on $filesystem..."

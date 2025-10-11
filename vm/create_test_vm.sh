@@ -92,14 +92,28 @@ echo
 mkdir -p "$SCRIPT_DIR/images"
 mkdir -p "$SCRIPT_DIR/configs"
 
-# Download Ubuntu cloud image if needed
+# Use pre-built VM image if available (xibalba already installed!)
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+PREBUILT_IMAGE="$PROJECT_ROOT/bazel-bin/vm/xibalba-ready.qcow2"
 CLOUD_IMAGE="$IMAGES_DIR/ubuntu-24.04-server-cloudimg-amd64.img"
-if [ ! -f "$CLOUD_IMAGE" ]; then
+
+if [ -f "$PREBUILT_IMAGE" ]; then
+    echo "Using pre-built image with Xibalba already installed..."
+    cp "$PREBUILT_IMAGE" "$CLOUD_IMAGE"
+    echo "  ✓ Ready to boot (no installation needed!)"
+    XIBALBA_PREINSTALLED=true
+elif [ ! -f "$CLOUD_IMAGE" ]; then
     echo "Downloading Ubuntu 24.04 cloud image..."
+    echo "  💡 TIP: Build pre-built image with: bazel build //vm:xibalba_vm_image"
     wget -O "$CLOUD_IMAGE" \
         https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img
-    echo "  ✓ Downloaded"
+    echo "  ✓ Downloaded (will need to install xibalba after boot)"
+    XIBALBA_PREINSTALLED=false
+else
+    XIBALBA_PREINSTALLED=false
 fi
+
+export XIBALBA_PREINSTALLED
 
 # Create VM disk from cloud image
 VM_DISK="$IMAGES_DIR/${VM_NAME}.qcow2"
@@ -172,6 +186,10 @@ fi
 # Create user-data
 cat > "$CLOUD_INIT_DIR/user-data" << EOF
 #cloud-config
+# Fast boot configuration - skip unnecessary operations
+package_update: false
+package_upgrade: false
+
 # Allow password auth for automated testing (when no SSH keys available)
 ssh_pwauth: true
 chpasswd:
@@ -189,25 +207,37 @@ users:
     ssh_authorized_keys:
       - $SSH_PUBKEY
 
+# Pre-install ALL runtime dependencies so deployment can use 'dpkg -i' (fast)
+# instead of 'apt install' (slow - requires apt update + downloading deps)
+# These match the depends + recommends from //packaging:xibalba-deb
 packages:
-  - build-essential
-  - clang
-  - llvm
-  - libbpf-dev
-  - linux-headers-generic
-  - bpftool
-  - python3
+  - libbpf1
+  - libelf1
+  - jq
+  - e2fsprogs
+  - xfsprogs
+  - btrfs-progs
+  - zfsutils-linux
+  - f2fs-tools
+  - nilfs-tools
+  - nfs-common
 
 runcmd:
   - mkdir -p /test
   - echo "Xibalba test VM ready" > /etc/motd
-  - echo "XIBALBA_BOOT_COMPLETE" > /dev/ttyS0  # Signal via serial console
+  - systemctl disable snapd.service snapd.socket 2>/dev/null || true
+  - systemctl mask snapd.service snapd.socket 2>/dev/null || true
+
+# Speed up boot by disabling slow modules
+cloud_final_modules:
+  - scripts-user
+  - ssh-authkey-fingerprints
+  - keys-to-console
+  - final-message
 
 final_message: "XIBALBA_READY_$VM_NAME"
 
-power_state:
-  mode: reboot
-  timeout: 300
+# No reboot - faster boot times for testing
 EOF
 
 # Create meta-data
