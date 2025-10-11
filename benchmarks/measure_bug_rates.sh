@@ -86,9 +86,12 @@ run_benchmark() {
         echo "]" >> "$output_file"
         
         # Compute summary statistics
-        local total_bugs=$(grep -o '"bugs_found": [0-9]*' "$output_file" | awk '{sum+=$2} END {print sum}')
-        local total_scans=$(grep -o '"directory_scans": [0-9]*' "$output_file" | awk '{sum+=$2} END {print sum}')
-        local bug_rate=$(echo "scale=6; $total_bugs / $total_scans" | bc)
+        local total_bugs
+        local total_scans
+        local bug_rate
+        total_bugs=$(grep -o '"bugs_found": [0-9]*' "$output_file" | awk '{sum+=$2} END {print sum}')
+        total_scans=$(grep -o '"directory_scans": [0-9]*' "$output_file" | awk '{sum+=$2} END {print sum}')
+        bug_rate=$(echo "scale=6; $total_bugs / $total_scans" | bc)
         
         echo "    Summary: $total_bugs bugs in $total_scans scans (rate: $bug_rate)"
     done
