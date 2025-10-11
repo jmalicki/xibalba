@@ -261,9 +261,8 @@ git clone https://github.com/your-org/xibalba.git
 cd xibalba
 
 # (Optional but recommended) Setup pre-commit hooks for local linting
-# Requires: pipx or pip install pre-commit
-# pre-commit install  # Catches shellcheck/formatting issues before commit
-# Note: CI runs shellcheck anyway, so this is optional
+bazel run //tools:setup_precommits  # Installs pre-commit and git hooks
+# Note: CI enforces all checks anyway, so this is optional but convenient
 
 # Build everything
 bazel build //...
