@@ -62,7 +62,7 @@ trap cleanup EXIT
 
 # Step 1: Create VM
 echo "Step 1: Creating VM..."
-"$SCRIPT_DIR/create_test_vm.sh" "$VM_NAME" "$FILESYSTEM"
+"$SCRIPT_DIR/create_test_vm.sh" --name "$VM_NAME" --filesystem "$FILESYSTEM"
 
 # Step 2: Wait for SSH
 echo "Step 2: Waiting for SSH..."
