@@ -8,9 +8,30 @@
 
 ## What is Xibalba?
 
-**Xibalba** is a [Jepsen](https://jepsen.io/)-inspired chaos testing framework specifically designed for testing concurrent filesystem operations in the Linux kernel using eBPF fault injection.
+**Xibalba** is a chaos testing framework that finds subtle bugs in Linux filesystem code—the kind that only show up when many programs access files at the same time.
 
-**Purpose**: Find race conditions, concurrency bugs, and edge cases in kernel filesystem code **before** they reach production.
+### Why This Matters
+
+**The Problem**: Imagine 100 programs all trying to list files in the same directory simultaneously. One program might see a file that doesn't exist, another might see the same file twice, and a third might miss files entirely. These bugs are **nearly impossible to find** with normal testing because they depend on exact timing—threads hitting the same code at just the right microsecond.
+
+**Real-world impact**:
+- Database corruption when `ls` misses transaction log files
+- Build failures when `make` doesn't see all source files
+- Backup tools skip files, leading to data loss
+- Package managers install incomplete software
+
+**Traditional testing fails** because running tests 1000 times might never hit the exact timing that triggers the bug. The bug might appear once per million operations—**in production**, not in testing.
+
+**Xibalba's solution**: Don't wait for luck. **Force** the timing bugs to appear by:
+1. Running many threads concurrently (amplify the chaos)
+2. Injecting strategic delays with eBPF (widen the narrow timing windows)
+3. Validating that every read operation is correct (catch the bugs)
+
+If your code passes Xibalba's tests, it can handle the chaos of real production systems.
+
+### Technical Details
+
+**Xibalba** is a [Jepsen](https://jepsen.io/)-inspired chaos testing framework specifically designed for testing concurrent filesystem operations in the Linux kernel using eBPF fault injection.
 
 **Inspired by**: [Kyle Kingsbury](https://aphyr.com/)'s [Jepsen framework](https://github.com/jepsen-io/jepsen) for distributed systems
 
@@ -380,21 +401,32 @@ Multiple writers changing the directory while you read. The death bats of concur
 
 ---
 
-## Why Xibalba?
+## How It Works (Simple Explanation)
 
-**Problem**: Concurrent filesystem code has subtle race conditions that only appear under specific timing conditions.
+Think of it like stress-testing a bridge, but for filesystem code:
 
-**Traditional testing**: Doesn't find timing-dependent bugs. They slip through to production.
+**Step 1: Create Chaos**
+- Launch 10 threads all reading the same directory
+- Launch 3 threads creating/deleting files
+- Let them fight for 5 seconds
 
-**Xibalba approach**: 
-1. **Concurrent Operations** - Run multiple readers/writers simultaneously (The Dark House)
-2. **Timing Manipulation** - eBPF delays widen race windows (The Jaguar House)  
-3. **Fault Injection** - Inject errors to test resilience (The Fire House)
-4. **Resource Starvation** - ENOMEM, allocation failures (The Cold House)
-5. **Edge Cases** - Boundary conditions, corner cases (The Razor House)
-6. **Concurrent Mutations** - Modify while reading (The Bat House)
+**Step 2: Make Bugs Appear**
+- Use eBPF to inject tiny delays (microseconds) at critical moments
+- These delays turn "might happen once in a million operations" into "happens every few seconds"
+- It's like slow-motion replay for race conditions
 
-**Result**: Code that survives Xibalba has faced the worst. Bugs that would take months to appear in production are found in minutes.
+**Step 3: Check for Correctness**
+- Track every file that should exist
+- Validate every directory read
+- Catch bugs: missing files, duplicate files, phantom files
+
+**Real Example**:
+```
+Without Xibalba: Test passes 999,999 times, fails once (in production)
+With Xibalba:    Test fails in 30 seconds (before production)
+```
+
+**Result**: Bugs that would take months to find in production are caught in minutes during testing.
 
 ---
 
