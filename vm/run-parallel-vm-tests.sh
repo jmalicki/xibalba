@@ -63,18 +63,29 @@ echo
 echo "Checking prerequisites..."
 if ! command -v virsh &> /dev/null; then
     echo "❌ Error: libvirt not installed"
-    echo "Run: bazel run //vm:check_prerequisites"
+    echo "Install: sudo apt install libvirt-daemon-system qemu-kvm"
     exit 1
 fi
 echo "✓ Prerequisites OK"
 echo
 
-# Build Debian package
-echo "Building Xibalba package..."
-cd "$PROJECT_ROOT"
-bazel build //packaging:xibalba-deb
-PACKAGE_PATH="$PROJECT_ROOT/bazel-bin/packaging/xibalba_0.1.0_amd64.deb"
-echo "✓ Package built: $PACKAGE_PATH"
+# Get package path (passed by Bazel as first argument or from environment)
+if [ $# -gt 0 ]; then
+    PACKAGE_PATH="$1"
+elif [ -n "${XIBALBA_PACKAGE:-}" ]; then
+    PACKAGE_PATH="$XIBALBA_PACKAGE"
+else
+    # Fallback for direct execution
+    PACKAGE_PATH="$PROJECT_ROOT/bazel-bin/packaging/xibalba_0.1.0_amd64.deb"
+fi
+
+if [ ! -f "$PACKAGE_PATH" ]; then
+    echo "❌ Error: Package not found: $PACKAGE_PATH"
+    echo "Build it first: bazel build //packaging:xibalba-deb"
+    exit 1
+fi
+
+echo "Using package: $PACKAGE_PATH"
 echo
 
 # Function to setup and run test in a VM

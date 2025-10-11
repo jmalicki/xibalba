@@ -22,11 +22,13 @@ sh_binary(
 )
 
 # Parallel VM test runner - runs multiple VMs with different filesystems simultaneously
+# Wrapper script that passes the package path to the test script
 sh_binary(
     name = "parallel_vm_tests",
-    srcs = ["run-parallel-vm-tests.sh"],
+    srcs = ["run-parallel-vm-tests-wrapper.sh"],
+    args = ["$(location //packaging:xibalba-deb)"],
     data = [
-        ":create_vm",
+        ":run-parallel-vm-tests.sh",
         "//packaging:xibalba-deb",
     ],
 )
