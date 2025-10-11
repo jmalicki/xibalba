@@ -137,8 +137,8 @@ jobs:
       - name: Verify package contents
         run: |
           echo "=== Debian package for VM deployment ==="
-          dpkg-deb --info packages/rudra_0.1.0_amd64.deb
-          dpkg-deb --contents packages/rudra_0.1.0_amd64.deb
+          dpkg-deb --info packages/xibalba_0.1.0_amd64.deb
+          dpkg-deb --contents packages/xibalba_0.1.0_amd64.deb
           echo "✅ Package ready for VM deployment"
       
       - name: Validate VM script arguments
@@ -146,7 +146,7 @@ jobs:
           echo "=== Testing VM script argument parsing ==="
           # Test scripts accept --help without errors
           bash -n vm/create_test_vm.sh
-          bash -n vm/deploy_rudra.sh
+          bash -n vm/deploy_xibalba.sh
           bash -n vm/run_tests.sh
           bash -n vm/destroy_vm.sh
           echo "✅ All VM scripts are syntactically valid"
@@ -159,7 +159,7 @@ jobs:
           echo ""
           echo "Local testing (requires KVM):"
           echo "  bazel run //vm:create_vm -- --name test-01"
-          echo "  bazel run //vm:deploy_rudra -- test-01"
+          echo "  bazel run //vm:deploy_xibalba -- test-01"
           echo "  bazel run //vm:run_tests -- test-01"
           echo ""
           echo "Self-hosted runner:"
