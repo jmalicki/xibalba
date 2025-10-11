@@ -292,7 +292,16 @@ sudo usermod -aG libvirt,kvm $USER
 # Log out and back in for group changes to take effect
 ```
 
-**Step 2 - Run VM Tests** (Bazel validates automatically):
+**Step 2 - Quick Smoke Test** (recommended first):
+```bash
+# Fast infrastructure validation (~2 minutes)
+# Validates: VM boot, package install, filesystem setup, test execution
+bazel test //vm:vm_smoke_test
+
+# Perfect for testing setup or infrastructure changes!
+```
+
+**Step 3 - Full Gauntlet** (when ready):
 ```bash
 # Run progressive gauntlet on ext4 and ZFS (parallel)
 # Automatically validates host dependencies first!
@@ -300,6 +309,7 @@ sudo usermod -aG libvirt,kvm $USER
 bazel test //vm:parallel_vm_tests_validated
 
 # Results saved to: test-results/parallel-vm-tests-{timestamp}/
+# Duration: ~15 minutes with KVM acceleration
 ```
 
 **Or validate separately first**:
