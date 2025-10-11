@@ -103,7 +103,8 @@ run_vm_test() {
     # Check if VM exists, create if not
     if ! virsh list --all | grep -q "$vm_name"; then
         echo "[${vm_name}] Creating VM..."
-        bazel run //vm:create_vm -- --name "$vm_name" --ram 2048 --disk 10
+        # Call create_test_vm.sh directly (we're already in bazel context)
+        "$SCRIPT_DIR/create_test_vm.sh" --name "$vm_name" --ram 2048 --disk 10
     else
         echo "[${vm_name}] VM exists, starting..."
         virsh start "$vm_name" 2>/dev/null || true
@@ -230,7 +231,7 @@ cat > "$RESULTS_DIR/summary.json" <<EOF
   "duration_seconds": $DURATION,
   "readers": $READERS,
   "writers": $WRITERS,
-  "model": "$MODEL",
+  "progressive_testing": ["eventual", "weak", "strict"],
   "vms": [
 EOF
 
