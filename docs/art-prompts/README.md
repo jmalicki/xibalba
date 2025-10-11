@@ -1,8 +1,8 @@
-# RUDRA: AI Art Generation Prompts
+# Xibalba: AI Art Generation Prompts
 
 *Prompts for generating visual assets to complement documentation*
 
-This directory contains prompts for AI art generators (Midjourney, DALL-E, Stable Diffusion) to create visual representations of RUDRA concepts.
+This directory contains prompts for AI art generators (Midjourney, DALL-E, Stable Diffusion) to create visual representations of Xibalba concepts.
 
 ---
 
@@ -17,7 +17,7 @@ This directory contains prompts for AI art generators (Midjourney, DALL-E, Stabl
 
 ## Available Prompts
 
-- **`logo-prompts.md`** - RUDRA logo and branding
+- **`logo-prompts.md`** - Xibalba logo and branding
 - **`concept-diagrams.md`** - Architecture and workflow visualizations
 - **`mythology-art.md`** - Vedic storm god Rudra imagery
 - **`technical-illustrations.md`** - eBPF, chaos engineering visuals
@@ -26,7 +26,7 @@ This directory contains prompts for AI art generators (Midjourney, DALL-E, Stabl
 
 ## Style Guidelines
 
-**Recommended styles for RUDRA**:
+**Recommended styles for Xibalba**:
 - Dark, stormy, dramatic
 - Technical/cyberpunk aesthetic
 - Blue/purple/electric color schemes

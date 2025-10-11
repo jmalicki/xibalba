@@ -1,4 +1,4 @@
-# RUDRA: Root BUILD file
+# Xibalba: Root BUILD file
 
 package(default_visibility = ["//visibility:public"])
 
@@ -16,6 +16,6 @@ alias(
 
 alias(
     name = "package",
-    actual = "//packaging:rudra-deb",
+    actual = "//packaging:xibalba-deb",
 )
 

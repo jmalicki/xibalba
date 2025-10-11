@@ -1,4 +1,4 @@
-# RUDRA: After Tech De-Risking - What's Next?
+# Xibalba: After Tech De-Risking - What's Next?
 
 *The roadmap from PoC to production-ready framework*
 *Assumes: Tech de-risking succeeded - eBPF pause injection works!*
@@ -152,13 +152,13 @@ After 2-3 weeks of de-risking, you have:
    # Install custom kernel
    ./vms/deploy_kernel.sh linux-image-*.deb
    
-   # Deploy RUDRA
-   ./vms/deploy_rudra.sh
+   # Deploy Xibalba
+   ./vms/deploy_xibalba.sh
    ```
 
 3. **Remote test execution**:
    ```bash
-   # Run RUDRA tests in VM
+   # Run Xibalba tests in VM
    ./vms/run_tests.sh ext4
    
    # Collect results
@@ -174,9 +174,9 @@ After 2-3 weeks of de-risking, you have:
    }
    ```
 
-**Deliverable**: Can test custom kernel in VM with RUDRA
+**Deliverable**: Can test custom kernel in VM with Xibalba
 
-**Validation**: Run RUDRA against kernel with your async getdents patches
+**Validation**: Run Xibalba against kernel with your async getdents patches
 
 ---
 
@@ -377,7 +377,7 @@ Focus: Build iteratively, validate each step
 - Week 7: Single VM setup (ext4)
 
 **Month 2** (Weeks 8-11):
-- Week 8-9: Deploy your kernel to VM, test with RUDRA
+- Week 8-9: Deploy your kernel to VM, test with Xibalba
 - Week 10: Add VFS-level eBPF hooks
 - Week 11: Iterate on kernel patches based on findings
 
@@ -533,7 +533,7 @@ int BPF_KPROBE(fault_io) {
 2. Create VM with virt-install
 3. Build your kernel with async getdents patches
 4. Deploy kernel to VM
-5. Deploy RUDRA to VM
+5. Deploy Xibalba to VM
 6. Run tests remotely
 
 **Script to create**:
@@ -555,7 +555,7 @@ int BPF_KPROBE(fault_io) {
 
 ### Week 8-9: Kernel Integration
 
-**Goal**: Test your actual kernel patches with RUDRA
+**Goal**: Test your actual kernel patches with Xibalba
 
 **Workflow**:
 1. **Build kernel** with patches:
@@ -570,7 +570,7 @@ int BPF_KPROBE(fault_io) {
    ./vms/deploy_kernel.sh linux-image-*.deb ext4
    ```
 
-3. **Run RUDRA tests**:
+3. **Run Xibalba tests**:
    ```bash
    ./vms/run_tests.sh ext4 --with-ebpf --duration 300s
    ```
@@ -652,7 +652,7 @@ int BPF_KPROBE(fault_io) {
 1. **Week 4**: Race detector ← immediate value
 2. **Week 5**: Enhanced eBPF (ENOMEM, EAGAIN) ← test error handling
 3. **Week 6-7**: Single VM (ext4) + kernel deploy ← test real patches
-4. **Week 8**: Iterate on patches with RUDRA feedback ← core value!
+4. **Week 8**: Iterate on patches with Xibalba feedback ← core value!
 5. **Week 9-11**: Add XFS, tmpfs if time allows
 6. **Week 12+**: Automation as needed
 

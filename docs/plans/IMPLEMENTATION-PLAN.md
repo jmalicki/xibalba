@@ -1,4 +1,4 @@
-# RUDRA: Chaos Testing Framework & VM Infrastructure Implementation Plan
+# Xibalba: Chaos Testing Framework & VM Infrastructure Implementation Plan
 
 *Framework: Standalone Testing for Linux Kernel VFS Changes*
 *Timeline: 8-12 weeks*
@@ -6,7 +6,7 @@
 
 ## Overview
 
-**RUDRA** is a standalone chaos testing framework designed to test Linux kernel VFS changes (async getdents, io_uring operations, etc.) using Jepsen-inspired techniques.
+**Xibalba** is a standalone chaos testing framework designed to test Linux kernel VFS changes (async getdents, io_uring operations, etc.) using Jepsen-inspired techniques.
 
 **What this framework does**:
 - Tests kernel VFS changes in isolation (VMs with custom kernels)
@@ -98,7 +98,7 @@ This is a **step-by-step implementation plan** for building:
 
 ### 0.2 Install Required Packages
 
-**Note**: RUDRA uses **QEMU/KVM** (hardware-accelerated virtualization) managed by **libvirt**.
+**Note**: Xibalba uses **QEMU/KVM** (hardware-accelerated virtualization) managed by **libvirt**.
 
 - [ ] Update package list: `sudo apt-get update`
 - [ ] Install QEMU/KVM and libvirt:
@@ -148,16 +148,16 @@ This is a **step-by-step implementation plan** for building:
 
 ### 0.4 Verify Project Directory Structure
 
-The RUDRA project structure should already exist:
+The Xibalba project structure should already exist:
 
 ```bash
-cd /home/jmalicki/src/rudra
+cd /home/jmalicki/src/xibalba
 tree -L 1
 ```
 
 Expected structure:
 ```
-rudra/
+xibalba/
 ├── BUILD.bazel          # Root build file
 ├── WORKSPACE            # Bazel workspace
 ├── common/              # DirectoryReader abstraction
@@ -1307,11 +1307,11 @@ rudra/
 - [ ] Add content:
   ```bash
   #!/bin/bash
-  # RUDRA Master setup script - run once to set up everything
+  # Xibalba Master setup script - run once to set up everything
   
   set -e  # Exit on error
   
-  echo "=== RUDRA Chaos Testing Framework Setup ==="
+  echo "=== Xibalba Chaos Testing Framework Setup ==="
   echo ""
   echo "This will:"
   echo "  1. Build test framework (Bazel)"
@@ -1351,7 +1351,7 @@ rudra/
   ./populate_test_data.sh
   
   echo ""
-  echo "=== RUDRA Setup Complete ==="
+  echo "=== Xibalba Setup Complete ==="
   echo ""
   echo "To run tests:"
   echo "  cd vms"

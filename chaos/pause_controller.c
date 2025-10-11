@@ -8,7 +8,7 @@
 #include <stdbool.h>
 
 /**
- * RUDRA Error Injector Controller
+ * Xibalba Error Injector Controller
  * 
  * Controls eBPF error injection for chaos testing.
  * 
@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
     else if (error_code == 4) error_name = "EINTR";
     else if (error_code == 2) error_name = "ENOENT";
     
-    printf("=== RUDRA Error Injector ===\n");
+    printf("=== Xibalba Error Injector ===\n");
     printf("Error probability: %u%%\n", error_prob);
     printf("Error code: -%s (%u)\n", error_name, error_code);
     printf("\n");

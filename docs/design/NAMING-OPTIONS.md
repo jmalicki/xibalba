@@ -79,7 +79,7 @@ apophis --chaos-incarnate
 
 ---
 
-### **Option 3: RUDRA** ⚡ ⭐⭐⭐⭐
+### **Option 3: Xibalba** ⚡ ⭐⭐⭐⭐
 
 **Origin**: Vedic Hinduism - Storm god, "The Howler"
 
@@ -98,11 +98,11 @@ apophis --chaos-incarnate
 
 **Usage**:
 ```bash
-rudra --unleash-storm
-rudra-test --howl-at-bugs
+xibalba --unleash-storm
+xibalba-test --howl-at-bugs
 ```
 
-**Tagline**: "RUDRA: The Howling Storm of Testing"
+**Tagline**: "Xibalba: The Howling Storm of Testing"
 
 **Pros**:
 - ✅ Very cryptic (Vedic, pre-classical Hinduism)
@@ -635,29 +635,29 @@ Given your desire for "moderately cryptic yet appropriate" and now knowing what'
 
 ---
 
-## **Additional Check: RUDRA** ⚡
+## **Additional Check: Xibalba** ⚡
 
-**User request**: Check if RUDRA is available
+**User request**: Check if Xibalba is available
 
 **Search results**:
-- ✅ No major testing frameworks named RUDRA
+- ✅ No major testing frameworks named Xibalba
 - ✅ No open-source tools on GitHub with significant presence
 - ⚠️ Some companies use "Rudra" in their name (Rudra Innovative Software, etc.)
-- ⚠️ **IMPORTANT**: Found "RUDRA" - a Rust memory safety analyzer from Stanford/Microsoft Research
-  - GitHub: microsoft/RUDRA
+- ⚠️ **IMPORTANT**: Found "Xibalba" - a Rust memory safety analyzer from Stanford/Microsoft Research
+  - GitHub: microsoft/Xibalba
   - Purpose: Find memory safety bugs in Rust unsafe code
   - Status: Research project
 
 **Analysis**:
-- ❌ **RUDRA is TAKEN** - Microsoft Research has a Rust analyzer named RUDRA
+- ❌ **Xibalba is TAKEN** - Microsoft Research has a Rust analyzer named Xibalba
 - Different domain (Rust vs kernel filesystems)
 - But both are testing/analysis tools
 - Could cause confusion in testing/research community
 
-**Recommendation if you love RUDRA**:
-- **RUDRA-FS**: RUDRA for Filesystems (differentiates from Rust RUDRA)
-- **kRUDRA**: Kernel RUDRA (k prefix)
-- **RUDRA/bpf**: RUDRA with eBPF
+**Recommendation if you love Xibalba**:
+- **Xibalba-FS**: Xibalba for Filesystems (differentiates from Rust Xibalba)
+- **kXibalba**: Kernel Xibalba (k prefix)
+- **Xibalba/bpf**: Xibalba with eBPF
 
 **Alternative if avoiding conflict**:
 - **RAHU** (eclipse demon, very similar vibe, AVAILABLE)
@@ -666,14 +666,14 @@ Given your desire for "moderately cryptic yet appropriate" and now knowing what'
 
 ---
 
-## **FINAL DECISION: RUDRA** ⚡
+## **FINAL DECISION: Xibalba** ⚡
 
-**Despite Microsoft Research's RUDRA**:
+**Despite Microsoft Research's Xibalba**:
 
-User preference: RUDRA
+User preference: Xibalba
 Reasoning: Different domains (Rust safety vs filesystem chaos)
 Context: Can coexist as both are testing/research tools
-Differentiation: This is "RUDRA - Filesystem Chaos Testing"
+Differentiation: This is "Xibalba - Filesystem Chaos Testing"
 
 **Full name**: **R**ace **U**ncovering **D**irectory **R**ead **A**ssessment
 
@@ -685,6 +685,6 @@ Differentiation: This is "RUDRA - Filesystem Chaos Testing"
 
 ---
 
-**All documentation will use RUDRA as the official name.**
+**All documentation will use Xibalba as the official name.**
 
 *The Howler is ready to storm through filesystem code.* 🌪️

@@ -1,13 +1,13 @@
 # Rudra Deity Art Prompts
 
-*Invoking the Vedic Storm God for RUDRA branding*
+*Invoking the Vedic Storm God for Xibalba branding*
 
 ---
 
 ## Understanding Rudra (रुद्र)
 
 **Rudra in Vedic tradition**:
-- The Howler, The Roarer (rudra = "to cry, howl")
+- The Howler, The Roarer (xibalba = "to cry, howl")
 - Storm god with power over lightning and tempests
 - Fierce destroyer who transforms through destruction
 - Healer who destroys disease
@@ -18,7 +18,7 @@
   - Fierce expression, third eye
   - Tigers, serpents, or storms surrounding him
 
-**For RUDRA framework**: The storm that destroys bugs to transform code
+**For Xibalba framework**: The storm that destroys bugs to transform code
 
 ---
 
@@ -91,7 +91,7 @@ Trishula held high, crackling with power.
 Below: abstract representation of code/filesystem structures being tested.
 Dramatic, cinematic, powerful.
 Dark blue and purple palette with bright electric highlights.
-Title space: "RUDRA: The Howling Storm of Testing"
+Title space: "Xibalba: The Howling Storm of Testing"
 Photorealistic with ethereal divine energy.
 ```
 
@@ -250,7 +250,7 @@ Blue/purple/electric color progression
 - **Garments**: Tiger skin, serpents as ornaments, minimal clothing
 - **Companions**: Tigers, serpents, sometimes Nandi (bull)
 
-**RUDRA framework interpretation**:
+**Xibalba framework interpretation**:
 - Storm = Chaos testing
 - Trishula = Three-pronged approach (chaos + eBPF + VMs)
 - Third eye = Seeing hidden bugs
@@ -357,5 +357,5 @@ Educational but epic.
 
 ---
 
-*These prompts will create a distinctive visual identity for RUDRA that honors both the deity and the technical purpose.*
+*These prompts will create a distinctive visual identity for Xibalba that honors both the deity and the technical purpose.*
 

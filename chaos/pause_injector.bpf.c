@@ -3,7 +3,7 @@
 #include <bpf/bpf_tracing.h>
 
 /**
- * RUDRA eBPF Error Injector - Jepsen-Style Chaos via bpf_override_return
+ * Xibalba eBPF Error Injector - Jepsen-Style Chaos via bpf_override_return
  * 
  * Hooks getdents64 syscall and INJECTS ERRORS to force retries and expose races!
  * 

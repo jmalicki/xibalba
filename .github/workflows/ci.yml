@@ -1,4 +1,4 @@
-name: RUDRA CI
+name: Xibalba CI
 
 on:
   push:
@@ -43,7 +43,7 @@ jobs:
         run: bazel build //...
       
       - name: Build Debian package
-        run: bazel build //packaging:rudra-deb
+        run: bazel build //packaging:xibalba-deb
       
       - name: Verify eBPF program
         run: |
@@ -53,29 +53,29 @@ jobs:
       
       - name: Verify Debian package
         run: |
-          dpkg-deb --info bazel-bin/packaging/rudra_0.1.0_amd64.deb
-          dpkg-deb --contents bazel-bin/packaging/rudra_0.1.0_amd64.deb
+          dpkg-deb --info bazel-bin/packaging/xibalba_0.1.0_amd64.deb
+          dpkg-deb --contents bazel-bin/packaging/xibalba_0.1.0_amd64.deb
       
       - name: Run chaos test (smoke test)
         run: |
-          mkdir -p /tmp/rudra_test
-          touch /tmp/rudra_test/file{1..100}
-          timeout 3s bazel-bin/chaos/simple_chaos_test /tmp/rudra_test || true
+          mkdir -p /tmp/xibalba_test
+          touch /tmp/xibalba_test/file{1..100}
+          timeout 3s bazel-bin/chaos/simple_chaos_test /tmp/xibalba_test || true
           echo "✓ Chaos test runs without crashing"
       
       # Upload Debian package as primary artifact
       - name: Upload Debian package
         uses: actions/upload-artifact@v4
         with:
-          name: rudra-deb-package
-          path: bazel-bin/packaging/rudra_0.1.0_amd64.deb
+          name: xibalba-deb-package
+          path: bazel-bin/packaging/xibalba_0.1.0_amd64.deb
           retention-days: 7
       
       # Also upload VM scripts for deployment
       - name: Upload VM scripts
         uses: actions/upload-artifact@v4
         with:
-          name: rudra-vm-scripts
+          name: xibalba-vm-scripts
           path: |
             vm/*.sh
             bazel-bin/vm/
@@ -108,13 +108,13 @@ jobs:
       - name: Download Debian package
         uses: actions/download-artifact@v4
         with:
-          name: rudra-deb-package
+          name: xibalba-deb-package
           path: packages/
       
       - name: Download VM scripts
         uses: actions/download-artifact@v4
         with:
-          name: rudra-vm-scripts
+          name: xibalba-vm-scripts
           path: .
       
       - name: Make scripts executable
@@ -124,7 +124,7 @@ jobs:
         run: |
           echo "=== Debian package downloaded ==="
           ls -lh packages/
-          dpkg-deb --info packages/rudra_0.1.0_amd64.deb
+          dpkg-deb --info packages/xibalba_0.1.0_amd64.deb
       
       - name: Create test VM (${{ matrix.filesystem }})
         run: |
@@ -136,13 +136,13 @@ jobs:
             --disk 8
         timeout-minutes: 15
       
-      - name: Deploy RUDRA to VM (install .deb package)
+      - name: Deploy Xibalba to VM (install .deb package)
         run: |
           # Install from Debian package (no rebuild!)
           # Copy package to VM and install
           VM_NAME="ci-test-${{ matrix.filesystem }}-${{ github.run_id }}"
-          scp packages/rudra_0.1.0_amd64.deb root@$VM_NAME:/tmp/
-          ssh root@$VM_NAME "dpkg -i /tmp/rudra_0.1.0_amd64.deb || apt-get install -f -y"
+          scp packages/xibalba_0.1.0_amd64.deb root@$VM_NAME:/tmp/
+          ssh root@$VM_NAME "dpkg -i /tmp/xibalba_0.1.0_amd64.deb || apt-get install -f -y"
         timeout-minutes: 5
       
       - name: Run tests in VM
@@ -181,7 +181,7 @@ jobs:
       
       - name: Display results summary
         run: |
-          echo "=== RUDRA Test Results ==="
+          echo "=== Xibalba Test Results ==="
           echo
           for fs in ext4 xfs btrfs tmpfs; do
             echo "## $fs filesystem:"

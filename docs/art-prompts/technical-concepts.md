@@ -1,6 +1,6 @@
 # Technical Concept Art Prompts
 
-*Visual representations of RUDRA's technical concepts*
+*Visual representations of Xibalba's technical concepts*
 
 ---
 
@@ -209,7 +209,7 @@ Black and white with electric blue accent option.
 ```
 T-shirt design: Rudra emerging from storm (chest area).
 Trishula and lightning extending down the shirt.
-Front: Fierce Rudra face with "RUDRA" text.
+Front: Fierce Rudra face with "Xibalba" text.
 Back: Full storm scene with "The Howling Storm of Testing" tagline.
 High contrast for printing (dark shirt, bright design).
 Clean enough for professional wear.

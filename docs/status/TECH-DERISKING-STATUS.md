@@ -1,4 +1,4 @@
-# RUDRA Tech De-Risking - Current Status
+# Xibalba Tech De-Risking - Current Status
 
 *Progress report for PoC implementation*
 *Date: October 10, 2025*
@@ -39,7 +39,7 @@
 
 **Test results**:
 ```
-Directory: /tmp/rudra_test (100 files)
+Directory: /tmp/xibalba_test (100 files)
 Threads: 10
 Duration: 5 seconds
 
@@ -71,14 +71,14 @@ cd /tmp
 sudo ./pause_controller 20  # 20% pause probability
 
 # Should see:
-# === RUDRA Pause Controller ===
+# === Xibalba Pause Controller ===
 # Pause probability: 20%
 # ✓ eBPF program loaded
 # ✓ Attached: trace_getdents64_entry
 # 🚀 Pause controller active!
 
 # Terminal 2: Run chaos test
-/tmp/simple_chaos_test /tmp/rudra_test
+/tmp/simple_chaos_test /tmp/xibalba_test
 
 # Terminal 1 should show pause events!
 ```
@@ -103,7 +103,7 @@ sudo ./pause_controller 20  # 20% pause probability
 ## Files Created (Summary)
 
 ```
-rudra/
+xibalba/
 ├── common/
 │   ├── BUILD.bazel         (updated)
 │   ├── dir_reader.h        (new, 30 lines)
@@ -133,7 +133,7 @@ Total new code: ~430 lines
    cd /tmp && sudo ./pause_controller 20
    
    # Terminal 2
-   /tmp/simple_chaos_test /tmp/rudra_test
+   /tmp/simple_chaos_test /tmp/xibalba_test
    ```
 
 2. **Verify pauses are working**:
@@ -185,20 +185,20 @@ Total new code: ~430 lines
 
 ```bash
 # Compile everything
-cd /home/jmalicki/src/rudra
+cd /home/jmalicki/src/xibalba
 gcc -o /tmp/simple_chaos_test chaos/simple_chaos_test.c common/dir_reader.c -I. -pthread
 clang -g -O2 -target bpf -D__TARGET_ARCH_x86_64 -c chaos/pause_injector.bpf.c -o /tmp/pause_injector.bpf.o
 gcc -o /tmp/pause_controller chaos/pause_controller.c -lbpf -lelf
 
 # Run baseline test (no eBPF)
-/tmp/simple_chaos_test /tmp/rudra_test
+/tmp/simple_chaos_test /tmp/xibalba_test
 
 # Run with eBPF pauses (two terminals needed)
 # Terminal 1:
 cd /tmp && sudo ./pause_controller 20
 
 # Terminal 2:
-/tmp/simple_chaos_test /tmp/rudra_test
+/tmp/simple_chaos_test /tmp/xibalba_test
 ```
 
 ---

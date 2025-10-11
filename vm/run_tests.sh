@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-# Run RUDRA tests in a VM
+# Run Xibalba tests in a VM
 
 AUTOMATED=false
 VM_NAME=""
@@ -25,7 +25,7 @@ if [ -z "$VM_NAME" ]; then
     exit 1
 fi
 
-echo "=== Running RUDRA Tests on $VM_NAME ==="
+echo "=== Running Xibalba Tests on $VM_NAME ==="
 echo
 
 # Check if VM is running
@@ -53,18 +53,18 @@ if [ "$AUTOMATED" = true ]; then
     # Automated mode: run and collect results
     ssh root@"$VM_IP" bash << 'REMOTE_TEST'
 set -e
-cd /root/rudra/bin
+cd /root/xibalba/bin
 
 # Create test directory
-mkdir -p /test/rudra_test
-cd /test/rudra_test
+mkdir -p /test/xibalba_test
+cd /test/xibalba_test
 for i in {1..1000}; do
     touch "file_$i.txt"
 done
-cd /root/rudra/bin
+cd /root/xibalba/bin
 
 echo "=== Baseline Test (No Chaos) ==="
-./simple_chaos_test /test/rudra_test
+./simple_chaos_test /test/xibalba_test
 echo
 
 echo "=== Chaos Test (50% Error Injection) ==="
@@ -74,7 +74,7 @@ PAUSE_PID=$!
 sleep 2
 
 # Run test
-./simple_chaos_test /test/rudra_test
+./simple_chaos_test /test/xibalba_test
 
 # Stop error injector
 kill $PAUSE_PID || true
@@ -93,9 +93,9 @@ else
     echo "Connecting to VM..."
     echo "Run these commands inside the VM:"
     echo
-    echo "  cd /root/rudra/bin"
+    echo "  cd /root/xibalba/bin"
     echo "  ./pause_controller 50 500 &"
-    echo "  ./simple_chaos_test /test/rudra_test"
+    echo "  ./simple_chaos_test /test/xibalba_test"
     echo
     echo "Press Enter to SSH, or Ctrl+C to cancel"
     read

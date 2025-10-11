@@ -1,11 +1,11 @@
-# RUDRA Logo & Branding Prompts
+# Xibalba Logo & Branding Prompts
 
 ## Primary Logo Concept
 
 ### Prompt 1: Storm God Symbol (Minimalist)
 
 ```
-A minimalist logo for RUDRA, a chaos testing framework. 
+A minimalist logo for Xibalba, a chaos testing framework. 
 Abstract representation of Rudra the Vedic storm god.
 Circular emblem with swirling storm patterns, lightning bolts, and sanskrit letter 'र' (Ra).
 Dark blue and electric purple color scheme.
@@ -21,7 +21,7 @@ Transparent background, vector-style.
 ### Prompt 2: Storm Vortex (Abstract)
 
 ```
-Abstract logo for RUDRA chaos testing framework.
+Abstract logo for Xibalba chaos testing framework.
 Stylized vortex or storm spiral in dark blue and purple.
 Geometric, technical design with circuit-board-like patterns merging into storm clouds.
 Lightning accents in electric blue.
@@ -36,7 +36,7 @@ Transparent background, 512x512px.
 ### Prompt 3: Trident Symbol (Simplified)
 
 ```
-Minimalist trident symbol for RUDRA framework.
+Minimalist trident symbol for Xibalba framework.
 Stylized trishula (Shiva's trident) rendered as clean geometric lines.
 Dark background with electric blue/purple gradient.
 Lightning energy crackling around the trident.
@@ -56,7 +56,7 @@ Sharp, professional, not decorative.
 Wide banner image (1200x300px) for GitHub repository header.
 Dark stormy sky with lightning bolts striking downward.
 Below, abstract representation of code/filesystem structures.
-Title text space in center: "RUDRA - The Howling Storm of Testing"
+Title text space in center: "Xibalba - The Howling Storm of Testing"
 Dark blue/purple color palette with electric blue highlights.
 Professional, modern, technical aesthetic.
 Cinematic, dramatic lighting.
@@ -71,7 +71,7 @@ Cinematic, dramatic lighting.
 ### Prompt 5: Small Icon (Monochrome)
 
 ```
-Simple monochrome icon for RUDRA.
+Simple monochrome icon for Xibalba.
 Circular badge with stylized storm cloud and lightning bolt.
 Clean, minimal design that works at 64x64px.
 Black and white only, high contrast.

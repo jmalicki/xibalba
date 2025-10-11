@@ -58,9 +58,9 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Usage: %s <directory>\n", argv[0]);
         fprintf(stderr, "\n");
         fprintf(stderr, "Example:\n");
-        fprintf(stderr, "  mkdir -p /tmp/rudra_test\n");
-        fprintf(stderr, "  touch /tmp/rudra_test/file{1..100}\n");
-        fprintf(stderr, "  %s /tmp/rudra_test\n", argv[0]);
+        fprintf(stderr, "  mkdir -p /tmp/xibalba_test\n");
+        fprintf(stderr, "  touch /tmp/xibalba_test/file{1..100}\n");
+        fprintf(stderr, "  %s /tmp/xibalba_test\n", argv[0]);
         return 1;
     }
     
@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
         .total_entries = 0,
     };
     
-    printf("=== RUDRA Simple Chaos Test ===\n");
+    printf("=== Xibalba Simple Chaos Test ===\n");
     printf("Directory: %s\n", state.test_dir);
     printf("Threads: %d\n", NUM_THREADS);
     printf("Duration: %d seconds\n", TEST_DURATION);

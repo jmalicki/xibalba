@@ -1,4 +1,4 @@
-# RUDRA Bazel Workflow
+# Xibalba Bazel Workflow
 
 *Everything through Bazel - no ad-hoc scripts*
 
@@ -6,7 +6,7 @@
 
 ## Philosophy
 
-**RUDRA uses Bazel for all operations** - building, testing, and VM management. This ensures:
+**Xibalba uses Bazel for all operations** - building, testing, and VM management. This ensures:
 - ✅ Hermetic builds (reproducible everywhere)
 - ✅ Explicit dependencies (no hidden requirements)
 - ✅ Incremental compilation (only rebuild what changed)
@@ -39,7 +39,7 @@
 |--------|------|---------|
 | `//vm:check_prerequisites` | `sh_binary` | Check host has QEMU/KVM/libvirt |
 | `//vm:create_vm` | `sh_binary` | Create test VM |
-| `//vm:deploy_rudra` | `sh_binary` | Deploy binaries to VM |
+| `//vm:deploy_xibalba` | `sh_binary` | Deploy binaries to VM |
 | `//vm:run_tests` | `sh_binary` | Run tests in VM |
 | `//vm:destroy_vm` | `sh_binary` | Destroy test VM |
 
@@ -51,8 +51,8 @@
 
 ```bash
 # Clone repository
-git clone https://github.com/your-org/rudra.git
-cd rudra
+git clone https://github.com/your-org/xibalba.git
+cd xibalba
 
 # Build everything
 bazel build //...
@@ -75,9 +75,9 @@ bazel run //chaos:pause_controller -- 50 11
 
 **Terminal 2 - Run Chaos Test**:
 ```bash
-mkdir -p /tmp/rudra_test
-touch /tmp/rudra_test/file{1..100}
-bazel run //chaos:simple_chaos_test -- /tmp/rudra_test
+mkdir -p /tmp/xibalba_test
+touch /tmp/xibalba_test/file{1..100}
+bazel run //chaos:simple_chaos_test -- /tmp/xibalba_test
 ```
 
 **What happens**:
@@ -99,9 +99,9 @@ bazel run //vm:check_prerequisites
 bazel run //vm:create_vm -- --name test-01
 ```
 
-**Deploy RUDRA to VM**:
+**Deploy Xibalba to VM**:
 ```bash
-bazel run //vm:deploy_rudra -- test-01
+bazel run //vm:deploy_xibalba -- test-01
 ```
 
 **Run tests in VM**:
@@ -253,7 +253,7 @@ bazel run //vm:create_vm -- --name test-01
 ## Build Directory Structure
 
 ```
-rudra/
+xibalba/
 ├── BUILD.bazel                   # Root targets
 ├── WORKSPACE                     # Bazel workspace definition
 ├── MODULE.bazel                  # Bzlmod dependencies
@@ -298,7 +298,7 @@ rudra/
 | Build specific target | `bazel build //chaos:pause_controller` |
 | Run binary | `bazel run //chaos:pause_controller -- ARGS` |
 | Grant capabilities | `sudo ./grant_caps.sh` |
-| Run chaos test | `bazel run //chaos:simple_chaos_test -- /tmp/rudra_test` |
+| Run chaos test | `bazel run //chaos:simple_chaos_test -- /tmp/xibalba_test` |
 | Check VM prereqs | `bazel run //vm:check_prerequisites` |
 | Create VM | `bazel run //vm:create_vm -- --name test-01` |
 | List all targets | `bazel query //...` |
@@ -353,5 +353,5 @@ sudo ./grant_caps.sh
 
 ---
 
-*RUDRA: Everything through Bazel, nothing hidden* 🚀
+*Xibalba: Everything through Bazel, nothing hidden* 🚀
 
