@@ -263,6 +263,10 @@ bazel test //vm:verify_host_deps  # Bazel ensures environment is ready
 git clone https://github.com/your-org/xibalba.git
 cd xibalba
 
+# (Optional but recommended) Setup pre-commit hooks
+pip install pre-commit
+pre-commit install  # Catches shellcheck/formatting issues before commit
+
 # Build everything
 bazel build //...
 
