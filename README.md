@@ -20,7 +20,7 @@
 
 ## The Name: Xibalba
 
-**Xibalba** (shee-bahl-BAH) — literally **"Place of Fear"** or **"Place of Phantoms"** — is the Maya underworld from the *Popol Vuh*, the sacred K'iche' Maya text. Far below the surface world, Xibalba is a realm of darkness ruled by the **Ajawab' Xib'alb'a** (Lords of Xibalba), death gods who delight in tormenting souls through elaborate trials and deadly games.
+**[Xibalba](https://en.wikipedia.org/wiki/Xibalba)** (shee-bahl-BAH) — literally **"Place of Fear"** or **"Place of Phantoms"** — is the Maya underworld from the *[Popol Vuh](https://en.wikipedia.org/wiki/Popol_Vuh)*, the sacred K'iche' Maya text. Far below the surface world, Xibalba is a realm of darkness ruled by the **Ajawab' Xib'alb'a** (Lords of Xibalba), death gods who delight in tormenting souls through elaborate trials and deadly games.
 
 ### The Myth: The Hero Twins' Descent
 
@@ -481,8 +481,8 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - Linux kernel testing community - eBPF-based testing approaches
 
 **Mythology**:
-- Xibalba from the Popol Vuh - The Maya creation epic
-- The Hero Twins' trials - A metaphor for surviving through testing
+- [Xibalba](https://en.wikipedia.org/wiki/Xibalba) from the [Popol Vuh](https://en.wikipedia.org/wiki/Popol_Vuh) - The Maya creation epic
+- The [Hero Twins](https://en.wikipedia.org/wiki/Maya_Hero_Twins)' trials - A metaphor for surviving through testing
 
 ---
 
