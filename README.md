@@ -531,6 +531,21 @@ Every PR automatically faces the trials:
 
 Xibalba is actively developed. Want to help strengthen the trials?
 
+**Development setup**:
+```bash
+# Setup local linting (optional but recommended)
+bazel run //tools:setup_precommits
+
+# This installs:
+# - shellcheck (bash linting)
+# - shfmt (bash formatting)  
+# - YAML/JSON validation
+# - Trailing whitespace checks
+
+# Hooks run automatically on git commit
+# CI enforces all checks regardless
+```
+
 **How to contribute**:
 1. Add new fault injection modes
 2. Implement additional invariant checkers
