@@ -2,11 +2,14 @@
 
 package(default_visibility = ["//visibility:public"])
 
-# Simple chaos test - multi-threaded directory reading
+# Simple chaos test - multi-threaded directory reading with validation
 cc_binary(
     name = "simple_chaos_test",
     srcs = ["simple_chaos_test.c"],
-    deps = ["//common:dir_reader"],
+    deps = [
+        "//common:dir_reader",
+        "//common:state_tracker",  # Ground truth validation
+    ],
     linkopts = ["-pthread"],
 )
 
@@ -37,5 +40,12 @@ cc_binary(
     ],
     # Note: This binary needs Linux capabilities to run eBPF programs.
     # After building, run: sudo ./grant_caps.sh
+)
+
+# Consistency model benchmark - measures bug detection rates
+cc_binary(
+    name = "benchmark_consistency",
+    srcs = ["benchmark_consistency.c"],
+    # Runs simple_chaos_test multiple times with different models
 )
 

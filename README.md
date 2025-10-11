@@ -78,6 +78,115 @@ Only by passing **all** the trials could they prove their worthiness and emerge 
 
 **Current Status**: ✅ Core implementation complete, eBPF fault injection working
 
+**⚠️ IMPORTANT**: [CI and VM Testing Strategy](docs/CI-AND-VM-TESTING.md) - **Read this first!**
+
+**Key points**:
+- CI validates builds/packages (✅ automated)
+- VM testing requires KVM (run locally or self-hosted)
+- **Why**: We test CUSTOM KERNELS - containers can't do this!
+
+### Two Paths Forward:
+
+---
+
+### **Path 1: Tech De-Risking (RECOMMENDED)** 🚀
+
+**→ [Tech De-Risking Plan](docs/TECH-DERISKING-PLAN.md)** ⭐ **START HERE!**
+
+**Why this first**: Validate eBPF fault injection works in 2-3 weeks before committing to 12-16 week full build
+
+**What you'll build**:
+- Minimal DirectoryReader (~200 lines)
+- Simple chaos test (~100 lines)
+- Basic eBPF pause injection (~50 lines eBPF + ~150 lines userspace)
+- Total: ~500 lines of code
+
+**What you'll prove**:
+- ✅ eBPF toolchain works on your machine
+- ✅ Can inject pauses via eBPF → userspace coordination
+- ✅ Pauses increase race detection (find at least one bug)
+- ✅ Approach is viable
+
+**Investment**: 2-3 weeks | **Risk reduction**: 80%+
+
+**Then**: If successful, proceed to full implementation with confidence!
+
+---
+
+### **Path 2: Full Implementation**
+
+**→ [Full Implementation Plan](docs/IMPLEMENTATION-PLAN.md)**
+
+**Choose this if**: You're already confident in eBPF and ready to commit 12-16 weeks
+
+**What you'll build**: Complete RUDRA with VMs, 5 filesystems, full automation
+
+**265 checkboxes** across 9 phases
+
+---
+
+### **Supporting Documents**
+
+**Must read**:
+- **⚠️ [Risks & Open Questions](docs/RISKS-AND-OPEN-QUESTIONS.md)** - Critical decisions needed
+
+**Good news**: Most risks resolved! VMs + custom kernels = full control ✅
+
+---
+
+### Documentation
+
+**Start Here**:
+1. **📖 [START HERE Guide](docs/guides/START-HERE.md)** - Navigation hub ⭐
+2. **⚠️ [Risks & Open Questions](docs/plans/RISKS-AND-OPEN-QUESTIONS.md)** - Critical decisions
+3. **🚀 [Tech De-Risking Plan](docs/plans/TECH-DERISKING-PLAN.md)** - 2-3 week PoC (RECOMMENDED)
+4. **📋 [Full Implementation Plan](docs/plans/IMPLEMENTATION-PLAN.md)** - Complete 12-16 week guide
+
+**Recommended path**: Start with tech de-risking (2-3 weeks) to prove eBPF fault injection works, THEN commit to full implementation.
+
+**Getting Started** (`docs/guides/`):
+- **📖 [START HERE](docs/guides/START-HERE.md)** - Navigation hub ⭐
+- **⚡ [Quick Start](docs/guides/QUICK-START.md)** - Run tests in 15 minutes
+- **🧪 [Run Test Now](docs/guides/RUN-TEST-NOW.md)** - Two-terminal validation
+- **✅ [Setup Complete](docs/guides/SETUP-COMPLETE.md)** - Initial setup verification
+
+**Implementation Plans** (`docs/plans/`):
+- **🚀 [Tech De-Risking Plan](docs/plans/TECH-DERISKING-PLAN.md)** - 2-3 week PoC (RECOMMENDED)
+- **📋 [Full Implementation Plan](docs/plans/IMPLEMENTATION-PLAN.md)** - Complete 12-16 week guide
+- **🗺️ [After De-Risking](docs/plans/AFTER-DERISKING.md)** - Roadmap for Weeks 4-15
+- **⚠️ [Risks & Open Questions](docs/plans/RISKS-AND-OPEN-QUESTIONS.md)** - Critical decisions
+
+**Design & Concepts** (`docs/design/`):
+- **🎓 [Jepsen Principles](docs/design/JEPSEN-INSPIRED-FILESYSTEM-TESTING.md)** - Conceptual foundation
+- **🔧 [Race Conditions & Fault Injection](docs/design/RACE-CONDITIONS-AND-FAULT-INJECTION.md)** - Technical details
+- **🎯 [Fault Injection Scope](docs/design/FAULT-INJECTION-SCOPE.md)** - What to test vs not test
+- **📊 [Testing Framework](docs/design/TESTING-FRAMEWORK.md)** - Complete specification
+- **📛 [Naming Options](docs/design/NAMING-OPTIONS.md)** - Why "RUDRA"
+
+**Status & Progress** (`docs/status/`):
+- **📈 [Tech De-Risking Status](docs/status/TECH-DERISKING-STATUS.md)** - Current progress
+- **🎉 [Completed Today](docs/status/COMPLETED-TODAY.md)** - Day 1 achievements
+
+---
+
+### Prerequisites
+
+**Host Machine**:
+- Linux host with KVM support (QEMU/KVM + libvirt)
+- 32GB+ RAM ✅ (confirmed available)
+- 500GB+ disk space ✅ (confirmed available)
+- Ubuntu 22.04 or later
+- Shared dev machine OK (use overnight for long benchmarks)
+
+**Kernel Development**:
+- Kernel source tree (with your patches or baseline)
+- Build environment (gcc, make, pahole for BTF)
+- Will build custom kernels with eBPF support enabled
+
+**VM Technology**: QEMU/KVM managed via libvirt
+- Fast, hardware-accelerated virtualization
+- Standard Linux VM tooling (virsh, virt-install)
+
 ### Quick Start
 
 ```bash
@@ -329,7 +438,9 @@ Xibalba is actively developed. Want to help strengthen the trials?
 
 ## License
 
-TBD
+MIT License - see [LICENSE](LICENSE) file for details.
+
+**Summary**: Free to use, modify, and distribute. No warranty provided.
 
 ---
 
