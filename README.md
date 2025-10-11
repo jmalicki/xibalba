@@ -215,7 +215,8 @@ But if your code survives—like the Hero Twins—it doesn't just work. It has b
 - **🔧 [Race Conditions & Fault Injection](docs/design/RACE-CONDITIONS-AND-FAULT-INJECTION.md)** - Technical details
 - **🎯 [Fault Injection Scope](docs/design/FAULT-INJECTION-SCOPE.md)** - What to test vs not test
 - **📊 [Testing Framework](docs/design/TESTING-FRAMEWORK.md)** - Complete specification
-- **📛 [Naming Options](docs/design/NAMING-OPTIONS.md)** - Why "RUDRA"
+- **🗂️ [Filesystem Consistency Models](docs/design/FILESYSTEM-CONSISTENCY-MODELS.md)** - 10+ filesystems documented
+- **📝 [State Tracking & Validation](docs/design/STATE-TRACKING-AND-VALIDATION.md)** - Ground truth approach
 
 **Status & Progress** (`docs/status/`):
 - **📈 [Tech De-Risking Status](docs/status/TECH-DERISKING-STATUS.md)** - Current progress
