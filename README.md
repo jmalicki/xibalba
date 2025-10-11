@@ -8,11 +8,11 @@
 
 ## What is Xibalba?
 
-**Xibalba** is a Jepsen-inspired chaos testing framework specifically designed for testing concurrent filesystem operations in the Linux kernel using eBPF fault injection.
+**Xibalba** is a [Jepsen](https://jepsen.io/)-inspired chaos testing framework specifically designed for testing concurrent filesystem operations in the Linux kernel using eBPF fault injection.
 
 **Purpose**: Find race conditions, concurrency bugs, and edge cases in kernel filesystem code **before** they reach production.
 
-**Inspired by**: Kyle Kingsbury's Jepsen framework for distributed systems
+**Inspired by**: [Kyle Kingsbury](https://aphyr.com/)'s [Jepsen framework](https://github.com/jepsen-io/jepsen) for distributed systems
 
 **Novel approach**: Brings Jepsen-quality chaos engineering to kernel filesystem testing using eBPF
 
@@ -72,7 +72,7 @@ But if your code survives—like the Hero Twins—it doesn't just work. It has b
 
 ## Key Features
 
-### 🌪️ **Jepsen-Style Chaos Engineering**
+### 🌪️ **[Jepsen](https://jepsen.io/)-Style Chaos Engineering**
 - Concurrent readers + writers
 - 60-second torture runs
 - Invariant checking
@@ -476,8 +476,8 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## Acknowledgments
 
 **Inspired by**:
-- Kyle Kingsbury's Jepsen framework - Chaos engineering for distributed systems
-- Aphyr's database testing methodology - Rigorous invariant checking
+- [Kyle Kingsbury (Aphyr)](https://aphyr.com/)'s [Jepsen framework](https://github.com/jepsen-io/jepsen) - Chaos engineering for distributed systems
+- [Jepsen.io](https://jepsen.io/) database testing methodology - Rigorous invariant checking
 - Linux kernel testing community - eBPF-based testing approaches
 
 **Mythology**:
