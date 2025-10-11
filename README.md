@@ -1,14 +1,16 @@
-# Xibalba: Chaos Testing Framework for Kernel Filesystems
+# Xibalba: Chaos Testing Framework for Linux Kernel Filesystems
 
 *The Underworld of Trials*
 
 **Xibalba** (shee-BAHL-bah) - The Mayan underworld where code faces its darkest trials
 
+**Linux-specific**: This framework uses Linux eBPF for fault injection, which is not available on other kernels (BSD, Windows, macOS)
+
 ---
 
 ## What is Xibalba?
 
-**Xibalba** is a chaos testing framework that finds subtle bugs in Linux filesystem code—the kind that only show up when many programs access files at the same time.
+**Xibalba** is a chaos testing framework that finds subtle bugs in **Linux kernel** filesystem code—the kind that only show up when many programs access files at the same time.
 
 ### Why This Matters
 
@@ -31,11 +33,13 @@ If your code passes Xibalba's tests, it can handle the chaos of real production 
 
 ### Technical Details
 
-**Xibalba** is a [Jepsen](https://jepsen.io/)-inspired chaos testing framework specifically designed for testing concurrent filesystem operations in the Linux kernel using eBPF fault injection.
+**Xibalba** is a [Jepsen](https://jepsen.io/)-inspired chaos testing framework specifically designed for testing concurrent filesystem operations in the **Linux kernel** using eBPF fault injection.
+
+**Linux-only**: eBPF is a Linux kernel feature. Other operating systems (FreeBSD, Windows, macOS) don't have equivalent fault injection capabilities at the kernel level.
 
 **Inspired by**: [Kyle Kingsbury](https://aphyr.com/)'s [Jepsen framework](https://github.com/jepsen-io/jepsen) for distributed systems
 
-**Novel approach**: Brings Jepsen-quality chaos engineering to kernel filesystem testing using eBPF
+**Novel approach**: Brings Jepsen-quality chaos engineering to Linux kernel filesystem testing using eBPF
 
 ---
 
