@@ -79,7 +79,7 @@ mkdir -p "$SCRIPT_DIR/images"
 mkdir -p "$SCRIPT_DIR/configs"
 
 # Download Ubuntu cloud image if needed
-CLOUD_IMAGE="$SCRIPT_DIR/images/ubuntu-24.04-server-cloudimg-amd64.img"
+CLOUD_IMAGE="$IMAGES_DIR/ubuntu-24.04-server-cloudimg-amd64.img"
 if [ ! -f "$CLOUD_IMAGE" ]; then
     echo "Downloading Ubuntu 24.04 cloud image..."
     wget -O "$CLOUD_IMAGE" \
@@ -107,7 +107,7 @@ if [ -f "$VM_DISK" ]; then
         echo "  virsh destroy $VM_NAME 2>/dev/null || true"
         echo "  virsh undefine $VM_NAME 2>/dev/null || true"
         echo "  rm -f $VM_DISK"
-        echo "  rm -f $SCRIPT_DIR/images/${VM_NAME}-data.qcow2"
+        echo "  rm -f $IMAGES_DIR/${VM_NAME}-data.qcow2"
         echo
         echo "Or use: vm/destroy_vm.sh $VM_NAME"
         exit 1
