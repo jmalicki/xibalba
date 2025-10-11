@@ -19,21 +19,20 @@ pkg_tar(
     strip_prefix = "/chaos",
 )
 
-# Tar archive of test runner script  
-pkg_tar(
-    name = "xibalba-test-runner",
-    srcs = ["test-runner-renamed.sh"],
-    mode = "0755",
-    package_dir = "/usr/bin",
+# Copy and rename test-runner.sh to xibalba-test-runner
+genrule(
+    name = "copy_test_runner",
+    srcs = ["//vm:test-runner.sh"],
+    outs = ["xibalba-test-runner"],
+    cmd = "cp $< $@",
 )
 
-# Rename test-runner.sh to xibalba-test-runner for packaging
-genrule(
-    name = "rename_test_runner",
-    srcs = ["//vm:test_runner_script"],
-    outs = ["test-runner-renamed.sh"],
-    cmd = "cp $(location //vm:test_runner_script) $@ && chmod +x $@",
-    executable = True,
+# Tar archive of test runner script
+pkg_tar(
+    name = "xibalba-test-runner",
+    srcs = [":xibalba-test-runner"],
+    mode = "0755",
+    package_dir = "/usr/bin",
 )
 
 # Combined binaries
