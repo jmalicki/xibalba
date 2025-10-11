@@ -205,6 +205,7 @@ But if your code survives—like the Hero Twins—it doesn't just work. It has b
 **Getting Started** (`docs/guides/`):
 - **📖 [START HERE](docs/guides/START-HERE.md)** - Navigation hub ⭐
 - **⚡ [Quick Start](docs/guides/QUICK-START.md)** - Run tests in 15 minutes
+- **🖥️ [VM Setup Guide](docs/VM-SETUP.md)** - Complete system setup for VM testing
 - **🧪 [Run Test Now](docs/guides/RUN-TEST-NOW.md)** - Two-terminal validation
 - **✅ [Setup Complete](docs/guides/SETUP-COMPLETE.md)** - Initial setup verification
 
