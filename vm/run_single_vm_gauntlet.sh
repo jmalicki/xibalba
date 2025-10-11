@@ -100,14 +100,22 @@ for attempt in $(seq 1 300); do
         VM_IP=$(virsh domifaddr "$VM_NAME" --source lease 2>/dev/null | grep -oP '(\d+\.){3}\d+' | head -1 || true)
     fi
     
+    # DEBUG for first few attempts
+    if [ "$attempt" -le 5 ]; then
+        echo "  [DEBUG #$attempt] IP='$VM_IP', SSH_KEY='$SSH_KEY', SSH_OPTS='$SSH_OPTS'"
+    fi
+    
     # Test SSH connectivity (most reliable check)
     if [ -n "$VM_IP" ]; then
         # shellcheck disable=SC2086
-        # cloud-init status --wait returns 0 if done, 1 if running, 2 if error
-        # We just need SSH to work, don't care about cloud-init exit code
         if timeout 3 ssh $SSH_OPTS root@"$VM_IP" true 2>/dev/null; then
             echo "  ✓ VM ready at $VM_IP (after $((attempt * 2))s)"
             break
+        else
+            # DEBUG SSH failure
+            if [ "$attempt" -le 5 ]; then
+                echo "  [DEBUG #$attempt] SSH failed to $VM_IP"
+            fi
         fi
         VM_IP=""  # Reset if not ready
     fi
