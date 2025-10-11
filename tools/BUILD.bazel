@@ -1,0 +1,13 @@
+"""
+Developer tools and convenience scripts
+"""
+
+sh_binary(
+    name = "setup_precommits",
+    srcs = ["setup_precommits.sh"],
+    data = [
+        "//:.pre-commit-config.yaml",
+    ],
+    visibility = ["//visibility:public"],
+)
+
