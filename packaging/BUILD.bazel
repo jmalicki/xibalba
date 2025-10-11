@@ -27,10 +27,26 @@ genrule(
     cmd = "cp $< $@",
 )
 
+# Copy and rename xibalba-gauntlet.sh to xibalba-gauntlet
+genrule(
+    name = "copy_gauntlet",
+    srcs = ["//vm:xibalba-gauntlet.sh"],
+    outs = ["xibalba-gauntlet"],
+    cmd = "cp $< $@",
+)
+
 # Tar archive of test runner script
 pkg_tar(
     name = "xibalba-test-runner-tar",
     srcs = [":copy_test_runner"],
+    mode = "0755",
+    package_dir = "/usr/bin",
+)
+
+# Tar archive of gauntlet script
+pkg_tar(
+    name = "xibalba-gauntlet-tar",
+    srcs = [":copy_gauntlet"],
     mode = "0755",
     package_dir = "/usr/bin",
 )
@@ -41,6 +57,7 @@ pkg_tar(
     deps = [
         ":xibalba-test-bins",
         ":xibalba-test-runner-tar",
+        ":xibalba-gauntlet-tar",
     ],
 )
 
@@ -88,10 +105,12 @@ pkg_deb(
  Named after the Maya underworld of trials, Xibalba puts your code through
  a gauntlet of chaos tests to prove its worthiness for production.
  .
- This package includes:
-  - pause_controller: eBPF userspace controller
-  - simple_chaos_test: Multi-threaded directory reading test
-  - pause_injector.bpf.o: eBPF bytecode for fault injection
+This package includes:
+ - pause_controller: eBPF userspace controller
+ - simple_chaos_test: Multi-threaded directory reading test
+ - xibalba-test-runner: Single filesystem test automation
+ - xibalba-gauntlet: Progressive consistency testing (all filesystems)
+ - pause_injector.bpf.o: eBPF bytecode for fault injection
  .
  For comprehensive filesystem testing, recommended packages include tools
  for ext4, XFS, btrfs, ZFS, F2FS, NILFS2, and NFS. These are automatically

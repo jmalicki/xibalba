@@ -3,6 +3,9 @@ set -euo pipefail
 
 # Create a test VM configured for Xibalba testing
 
+# Script directory for relative paths
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Default values
 VM_NAME=""
 CUSTOM_KERNEL=""
