@@ -76,11 +76,11 @@ echo "Step 1: Creating VM..."
 "$SCRIPT_DIR/create_test_vm.sh" --name "$VM_NAME" --filesystem "$FILESYSTEM"
 
 # Step 2: Wait for VM to be SSH-accessible
-echo "Step 2: Waiting for VM to be SSH-accessible (up to 5 min)..."
+echo "Step 2: Waiting for VM to be SSH-accessible (cloud-init takes 5-10 min)..."
 VM_IP=""
 
-# Try for 5 minutes
-for attempt in $(seq 1 150); do
+# Try for 10 minutes (cloud-init is slow)
+for attempt in $(seq 1 300); do
     # Get IP from virsh (try ARP first, fallback to lease)
     VM_IP=$(virsh domifaddr "$VM_NAME" --source arp 2>/dev/null | grep -oP '(\d+\.){3}\d+' | head -1 || true)
     if [ -z "$VM_IP" ]; then
@@ -107,9 +107,10 @@ for attempt in $(seq 1 150); do
 done
 
 if [ -z "$VM_IP" ]; then
-    echo "❌ VM did not become SSH-accessible after $((150 * 2)) seconds"
+    echo "❌ VM did not become SSH-accessible after $((300 * 2)) seconds (10 min)"
+    echo "   This is unusual - cloud-init should finish within 10 minutes"
     echo "   Try: virsh console $VM_NAME"
-    echo "   Or:  virsh domifaddr $VM_NAME --source lease"
+    echo "   Or:  virsh domifaddr $VM_NAME --source arp"
     exit 1
 fi
 
