@@ -36,7 +36,8 @@ jobs:
           path: |
             /var/cache/apt/archives
             /var/lib/apt/lists
-          key: ${{ runner.os }}-apt-ebpf-${{ hashFiles('.github/workflows/apt-packages.txt') }}
+          # Cache key based on packaging/BUILD.bazel (source of truth for deps)
+          key: ${{ runner.os }}-apt-ebpf-${{ hashFiles('packaging/BUILD.bazel') }}
           restore-keys: |
             ${{ runner.os }}-apt-ebpf-
       
@@ -44,7 +45,7 @@ jobs:
         if: steps.apt-cache.outputs.cache-hit != 'true'
         run: |
           # clang and llvm are pre-installed on ubuntu-latest
-          # We only need to install eBPF-specific libraries
+          # Dependencies defined in packaging/BUILD.bazel (depends + recommends)
           sudo apt-get update
           sudo apt-get install -y \
             libbpf-dev \
