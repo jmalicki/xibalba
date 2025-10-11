@@ -82,9 +82,19 @@ jobs:
           retention-days: 1
 
   # Stage 2: VM Script Validation
-  # Note: GitHub-hosted runners don't support KVM/nested virtualization
-  # Actual VM testing requires self-hosted runners or local execution
-  # This stage validates the VM scripts are syntactically correct
+  # 
+  # IMPORTANT: GitHub-hosted runners CANNOT run VMs because:
+  #   1. Xibalba tests CUSTOM KERNELS (the entire purpose!)
+  #   2. VMs need nested virtualization (not available on GitHub runners)
+  #   3. Containers share host kernel (can't test custom kernels)
+  #   4. QEMU without KVM is 100x slower (not practical)
+  #
+  # Where to test VMs:
+  #   - Locally (requires KVM) - bazel run //vm:create_vm
+  #   - Self-hosted runner (with KVM enabled)
+  #
+  # This stage validates VM scripts are ready to use (syntax, package)
+  # See docs/CI-AND-VM-TESTING.md for complete explanation
   validate-vm-scripts:
     name: Validate VM Scripts
     runs-on: ubuntu-latest
