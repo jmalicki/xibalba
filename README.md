@@ -534,16 +534,16 @@ Xibalba is actively developed. Want to help strengthen the trials?
 **Development setup**:
 ```bash
 # Setup local linting (optional but recommended)
-bazel run //tools:setup_precommits
+# First-time: sudo apt install pipx (if not already installed)
+bazel run //tools:setup_precommits  # Installs pre-commit and git hooks
 
-# This installs:
+# This enables automatic checks on commit:
 # - shellcheck (bash linting)
 # - shfmt (bash formatting)  
 # - YAML/JSON validation
 # - Trailing whitespace checks
 
-# Hooks run automatically on git commit
-# CI enforces all checks regardless
+# CI enforces all checks regardless of local setup
 ```
 
 **How to contribute**:
