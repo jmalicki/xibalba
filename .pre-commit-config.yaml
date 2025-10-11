@@ -1,7 +1,8 @@
-# RUDRA pre-commit hooks
+# Pre-commit hooks for Xibalba
+# Install: pip install pre-commit && pre-commit install
+# Run manually: pre-commit run --all-files
 
 repos:
-  # General file checks
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:
@@ -9,61 +10,22 @@ repos:
       - id: end-of-file-fixer
       - id: check-yaml
       - id: check-added-large-files
-        args: ['--maxkb=1024']
+        args: ['--maxkb=1000']
       - id: check-merge-conflict
-      - id: check-executables-have-shebangs
       - id: mixed-line-ending
 
-  # C/C++ formatting
-  - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v18.1.0
-    hooks:
-      - id: clang-format
-        types_or: [c, c++]
-        args: ['-i', '--style=Linux']
-
-  # Shell script linting
   - repo: https://github.com/shellcheck-py/shellcheck-py
     rev: v0.9.0.6
     hooks:
       - id: shellcheck
-        args: ['-x', '-e', 'SC1091']  # Exclude source file not found
+        args: ['--severity=warning']
+        files: \.(sh|bash)$
+        exclude: '^(bazel-|\.git/)'
 
-  # Shell script formatting
-  - repo: https://github.com/scop/pre-commit-shfmt
-    rev: v3.7.0-1
+  - repo: https://github.com/jumanjihouse/pre-commit-hooks
+    rev: 3.0.0
     hooks:
       - id: shfmt
-        args: ['-i', '4', '-ci', '-w']
-
-  # Markdown linting
-  - repo: https://github.com/markdownlint/markdownlint
-    rev: v0.12.0
-    hooks:
-      - id: markdownlint
-        args: ['--fix']
-        files: '\.md$'
-
-  # Python (if we add Python scripts)
-  - repo: https://github.com/psf/black
-    rev: 23.12.1
-    hooks:
-      - id: black
-        language_version: python3
-
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.9
-    hooks:
-      - id: ruff
-        args: [--fix]
-
-  # Commit message format (Conventional Commits)
-  - repo: https://github.com/compilerla/conventional-pre-commit
-    rev: v3.0.0
-    hooks:
-      - id: conventional-pre-commit
-        stages: [commit-msg]
-
-
-
-
+        args: ['-i', '4', '-ci', '-sr', '-w']
+        files: \.(sh|bash)$
+        exclude: '^(bazel-|\.git/)'

@@ -138,6 +138,8 @@ run_test() {
     echo "  Testing $fs with $model model..."
     
     # Run test
+    local status
+    local bugs
     if simple_chaos_test \
         --json \
         --"$model" \
@@ -146,18 +148,22 @@ run_test() {
         --writers "$WRITERS" \
         "$test_dir" > "$result_json" 2>&1; then
         
-        local status="PASS"
-        local bugs=0
+        status="PASS"
+        bugs=0
     else
-        local status="FAIL"
-        local bugs=$(jq -r '.results.bugs_found // 0' "$result_json" 2>/dev/null || echo "0")
+        status="FAIL"
+        bugs=$(jq -r '.results.bugs_found // 0' "$result_json" 2>/dev/null || echo "0")
     fi
     
     # Extract metrics
-    local ops=$(jq -r '.results.total_operations // 0' "$result_json" 2>/dev/null || echo "0")
-    local missing=$(jq -r '.results.missing_entries // 0' "$result_json" 2>/dev/null || echo "0")
-    local phantom=$(jq -r '.results.phantom_entries // 0' "$result_json" 2>/dev/null || echo "0")
-    local duplicate=$(jq -r '.results.duplicate_entries // 0' "$result_json" 2>/dev/null || echo "0")
+    local ops
+    local missing
+    local phantom
+    local duplicate
+    ops=$(jq -r '.results.total_operations // 0' "$result_json" 2>/dev/null || echo "0")
+    missing=$(jq -r '.results.missing_entries // 0' "$result_json" 2>/dev/null || echo "0")
+    phantom=$(jq -r '.results.phantom_entries // 0' "$result_json" 2>/dev/null || echo "0")
+    duplicate=$(jq -r '.results.duplicate_entries // 0' "$result_json" 2>/dev/null || echo "0")
     
     echo "    Status: $status | Bugs: $bugs | Ops: $ops | Missing: $missing | Phantom: $phantom | Duplicate: $duplicate"
     
@@ -186,9 +192,13 @@ run_test() {
     mv "$temp_summary" "$SUMMARY_FILE"
     
     # Cleanup test directory
-    rm -rf "$test_dir"/* 2>/dev/null || true
+    rm -rf "${test_dir:?}"/* 2>/dev/null || true
     
-    return $([ "$status" = "PASS" ] && echo 0 || echo 1)
+    if [ "$status" = "PASS" ]; then
+        return 0
+    else
+        return 1
+    fi
 }
 
 # Main test loop
