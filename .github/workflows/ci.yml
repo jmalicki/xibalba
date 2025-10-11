@@ -81,11 +81,50 @@ jobs:
             bazel-bin/vm/
           retention-days: 1
 
-  # Stage 2: Parallel VM tests across filesystems
+  # Stage 2a: Prepare VM infrastructure (once)
+  # TODO: Move VM dependency management to Bazel for better caching
+  # GitHub Actions matrix jobs run on separate runners, so apt packages
+  # can't be shared directly. Future improvements:
+  #   - Docker container with pre-installed VM deps
+  #   - Bazel rules for VM management with hermetic caching
+  prepare-vms:
+    name: Prepare VM Infrastructure  
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Cache VM dependencies
+        uses: actions/cache@v3
+        id: vm-deps-cache
+        with:
+          path: |
+            /var/cache/apt/archives/*.deb
+          key: vm-deps-${{ runner.os }}-${{ hashFiles('.github/workflows/ci.yml') }}
+      
+      - name: Install VM dependencies (once for all tests)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            qemu-kvm \
+            libvirt-daemon-system \
+            libvirt-clients \
+            virtinst \
+            bridge-utils
+          echo "✅ VM infrastructure ready"
+      
+      - name: Verify KVM/libvirt
+        run: |
+          sudo systemctl start libvirtd || true
+          virsh --version
+          qemu-system-x86_64 --version
+
+  # Stage 2b: Parallel VM tests across filesystems
   vm-tests:
     name: VM Test (${{ matrix.filesystem }})
     runs-on: ubuntu-latest
-    needs: build-and-test
+    needs: prepare-vms
     
     strategy:
       fail-fast: false  # Continue other tests even if one fails
@@ -95,9 +134,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Install VM dependencies
+      - name: Restore VM dependencies cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            /var/cache/apt/archives/*.deb
+          key: vm-deps-${{ runner.os }}-${{ hashFiles('.github/workflows/ci.yml') }}
+      
+      - name: Install VM dependencies (from cache)
         run: |
-          sudo apt-get update
           sudo apt-get install -y \
             qemu-kvm \
             libvirt-daemon-system \
