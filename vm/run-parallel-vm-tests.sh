@@ -88,74 +88,79 @@ fi
 echo "Using package: $PACKAGE_PATH"
 echo
 
-# Function to setup and run test in a VM
+# Function to setup and run test in a VM (runs synchronously, caller backgrounds it)
 run_vm_test() {
     local vm_name=$1
     local filesystem=$2
     local log_file="$RESULTS_DIR/${vm_name}.log"
+    local exit_code_file="$RESULTS_DIR/${vm_name}.exit"
     
-    {
-        echo "[${vm_name}] Starting at $(date +%H:%M:%S)"
-        
-        # Check if VM exists, create if not
-        if ! virsh list --all | grep -q "$vm_name"; then
-            echo "[${vm_name}] Creating VM..."
-            bazel run //vm:create_vm -- --name "$vm_name" --ram 2048 --disk 10
-        else
-            echo "[${vm_name}] VM exists, starting..."
-            virsh start "$vm_name" 2>/dev/null || true
-        fi
-        
-        # Wait for VM to be ready
-        echo "[${vm_name}] Waiting for SSH..."
-        timeout 60 bash -c "until ssh -o StrictHostKeyChecking=no -o ConnectTimeout=2 root@$vm_name true 2>/dev/null; do sleep 2; done" || {
-            echo "[${vm_name}] ❌ Failed to connect via SSH"
-            return 1
-        }
-        
-        # Deploy package
-        echo "[${vm_name}] Deploying Xibalba..."
-        scp -o StrictHostKeyChecking=no "$PACKAGE_PATH" "root@${vm_name}:/tmp/" || {
-            echo "[${vm_name}] ❌ Failed to copy package"
-            return 1
-        }
-        
-        ssh -o StrictHostKeyChecking=no "root@${vm_name}" "apt update && apt install -y /tmp/xibalba_0.1.0_amd64.deb" || {
-            echo "[${vm_name}] ❌ Failed to install package"
-            return 1
-        }
-        
-        # Run gauntlet (progressive testing: EVENTUAL → WEAK → STRICT)
-        echo "[${vm_name}] Running progressive gauntlet on $filesystem..."
-        echo "[${vm_name}]   1. EVENTUAL (baseline) - should PASS"
-        echo "[${vm_name}]   2. WEAK (POSIX) - should PASS"
-        echo "[${vm_name}]   3. STRICT (ideal) - quantify departures"
-        
-        if ssh -o StrictHostKeyChecking=no "root@${vm_name}" \
-            "XIBALBA_DURATION=$DURATION XIBALBA_READERS=$READERS XIBALBA_WRITERS=$WRITERS xibalba-gauntlet $filesystem"; then
-            echo "[${vm_name}] ✅ TEST PASSED at $(date +%H:%M:%S)"
-            
-            # Get gauntlet results (comprehensive summary + individual model results)
-            ssh -o StrictHostKeyChecking=no "root@${vm_name}" \
-                "cat /var/log/xibalba/gauntlet/latest-gauntlet.json" > "$RESULTS_DIR/${vm_name}-gauntlet.json" 2>/dev/null || true
-            ssh -o StrictHostKeyChecking=no "root@${vm_name}" \
-                "cat /var/log/xibalba/gauntlet/latest-gauntlet.txt" > "$RESULTS_DIR/${vm_name}-gauntlet.txt" 2>/dev/null || true
-            
-            return 0
-        else
-            echo "[${vm_name}] ❌ TEST FAILED at $(date +%H:%M:%S)"
-            
-            # Get gauntlet failure details
-            ssh -o StrictHostKeyChecking=no "root@${vm_name}" \
-                "cat /var/log/xibalba/gauntlet/latest-gauntlet.json" > "$RESULTS_DIR/${vm_name}-gauntlet.json" 2>/dev/null || true
-            ssh -o StrictHostKeyChecking=no "root@${vm_name}" \
-                "cat /var/log/xibalba/gauntlet/latest-gauntlet.txt" > "$RESULTS_DIR/${vm_name}-gauntlet.txt" 2>/dev/null || true
-            
-            return 1
-        fi
-    } > "$log_file" 2>&1 &
+    # Redirect to log file
+    exec > "$log_file" 2>&1
     
-    echo $!  # Return background PID
+    echo "[${vm_name}] Starting at $(date +%H:%M:%S)"
+    
+    # Check if VM exists, create if not
+    if ! virsh list --all | grep -q "$vm_name"; then
+        echo "[${vm_name}] Creating VM..."
+        bazel run //vm:create_vm -- --name "$vm_name" --ram 2048 --disk 10
+    else
+        echo "[${vm_name}] VM exists, starting..."
+        virsh start "$vm_name" 2>/dev/null || true
+    fi
+    
+    # Wait for VM to be ready
+    echo "[${vm_name}] Waiting for SSH..."
+    timeout 60 bash -c "until ssh -o StrictHostKeyChecking=no -o ConnectTimeout=2 root@$vm_name true 2>/dev/null; do sleep 2; done" || {
+        echo "[${vm_name}] ❌ Failed to connect via SSH"
+        echo 1 > "$exit_code_file"
+        return 1
+    }
+    
+    # Deploy package
+    echo "[${vm_name}] Deploying Xibalba..."
+    scp -o StrictHostKeyChecking=no "$PACKAGE_PATH" "root@${vm_name}:/tmp/" || {
+        echo "[${vm_name}] ❌ Failed to copy package"
+        echo 1 > "$exit_code_file"
+        return 1
+    }
+    
+    ssh -o StrictHostKeyChecking=no "root@${vm_name}" "apt update && apt install -y /tmp/xibalba_0.1.0_amd64.deb" || {
+        echo "[${vm_name}] ❌ Failed to install package"
+        echo 1 > "$exit_code_file"
+        return 1
+    }
+    
+    # Run gauntlet (progressive testing: EVENTUAL → WEAK → STRICT)
+    echo "[${vm_name}] Running progressive gauntlet on $filesystem..."
+    echo "[${vm_name}]   1. EVENTUAL (baseline) - should PASS"
+    echo "[${vm_name}]   2. WEAK (POSIX) - should PASS"
+    echo "[${vm_name}]   3. STRICT (ideal) - quantify departures"
+    
+    if ssh -o StrictHostKeyChecking=no "root@${vm_name}" \
+        "XIBALBA_DURATION=$DURATION XIBALBA_READERS=$READERS XIBALBA_WRITERS=$WRITERS xibalba-gauntlet $filesystem"; then
+        echo "[${vm_name}] ✅ TEST PASSED at $(date +%H:%M:%S)"
+        
+        # Get gauntlet results (comprehensive summary + individual model results)
+        ssh -o StrictHostKeyChecking=no "root@${vm_name}" \
+            "cat /var/log/xibalba/gauntlet/latest-gauntlet.json" > "$RESULTS_DIR/${vm_name}-gauntlet.json" 2>/dev/null || true
+        ssh -o StrictHostKeyChecking=no "root@${vm_name}" \
+            "cat /var/log/xibalba/gauntlet/latest-gauntlet.txt" > "$RESULTS_DIR/${vm_name}-gauntlet.txt" 2>/dev/null || true
+        
+        echo 0 > "$exit_code_file"
+        return 0
+    else
+        echo "[${vm_name}] ❌ TEST FAILED at $(date +%H:%M:%S)"
+        
+        # Get gauntlet failure details
+        ssh -o StrictHostKeyChecking=no "root@${vm_name}" \
+            "cat /var/log/xibalba/gauntlet/latest-gauntlet.json" > "$RESULTS_DIR/${vm_name}-gauntlet.json" 2>/dev/null || true
+        ssh -o StrictHostKeyChecking=no "root@${vm_name}" \
+            "cat /var/log/xibalba/gauntlet/latest-gauntlet.txt" > "$RESULTS_DIR/${vm_name}-gauntlet.txt" 2>/dev/null || true
+        
+        echo 1 > "$exit_code_file"
+        return 1
+    fi
 }
 
 # Start all VM tests in parallel
@@ -167,7 +172,11 @@ for vm_config in "${VMS[@]}"; do
     IFS=':' read -r vm_name fs <<< "$vm_config"
     
     echo "Starting VM test: $vm_name ($fs)"
-    pid=$(run_vm_test "$vm_name" "$fs")
+    
+    # Start function in background and capture its PID
+    run_vm_test "$vm_name" "$fs" &
+    pid=$!
+    
     PIDS+=("$pid")
     VM_NAMES+=("$vm_name")
     FILESYSTEMS+=("$fs")
@@ -191,10 +200,17 @@ declare -a EXIT_CODES=()
 for i in "${!PIDS[@]}"; do
     pid=${PIDS[$i]}
     vm_name=${VM_NAMES[$i]}
+    exit_code_file="$RESULTS_DIR/${vm_name}.exit"
     
     echo "Waiting for ${vm_name} (PID: $pid)..."
-    wait "$pid"
-    exit_code=$?
+    wait "$pid" 2>/dev/null || true
+    
+    # Read exit code from file (more reliable than wait with redirected functions)
+    if [ -f "$exit_code_file" ]; then
+        exit_code=$(cat "$exit_code_file")
+    else
+        exit_code=1  # Default to failure if no exit code file
+    fi
     EXIT_CODES+=("$exit_code")
     
     # Show log tail
