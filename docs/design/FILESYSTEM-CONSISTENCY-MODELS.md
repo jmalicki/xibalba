@@ -100,22 +100,32 @@ From POSIX spec (paraphrased from various man pages and specifications):
 
 **Bug potential**: High - complex cursor management, hash collisions
 
+**Xibalba recommendation**: `--weak` model, high eBPF delay (50% @ 500 iterations)
+
+---
+
 ### XFS (SGI Filesystem)
 
-**Directory Implementation**: B+ tree for large directories
+**Directory Implementation**: B+ tree for large directories, shortform for small
 
 **Consistency Model**:
-- ✅ **Strong for individual operations** (transactional)
+- ✅ **Strong for individual operations** (transactional log)
 - ⚠️  **Weak for directory scanning** (no snapshot)
 - ✅ **With fsync**: Full transaction log guarantees
+- ✅ **Delayed logging**: Metadata updates batched
 
 **readdir() Behavior**:
 - Iterates B+ tree in key order
 - Concurrent modifications: Can cause cursor skips/duplicates
 - Cursor position: Tracked by B+ tree position
 - **Race window**: Medium (more sophisticated locking)
+- **Special**: Directory i-node locking more granular
 
-**Bug potential**: Medium - B+ tree is well-tested, but cursor races exist
+**Bug potential**: Medium - B+ tree well-tested, but cursor races exist
+
+**Xibalba recommendation**: `--weak` model, medium eBPF delay (50% @ 300 iterations)
+
+---
 
 ### btrfs (B-tree Filesystem)
 
@@ -126,6 +136,7 @@ From POSIX spec (paraphrased from various man pages and specifications):
 - ✅ **Snapshot support** (can create true snapshots)
 - ⚠️  **Weak for directory scanning without snapshot** (standard readdir)
 - ✅ **With fsync**: Full transaction guarantees
+- ✅ **ACID properties**: Full transactional semantics
 
 **readdir() Behavior**:
 - Iterates COW B-tree
@@ -136,22 +147,352 @@ From POSIX spec (paraphrased from various man pages and specifications):
 
 **Bug potential**: Low-Medium - COW helps, but cursor management still complex
 
+**Xibalba recommendation**: `--weak` model, lower eBPF delay (30% @ 200 iterations)
+
+---
+
+### ZFS (Zettabyte Filesystem)
+
+**Directory Implementation**: ZAP (ZFS Attribute Processor) - hash table or tree
+
+**Consistency Model**:
+- ✅ **Strong for individual operations** (COW + transaction groups)
+- ✅ **Snapshot support** (true snapshots, even for readdir if using snapshots)
+- ⚠️  **Weak for directory scanning** (no snapshot by default)
+- ✅ **With fsync**: Transaction group commit guaranteed
+- ✅ **ACID+**: Stronger than ACID (checksums, self-healing)
+
+**readdir() Behavior**:
+- Iterates ZAP object (hash table or tree depending on size)
+- Concurrent modifications: COW means seeing old or new, not partial
+- Cursor position: Object ID + iteration state
+- **Race window**: Very small (COW + transaction groups)
+- **Special**: Snapshots provide true point-in-time consistency
+
+**Bug potential**: Very Low - COW architecture prevents many race classes
+
+**Xibalba recommendation**: `--weak` or `--eventual`, low eBPF delay (20% @ 100 iterations)
+
+**Note**: ZFS on Linux (ZoL/OpenZFS) may behave slightly differently from Solaris ZFS
+
+---
+
 ### tmpfs (In-Memory Filesystem)
 
-**Directory Implementation**: Simple linked list or radix tree (in memory)
+**Directory Implementation**: Simple radix tree (in memory)
 
 **Consistency Model**:
 - ✅ **Strong for individual operations** (atomic in-memory updates)
 - ⚠️  **Weak for directory scanning** (no snapshot by default)
-- ✅ **No durability needed** (RAM-based)
+- ✅ **No durability needed** (RAM-based, lost on reboot)
 
 **readdir() Behavior**:
 - Iterates in-memory structure
 - Concurrent modifications: Direct memory updates, visible immediately
 - Cursor position: Memory pointer or index
-- **Race window**: Tiny (all in RAM, fast)
+- **Race window**: Tiny (all in RAM, nanosecond ops)
 
 **Bug potential**: Low - simplest implementation, but races still possible
+
+**Xibalba recommendation**: `--eventual` model, very low eBPF delay (10% @ 50 iterations)
+
+---
+
+### F2FS (Flash-Friendly Filesystem)
+
+**Directory Implementation**: Hash-based directory for flash optimization
+
+**Consistency Model**:
+- ✅ **Strong for individual operations** (atomic)
+- ⚠️  **Weak for directory scanning** (no snapshot)
+- ✅ **With fsync**: Checkpoint-based durability
+- ⚠️  **Flash-optimized**: May delay metadata updates
+
+**readdir() Behavior**:
+- Optimized for flash storage patterns
+- Concurrent modifications: Hash-based iteration
+- Cursor position: Hash bucket + offset
+- **Race window**: Medium (flash write patterns)
+
+**Bug potential**: Medium - newer filesystem, less battle-tested
+
+**Xibalba recommendation**: `--weak` model, medium eBPF delay (40% @ 300 iterations)
+
+---
+
+### NILFS2 (New Implementation of Log-structured Filesystem)
+
+**Directory Implementation**: Log-structured with B-tree indexing
+
+**Consistency Model**:
+- ✅ **Strong for individual operations** (log-structured)
+- ✅ **Snapshot support** (continuous snapshots)
+- ⚠️  **Weak for directory scanning** (unless using snapshot)
+- ✅ **With fsync**: Log flush guarantees
+
+**readdir() Behavior**:
+- Reads from current checkpoint or snapshot
+- Concurrent modifications: May see older checkpoint
+- Cursor position: Log position + tree position
+- **Race window**: Small (log-structured reduces conflicts)
+
+**Bug potential**: Low-Medium - log structure helps consistency
+
+**Xibalba recommendation**: `--weak` model, medium eBPF delay (30% @ 250 iterations)
+
+---
+
+### NFS (Network Filesystem)
+
+**Directory Implementation**: Remote (depends on server filesystem)
+
+**Consistency Model**:
+- ⚠️  **Weak for all operations** (network delays)
+- ⚠️  **Cache coherency issues** (client-side caching)
+- ⚠️  **Eventual consistency** (close-to-open semantics)
+- ⚠️  **With fsync**: Only client→server, not server→storage
+
+**readdir() Behavior**:
+- May use cached directory contents
+- Concurrent modifications: Extreme staleness possible
+- Cursor position: Server-side, client has cookie
+- **Race window**: Huge (network + caching + server)
+
+**Bug potential**: Very High - network filesystem complexity
+
+**Xibalba recommendation**: `--eventual` model ONLY, high eBPF delay (70% @ 800 iterations)
+
+**Note**: NFS bugs are often "working as designed" due to network filesystem semantics
+
+---
+
+### FUSE-based Filesystems (User-space FS)
+
+**Directory Implementation**: Varies by implementation
+
+**Consistency Model**:
+- Varies widely (depends on FUSE implementation)
+- Generally weaker than kernel filesystems
+
+**readdir() Behavior**:
+- Depends entirely on FUSE implementation
+- Can be anything from strict to very weak
+- Cursor management varies
+
+**Bug potential**: Very High - user-space implementations vary widely
+
+**Xibalba recommendation**: `--eventual` model, test case-by-case
+
+**Examples**: sshfs, s3fs, GlusterFS, CephFS (FUSE mode)
+
+---
+
+### NTFS (on Linux via ntfs-3g)
+
+**Directory Implementation**: B+ tree (NTFS native), accessed via FUSE
+
+**Consistency Model**:
+- ⚠️  **FUSE layer** introduces additional complexity
+- ⚠️  **NTFS semantics** different from POSIX
+- ⚠️  **Translation layer** may have bugs
+
+**readdir() Behavior**:
+- Goes through FUSE to ntfs-3g to NTFS B+ tree
+- Multiple layers of abstraction
+- Cursor management complex
+
+**Bug potential**: High - complex translation, multiple layers
+
+**Xibalba recommendation**: `--eventual` model, high eBPF delay (60% @ 600 iterations)
+
+---
+
+### exFAT (Extended FAT)
+
+**Directory Implementation**: Linked cluster chain
+
+**Consistency Model**:
+- ⚠️  **Very weak** (designed for flash media, not concurrency)
+- ❌ **No atomicity guarantees** for directory operations
+- ❌ **No journaling** (crash consistency poor)
+
+**readdir() Behavior**:
+- Sequential iteration through cluster chain
+- Concurrent modifications: Undefined behavior (not designed for it)
+- Cursor position: Cluster + offset
+
+**Bug potential**: Extreme - not designed for concurrent operations
+
+**Xibalba recommendation**: `--eventual` model ONLY, expect chaos
+
+**Warning**: exFAT should not be used for concurrent workloads!
+
+---
+
+### procfs / sysfs (Virtual Filesystems)
+
+**Directory Implementation**: Virtual (generated on demand)
+
+**Consistency Model**:
+- ✅ **Snapshot on open** (directory contents generated)
+- ✅ **Strong consistency** within one scan
+- ⚠️  **Different semantics** (not real files)
+
+**readdir() Behavior**:
+- Returns generated list
+- Concurrent modifications: New scan sees new view
+- No persistence (virtual)
+
+**Bug potential**: Low - generated, not persistent
+
+**Xibalba recommendation**: Not applicable (virtual FS, different semantics)
+
+---
+
+## Summary Table
+
+| Filesystem | Implementation | Consistency | Bug Potential | Xibalba Model | eBPF Config |
+|------------|----------------|-------------|---------------|---------------|-------------|
+| **ext4** | Hash tree | Weak | High | `--weak` | 50% @ 500 iter |
+| **XFS** | B+ tree | Weak | Medium | `--weak` | 50% @ 300 iter |
+| **btrfs** | COW B-tree | Weak* | Low-Med | `--weak` | 30% @ 200 iter |
+| **ZFS** | COW ZAP | Weak* | Very Low | `--weak`/`--eventual` | 20% @ 100 iter |
+| **tmpfs** | In-memory | Weak | Low | `--eventual` | 10% @ 50 iter |
+| **F2FS** | Flash-optimized | Weak | Medium | `--weak` | 40% @ 300 iter |
+| **NILFS2** | Log-structured | Weak* | Low-Med | `--weak` | 30% @ 250 iter |
+| **NFS** | Network | Eventual | Very High | `--eventual` | 70% @ 800 iter |
+| **FUSE** | User-space | Varies | Very High | `--eventual` | Case-by-case |
+| **NTFS** | FUSE/ntfs-3g | Weak | High | `--eventual` | 60% @ 600 iter |
+| **exFAT** | Cluster chain | Very Weak | Extreme | `--eventual` | Not recommended |
+
+*Can provide snapshots, but not via standard readdir()
+
+---
+
+## Advanced: Filesystem Categories
+
+### Category 1: Traditional Unix Filesystems
+**Examples**: ext2, ext3, ext4  
+**Design**: Inodes + directory entries  
+**Consistency**: Weak for scanning  
+**Testing**: `--weak` model  
+
+### Category 2: Enterprise Filesystems
+**Examples**: XFS, JFS  
+**Design**: Journaling + B-trees  
+**Consistency**: Weak for scanning, strong transactions  
+**Testing**: `--weak` model  
+
+### Category 3: Copy-on-Write Filesystems
+**Examples**: btrfs, ZFS, NILFS2  
+**Design**: COW + snapshots  
+**Consistency**: Weak for readdir, strong via snapshots  
+**Testing**: `--weak` or `--eventual` depending on workload  
+
+### Category 4: Flash-Optimized Filesystems
+**Examples**: F2FS, JFFS2, UBIFS  
+**Design**: Log-structured or FTL-aware  
+**Consistency**: Varies (flash constraints)  
+**Testing**: `--weak` model  
+
+### Category 5: Network Filesystems
+**Examples**: NFS, CIFS/SMB, AFS  
+**Design**: Client-server with caching  
+**Consistency**: Eventual (network latency)  
+**Testing**: `--eventual` model ONLY  
+
+### Category 6: User-Space Filesystems
+**Examples**: FUSE implementations (sshfs, s3fs, GlusterFS)  
+**Design**: Varies wildly  
+**Consistency**: Varies wildly  
+**Testing**: `--eventual` model, case-by-case tuning  
+
+### Category 7: Virtual Filesystems
+**Examples**: procfs, sysfs, debugfs  
+**Design**: Kernel-generated  
+**Consistency**: Snapshot on open  
+**Testing**: Not applicable (different semantics)  
+
+---
+
+## Filesystem Features Affecting Consistency
+
+### Journaling
+
+**With journaling** (ext4, XFS, JFS):
+- ✅ Crash recovery guaranteed
+- ✅ Atomicity of operations
+- ⚠️  Does NOT guarantee snapshot semantics for readdir
+
+### Copy-on-Write (COW)
+
+**With COW** (btrfs, ZFS, NILFS2):
+- ✅ Natural atomicity (old or new, never partial)
+- ✅ Can create true snapshots
+- ⚠️  Standard readdir still sees fuzzy view
+
+### Transaction Support
+
+**With transactions** (XFS, btrfs, ZFS):
+- ✅ All-or-nothing operations
+- ✅ Durability guarantees
+- ⚠️  Transaction boundaries don't align with readdir scans
+
+### Snapshot Support
+
+**With snapshots** (btrfs, ZFS, NILFS2):
+- ✅ Can get true point-in-time view
+- ❌ Requires special API (not standard POSIX readdir)
+- ⚠️  Xibalba currently tests standard readdir only
+
+---
+
+## Future Xibalba Enhancements
+
+### Test Snapshot APIs
+
+For btrfs and ZFS:
+```c
+// Create snapshot
+snapshot = filesystem_create_snapshot(dir);
+
+// Read from snapshot (guaranteed consistent)
+entries = read_snapshot_directory(snapshot);
+
+// Validate (should be PERFECT - no races possible)
+validate_strict(entries);  // Should find 0 bugs
+```
+
+### Test Filesystem-Specific Features
+
+1. **ext4 htree splitting**: Trigger directory growth during scan
+2. **XFS delayed allocation**: Test metadata updates
+3. **btrfs balance**: Test while filesystem is rebalancing
+4. **ZFS scrub**: Test during data integrity checking
+
+### Test Different Mount Options
+
+```bash
+# ext4 with data=journal (strictest)
+mount -o data=journal /dev/sdb1 /mnt/test
+
+# ext4 with data=writeback (weakest)
+mount -o data=writeback /dev/sdb1 /mnt/test
+```
+
+Different mount options → Different consistency guarantees!
+
+---
+
+## Key Insights
+
+1. **POSIX is deliberately vague** about readdir consistency
+2. **All filesystems have weak guarantees** for directory scanning
+3. **COW filesystems** (btrfs, ZFS) have fewer race classes
+4. **Network filesystems** have extreme weak consistency
+5. **Snapshots help** but require special APIs
+
+**Bottom line**: Xibalba's multi-model approach is necessary because different filesystems and scenarios need different validation strategies!
 
 ---
 
@@ -267,15 +608,20 @@ With **--eventual**:
 
 ## Filesystem Comparison Table
 
-| Filesystem | Directory Structure | Lock Granularity | Snapshot Support | Typical Bug Rate |
-|------------|---------------------|------------------|------------------|------------------|
-| **ext4** | Hash tree | Directory-level | No | High |
-| **XFS** | B+ tree | Fine-grained | No | Medium |
-| **btrfs** | COW B-tree | Very fine | Yes* | Low-Medium |
-| **tmpfs** | In-memory | Very fine | No | Low |
-| **NFS** | Remote | Protocol-level | No | Very High |
+| Filesystem | Directory Structure | Lock Granularity | Snapshot Support | Typical Bug Rate | Xibalba Model |
+|------------|---------------------|------------------|------------------|------------------|---------------|
+| **ext4** | Hash tree | Directory-level | No | High | `--weak` |
+| **XFS** | B+ tree | Fine-grained | No | Medium | `--weak` |
+| **btrfs** | COW B-tree | Very fine | Yes* | Low-Medium | `--weak` |
+| **ZFS** | COW ZAP | Very fine | Yes* | Very Low | `--weak`/`--eventual` |
+| **tmpfs** | In-memory | Very fine | No | Low | `--eventual` |
+| **F2FS** | Hash + flash | Medium | No | Medium | `--weak` |
+| **NILFS2** | Log + B-tree | Fine | Yes* | Low-Medium | `--weak` |
+| **NFS** | Remote | Protocol-level | No | Very High | `--eventual` |
+| **FUSE** | Varies | Varies | Varies | Very High | `--eventual` |
+| **NTFS** | B+ tree (FUSE) | Medium | No | High | `--eventual` |
 
-*btrfs snapshots require special API, not standard readdir()
+*Snapshots require special API, not standard readdir()
 
 ---
 
