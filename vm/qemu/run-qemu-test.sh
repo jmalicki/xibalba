@@ -115,9 +115,14 @@ echo "✓ Xibalba binaries embedded in initramfs (no network/9p required)"
 echo ""
 echo "Booting VM..."
 
-# Calculate timeout: test duration + 60 seconds for boot/shutdown
-TIMEOUT=$((DURATION + 60))
-echo "VM timeout: ${TIMEOUT}s (test duration + 60s overhead)"
+# Calculate timeout: test duration + overhead (more for ZFS which is slow to create pools)
+if [ "$FILESYSTEM" = "zfs" ]; then
+    TIMEOUT=$((DURATION + 120))
+    echo "VM timeout: ${TIMEOUT}s (test duration + 120s overhead for ZFS)"
+else
+    TIMEOUT=$((DURATION + 60))
+    echo "VM timeout: ${TIMEOUT}s (test duration + 60s overhead)"
+fi
 
 # Run QEMU with timeout
 timeout --foreground --kill-after=10 $TIMEOUT \

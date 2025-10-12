@@ -116,12 +116,20 @@ case "$FILESYSTEM" in
         fi
         echo "✓ ZFS module loaded"
         
-        # ZFS requires a pool
-        echo "Creating ZFS pool with 30s timeout..."
-        timeout 30 zpool create -f xibalba-test /dev/vda || {
+        # ZFS requires a pool (can take longer than other filesystems)
+        echo "Creating ZFS pool with 60s timeout..."
+        timeout 60 zpool create -f xibalba-test /dev/vda || {
             CODE=$?
             echo "ERROR: zpool create failed (exit: $CODE)"
-            exit $CODE
+            echo "ZFS pool creation timed out or failed"
+            echo ""
+            echo "=== XIBALBA_TEST_COMPLETE ==="
+            echo "EXIT_CODE=255"
+            echo "FILESYSTEM=zfs"
+            echo "ERROR=zpool_create_failed"
+            echo "=========================="
+            poweroff
+            exit 0
         }
         echo "✓ ZFS pool created"
         
