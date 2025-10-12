@@ -16,6 +16,10 @@ bazel_dep(name = "googletest", version = "1.14.0")
 # Rules for building OCI (Docker) images - used for hermetic build environment
 bazel_dep(name = "rules_oci", version = "1.7.4")
 
+# Hermetic Debian package management (needs bazel_gazelle)
+bazel_dep(name = "gazelle", version = "0.36.0")
+bazel_dep(name = "rules_distroless", version = "0.3.7")
+
 # Pull Ubuntu base image for build tools container
 oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
 oci.pull(
@@ -26,3 +30,12 @@ oci.pull(
     # TODO: Pin digest once we verify this works
 )
 use_repo(oci, "ubuntu_base")
+
+# Configure apt package sources for CI dev environment
+apt = use_extension("@rules_distroless//apt:extensions.bzl", "apt")
+apt.install(
+    name = "ubuntu_packages",
+    lock = "//tools/ci/docker:packages.lock.json",
+    manifest = "//tools/ci/docker:packages.yaml",
+)
+use_repo(apt, "ubuntu_packages")

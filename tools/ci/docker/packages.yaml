@@ -1,0 +1,41 @@
+version: 1
+
+sources:
+  - channel: noble main
+    url: https://snapshot.ubuntu.com/ubuntu/20241001T000000Z
+  - channel: noble universe
+    url: https://snapshot.ubuntu.com/ubuntu/20241001T000000Z
+
+archs:
+  - amd64
+
+packages:
+  # System essentials
+  - bash
+  - coreutils
+  - findutils
+  - grep
+  - sed
+  - gawk
+  
+  # Build dependencies (what CI needs to compile)
+  - clang-18
+  - libbpf-dev
+  - libelf-dev
+  - linux-headers-generic
+  
+  # Filesystem tools (for testing)
+  - e2fsprogs
+  - xfsprogs
+  - btrfs-progs
+  - zfsutils-linux
+  - f2fs-tools
+  - nilfs-tools
+  - nfs-common
+  - qemu-system-x86
+  
+  # Utilities
+  - jq
+  - curl
+  - ca-certificates
+

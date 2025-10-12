@@ -6,6 +6,7 @@ package(default_visibility = ["//visibility:public"])
 exports_files([
     "README.md",
     "START-HERE.md",
+    "MODULE.bazel.lock",  # For cache key generation
 ])
 
 # Convenience targets

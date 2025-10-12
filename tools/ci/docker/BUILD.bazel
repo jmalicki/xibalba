@@ -1,0 +1,93 @@
+# Xibalba CI Dev Environment (rules_distroless approach)
+#
+# Hermetic dev environment using rules_distroless for apt packages
+
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push", "oci_tarball")
+
+# ============================================================================
+# Lock File Management
+# ============================================================================
+
+# Update lock file when packages.yaml changes
+# Usage: bazel run @ubuntu_packages//:lock (can't alias due to visibility)
+
+exports_files([
+    "Dockerfile",
+    "packages.yaml",
+    "packages.lock.json",
+])
+
+# ============================================================================
+# OCI Images with apt packages
+# ============================================================================
+
+# Build environment with all CI dependencies
+oci_image(
+    name = "xibalba_dev_env",
+    base = "@ubuntu_base",
+    tars = [
+        # System essentials (must come first)
+        "@ubuntu_packages//bash/amd64:data",
+        "@ubuntu_packages//coreutils/amd64:data",
+        "@ubuntu_packages//findutils/amd64:data",
+        "@ubuntu_packages//grep/amd64:data",
+        "@ubuntu_packages//sed/amd64:data",
+        "@ubuntu_packages//gawk/amd64:data",
+        
+        # Build tools
+        "@ubuntu_packages//clang-18/amd64:data",
+        "@ubuntu_packages//libbpf-dev/amd64:data",
+        "@ubuntu_packages//libelf-dev/amd64:data",
+        "@ubuntu_packages//linux-headers-generic/amd64:data",
+        
+        # Filesystem tools
+        "@ubuntu_packages//e2fsprogs/amd64:data",
+        "@ubuntu_packages//xfsprogs/amd64:data",
+        "@ubuntu_packages//btrfs-progs/amd64:data",
+        "@ubuntu_packages//zfsutils-linux/amd64:data",
+        "@ubuntu_packages//f2fs-tools/amd64:data",
+        "@ubuntu_packages//nilfs-tools/amd64:data",
+        "@ubuntu_packages//nfs-common/amd64:data",
+        "@ubuntu_packages//qemu-system-x86/amd64:data",
+        
+        # Utilities
+        "@ubuntu_packages//jq/amd64:data",
+        "@ubuntu_packages//curl/amd64:data",
+        "@ubuntu_packages//ca-certificates/amd64:data",
+    ],
+    entrypoint = ["/usr/bin/bash"],
+)
+
+# Tarball for local testing
+oci_tarball(
+    name = "xibalba_dev_env_tarball",
+    image = ":xibalba_dev_env",
+    repo_tags = ["xibalba-dev:local"],
+)
+
+# Push to GitHub Container Registry
+oci_push(
+    name = "push_dev_env",
+    image = ":xibalba_dev_env",
+    repository = "ghcr.io/jmalicki/xibalba-dev-env",
+    remote_tags = ["latest"],
+)
+
+# ============================================================================
+# Utilities
+# ============================================================================
+
+# Generate cache key from lock files
+sh_binary(
+    name = "generate_cache_key",
+    srcs = ["generate_cache_key.sh"],
+    args = [
+        "$(location //:MODULE.bazel.lock)",
+        "$(location :packages.lock.json)",
+    ],
+    data = [
+        "//:MODULE.bazel.lock",
+        ":packages.lock.json",
+    ],
+)
+
