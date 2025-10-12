@@ -11,10 +11,11 @@ archs:
   - "arm64"
 
 packages:
-  # System essentials (for running commands in container)
+  # System essentials
   - bash
   - coreutils
   - findutils
+  - git  # GitHub Actions needs git
   
   # Build dependencies (what CI needs to COMPILE Xibalba)
   - clang-18
@@ -25,12 +26,20 @@ packages:
   - libelf-dev
   - linux-headers-generic
   
+  # Bazel dependencies
+  - python3
+  - openjdk-21-jdk-headless
+  - zip
+  - unzip
+  - wget
+  
   # Utilities (for CI scripts)
   - jq
   - libjq1
   - libonig5
   - curl
   - ca-certificates
+  - openssl
 
 # NOTE: Filesystem tools (mkfs.*, etc.) are NOT needed here!
 # They are installed in QEMU VMs via initramfs (see vm/build-scripts/build-initramfs.sh)

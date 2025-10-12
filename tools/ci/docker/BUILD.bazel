@@ -3,13 +3,11 @@
 # Hermetic dev environment using rules_distroless for apt packages
 
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push", "oci_tarball")
+load("@rules_distroless//distroless:defs.bzl", "flatten")
 
 # ============================================================================
 # Lock File Management
 # ============================================================================
-
-# Update lock file when packages.yaml changes
-# Usage: bazel run @ubuntu_packages//:lock (can't alias due to visibility)
 
 exports_files([
     "Dockerfile",
@@ -18,19 +16,62 @@ exports_files([
 ])
 
 # ============================================================================
+# Download and install Bazelisk
+# ============================================================================
+
+# Download Bazelisk and create a tar layer
+genrule(
+    name = "bazelisk_layer",
+    outs = ["bazelisk.tar.gz"],
+    cmd = """
+        mkdir -p tmp/usr/local/bin
+        wget -q -O tmp/usr/local/bin/bazel \
+          https://github.com/bazelbuild/bazelisk/releases/download/v1.19.0/bazelisk-linux-amd64
+        chmod +x tmp/usr/local/bin/bazel
+        tar -C tmp -czf $@ ./usr/local/bin/bazel
+        rm -rf tmp
+    """,
+    tags = ["requires-network"],
+)
+
+# ============================================================================
+# Strip ./ prefix from flat layer to avoid conflicts with ubuntu_base
+# ============================================================================
+
+# Reprocess the flat tar to remove ./ prefix that conflicts with ubuntu_base
+# AND run update-ca-certificates to generate cert bundle
+genrule(
+    name = "flat_no_prefix",
+    srcs = ["@ubuntu_packages//:flat"],
+    outs = ["flat_no_prefix.tar"],
+    cmd = """
+        mkdir -p tmp
+        tar -xf $(location @ubuntu_packages//:flat) -C tmp
+        
+        # Generate ca-certificates bundle (rules_distroless doesn't run postinst scripts)
+        # Manually create the cert bundle by concatenating all certs
+        mkdir -p tmp/etc/ssl/certs
+        if [ -d tmp/usr/share/ca-certificates ]; then
+            find tmp/usr/share/ca-certificates -name '*.crt' -exec cat {} \\; > tmp/etc/ssl/certs/ca-certificates.crt 2>/dev/null || true
+        fi
+        
+        tar -C tmp -cf $@ --transform='s|^\\./||' .
+        rm -rf tmp
+    """,
+)
+
+# ============================================================================
 # OCI Images with apt packages
 # ============================================================================
 
 # CI build environment (ONLY for compiling Xibalba, not testing)
-# Filesystem tools are in QEMU VMs, not in this container
 oci_image(
     name = "xibalba_dev_env",
     base = "@ubuntu_base",  # Ubuntu 24.04 base
     tars = [
-        # Use the aggregate target with all packages and their dependencies
-        "@ubuntu_packages//:ubuntu_packages",
+        ":flat_no_prefix",  # Flattened packages with ./ prefix stripped
+        ":bazelisk_layer",  # Bazelisk binary
     ],
-    # No entrypoint/cmd - let users specify when running
 )
 
 # Tarball for local testing
@@ -76,4 +117,3 @@ sh_binary(
         ":packages.lock.json",
     ],
 )
-

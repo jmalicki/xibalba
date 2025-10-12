@@ -13,6 +13,7 @@
     "https://bcr.bazel.build/modules/aspect_bazel_lib/1.36.0/MODULE.bazel": "710d3560d8891d209f7985f3e4223011c3fefed0cd4d23d3e7b77b0f8287ef64",
     "https://bcr.bazel.build/modules/aspect_bazel_lib/2.14.0/MODULE.bazel": "2b31ffcc9bdc8295b2167e07a757dbbc9ac8906e7028e5170a3708cecaac119f",
     "https://bcr.bazel.build/modules/aspect_bazel_lib/2.14.0/source.json": "0cf1826853b0bef8b5cd19c0610d717500f5521aa2b38b72b2ec302ac5e7526c",
+    "https://bcr.bazel.build/modules/aspect_bazel_lib/2.7.7/MODULE.bazel": "491f8681205e31bb57892d67442ce448cda4f472a8e6b3dc062865e29a64f89c",
     "https://bcr.bazel.build/modules/bazel_features/1.1.0/MODULE.bazel": "cfd42ff3b815a5f39554d97182657f8c4b9719568eb7fded2b9135f084bf760b",
     "https://bcr.bazel.build/modules/bazel_features/1.1.1/MODULE.bazel": "27b8c79ef57efe08efccbd9dd6ef70d61b4798320b8d3c134fd571f78963dbcd",
     "https://bcr.bazel.build/modules/bazel_features/1.11.0/MODULE.bazel": "f9382337dd5a474c3b7d334c2f83e50b6eaedc284253334cf823044a26de03e8",
@@ -413,7 +414,7 @@
     "@@rules_oci+//oci:extensions.bzl%oci": {
       "general": {
         "bzlTransitiveDigest": "6kITBlKt/NWeBdbtHEInzxzrnVCof5bVgQ59yUJVrzQ=",
-        "usagesDigest": "E98Ku5IsKmGH8kwoBd5jLproMvxvOyiElPjBPTLbwko=",
+        "usagesDigest": "z1NtbwE+kzO84lOzfy9CEzw3LgwPOTuV14TBU47JrII=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -441,32 +442,6 @@
                 "@@platforms//cpu:x86_64": "@ubuntu_base_linux_amd64"
               },
               "bzlmod_repository": "ubuntu_base",
-              "reproducible": true
-            }
-          },
-          "distroless_base_linux_amd64": {
-            "repoRuleId": "@@rules_oci+//oci/private:pull.bzl%oci_pull",
-            "attributes": {
-              "scheme": "https",
-              "registry": "gcr.io",
-              "repository": "distroless/base-debian12",
-              "identifier": "latest",
-              "platform": "linux/amd64",
-              "target_name": "distroless_base_linux_amd64"
-            }
-          },
-          "distroless_base": {
-            "repoRuleId": "@@rules_oci+//oci/private:pull.bzl%oci_alias",
-            "attributes": {
-              "target_name": "distroless_base",
-              "scheme": "https",
-              "registry": "gcr.io",
-              "repository": "distroless/base-debian12",
-              "identifier": "latest",
-              "platforms": {
-                "@@platforms//cpu:x86_64": "@distroless_base_linux_amd64"
-              },
-              "bzlmod_repository": "distroless_base",
               "reproducible": true
             }
           },
