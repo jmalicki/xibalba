@@ -20,3 +20,17 @@ sh_binary(
     visibility = ["//visibility:public"],
 )
 
+# Comprehensive filesystem comparison test suite
+# Runs all filesystems x consistency models in parallel
+sh_binary(
+    name = "filesystem_comparison",
+    srcs = ["run-filesystem-comparison.sh"],
+    data = [
+        "//vm:qemu_test_runner",
+    ],
+    env = {
+        "BAZEL": "bazel",
+    },
+    visibility = ["//visibility:public"],
+)
+

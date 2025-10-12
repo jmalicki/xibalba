@@ -161,6 +161,13 @@ But if your code survives—like the Hero Twins—it doesn't just work. It has b
 - **🔧 [Fast VM Testing Design](docs/design/FAST-VM-TESTING.md)** - Architecture overview
 - **📝 [VM Permissions](docs/VM-PERMISSIONS.md)** - Permission setup details
 
+**Bug Research** (Validation):
+- **🐛 [Bug Research](docs/bug-research/)** - Real-world filesystem bugs catalog (16+ bugs from 2018-2025)
+  - Research on bugs that evaded detection for years
+  - Test implementation plans with code examples
+  - Gap analysis: What Xibalba can detect now vs. what's needed
+  - 70+ links to LKML, CVEs, and bug trackers
+
 ---
 
 ### Prerequisites
@@ -232,6 +239,18 @@ bazel run //chaos:simple_chaos_test -- --duration 60 /tmp/xibalba_test
 ### VM Testing (Hermetic QEMU)
 
 **No setup needed!** VM infrastructure uses Docker for hermetic builds.
+
+**Comprehensive comparison** (all filesystems in parallel):
+```bash
+# Compare ext4, XFS, btrfs across consistency models (~2 minutes)
+bazel run //tools:filesystem_comparison
+
+# Custom duration
+DURATION=60 bazel run //tools:filesystem_comparison
+
+# View results
+cat test-results/comparison-*/REPORT.md
+```
 
 **Quick test** (single filesystem):
 ```bash

@@ -590,7 +590,8 @@ Namespace and permission edge cases are testable with Xibalba's framework.
 *Compiled for Xibalba Filesystem Testing Framework*
 
 **Navigation:**
-- For test implementation details, see: `PRIORITY-BUGS-FOR-TESTING.md`
-- For Xibalba architecture, see: `design/TESTING-FRAMEWORK.md`
-- For eBPF implementation, see: `design/EBPF-FAULT-INJECTION-FOR-POSIX-BUGS.md`
+- For test implementation details, see: [`PRIORITY-BUGS-FOR-TESTING.md`](PRIORITY-BUGS-FOR-TESTING.md)
+- For gap analysis & roadmap, see: [`XIBALBA-CURRENT-CAPABILITIES-VS-BUGS.md`](XIBALBA-CURRENT-CAPABILITIES-VS-BUGS.md)
+- For Xibalba architecture, see: [`../design/TESTING-FRAMEWORK.md`](../design/TESTING-FRAMEWORK.md)
+- For eBPF implementation, see: [`../design/EBPF-FAULT-INJECTION-FOR-POSIX-BUGS.md`](../design/EBPF-FAULT-INJECTION-FOR-POSIX-BUGS.md)
 

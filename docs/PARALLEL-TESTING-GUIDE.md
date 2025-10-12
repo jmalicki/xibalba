@@ -12,13 +12,18 @@ The parallel test infrastructure runs **all filesystems × consistency models** 
 
 ```bash
 # Default: 30s duration, 4 readers, 2 writers
-./tools/run-filesystem-comparison.sh
+bazel run //tools:filesystem_comparison
 
 # Custom duration
-DURATION=60 ./tools/run-filesystem-comparison.sh
+bazel run //tools:filesystem_comparison -- --test_env=DURATION=60
 
-# Custom workload
-DURATION=30 READERS=8 WRITERS=4 ./tools/run-filesystem-comparison.sh
+# Custom workload  
+bazel run //tools:filesystem_comparison -- --test_env=DURATION=30 --test_env=READERS=8 --test_env=WRITERS=4
+```
+
+**Alternative** (with environment variables):
+```bash
+DURATION=60 bazel run //tools:filesystem_comparison
 ```
 
 ### Test Matrix
@@ -131,11 +136,14 @@ Update `vm/qemu/run-qemu-test.sh` to pass `xibalba.ebpf=1`:
 -append "... xibalba.ebpf=1 ..."
 ```
 
-### 3. Create eBPF-Enabled Test Script
+### 3. Run with eBPF Injection
 
 ```bash
-# tools/run-comparison-with-ebpf.sh
-EBPF_INJECT=1 ./tools/run-filesystem-comparison.sh
+# Via Bazel
+EBPF_INJECT=1 bazel run //tools:filesystem_comparison
+
+# Or pass as environment variable
+bazel run //tools:filesystem_comparison -- --test_env=EBPF_INJECT=1
 ```
 
 ### eBPF Injection Levels
@@ -181,10 +189,10 @@ bazel run //vm:qemu_test_runner -- \
 
 ```bash
 # Natural (no eBPF)
-RESULTS_DIR=results/natural ./tools/run-filesystem-comparison.sh
+RESULTS_DIR=results/natural bazel run //tools:filesystem_comparison
 
 # With eBPF
-RESULTS_DIR=results/ebpf EBPF_INJECT=1 ./tools/run-filesystem-comparison.sh
+RESULTS_DIR=results/ebpf EBPF_INJECT=1 bazel run //tools:filesystem_comparison
 
 # Compare
 diff results/natural/summary.txt results/ebpf/summary.txt
@@ -194,14 +202,14 @@ diff results/natural/summary.txt results/ebpf/summary.txt
 
 ```bash
 # 5-minute tests for more stable results
-DURATION=300 ./tools/run-filesystem-comparison.sh
+DURATION=300 bazel run //tools:filesystem_comparison
 ```
 
 ### More Aggressive Workload
 
 ```bash
 # 16 readers, 8 writers
-READERS=16 WRITERS=8 ./tools/run-filesystem-comparison.sh
+READERS=16 WRITERS=8 bazel run //tools:filesystem_comparison
 ```
 
 ## Performance
@@ -242,7 +250,7 @@ cat test-results/comparison-*/ext4_posix.log | head -50
 
 ```yaml
 - name: Run filesystem comparison
-  run: ./tools/run-filesystem-comparison.sh
+  run: bazel run //tools:filesystem_comparison
   
 - name: Upload results
   uses: actions/upload-artifact@v3
