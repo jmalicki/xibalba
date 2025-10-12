@@ -182,9 +182,12 @@ build:release --config=lto
 # Test Configuration
 # ============================================================================
 
-# Output detailed test results
-test --test_output=all
+# Output test results (errors for clean output, 'all' for full logs)
+test --test_output=errors
 test --test_verbose_timeout_warnings
+
+# For debugging tests, use: bazel test --test_output=all
+test:verbose-tests --test_output=all
 
 # Sanitizers for tests: DISABLED by default due to complexity
 # Note: UBSan + Bazel + external C++ deps (googletest) = linking hell
@@ -229,12 +232,16 @@ build --repository_cache=~/.cache/bazel/rudra/repo
 # Logging and Output
 # ============================================================================
 
-# Show command lines
-build --subcommands=pretty_print
+# Suppress verbose compilation output (enable with --config=verbose if needed)
+# build --subcommands=pretty_print
 build --verbose_failures
 
 # Color output
 common --color=yes
+
+# Verbose mode (for debugging build issues)
+build:verbose --subcommands=pretty_print
+build:verbose --announce_rc
 
 # ============================================================================
 # Platform-Specific
