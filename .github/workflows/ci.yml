@@ -23,8 +23,8 @@ jobs:
     - name: Check markdown links
       uses: lycheeverse/lychee-action@v1
       with:
-        # Check all markdown files
-        args: --verbose --no-progress '**/*.md'
+        # Check all markdown files, exclude DOI links (bot protection)
+        args: '--verbose --no-progress --exclude-path .lycheeignore **/*.md'
         # Fail on broken links
         fail: true
         # Format output

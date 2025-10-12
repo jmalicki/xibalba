@@ -394,7 +394,7 @@ If VM rebuild is too risky right now, we can still get big wins:
 
 - [Virtio-9p Documentation](https://wiki.qemu.org/Documentation/9psetup)
 - [Firecracker](https://firecracker-microvm.github.io/)
-- [QEMU Direct Kernel Boot](https://qemu.readthedocs.io/en/latest/system/linuxboot.html)
+- [QEMU Direct Kernel Boot](https://qemu-project.gitlab.io/qemu/system/linuxboot.html)
 - [Minimal Linux Live](http://minimal.linux-bg.org/) - Example of minimal rootfs
 - Current Xibalba docs: `docs/design/JEPSEN-INSPIRED-FILESYSTEM-TESTING.md`
 

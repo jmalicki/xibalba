@@ -16,6 +16,15 @@ repos:
       - id: check-merge-conflict
       - id: mixed-line-ending
 
+  # Markdown link checking
+  - repo: https://github.com/lycheeverse/lychee.git
+    rev: v0.15.1
+    hooks:
+      - id: lychee
+        name: Check markdown links
+        args: ['--verbose', '--no-progress']
+        files: '\.md$'
+
   # Bazel-native linting (uses hermetic shellcheck from Bazel)
   - repo: local
     hooks:
