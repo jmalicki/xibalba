@@ -21,12 +21,23 @@ echo "Building minimal initramfs with embedded xibalba binaries and kernel modul
 cd /tmp
 mkdir -p initrd/{bin,sbin,usr/bin,usr/sbin,dev,proc,sys,test,opt/xibalba}
 
-# Install busybox, bash, and jq
-echo "Installing busybox, bash, and jq..."
-apt-get install -y -qq busybox-static bash jq
+# Install busybox, bash, jq, and udev (for ZFS)
+echo "Installing busybox, bash, jq, and udev..."
+apt-get install -y -qq busybox-static bash jq udev kmod
 cp /bin/busybox initrd/bin/busybox
 cp /bin/bash initrd/bin/bash
 cp /usr/bin/jq initrd/usr/bin/jq
+
+# Install udev for dynamic device node creation (needed by ZFS)
+echo "Installing udev components..."
+cp /lib/systemd/systemd-udevd initrd/sbin/udevd
+cp /bin/udevadm initrd/sbin/udevadm
+
+# Copy udev rules (minimal set for block devices)
+mkdir -p initrd/lib/udev/rules.d
+cp /lib/udev/rules.d/50-udev-default.rules initrd/lib/udev/rules.d/ 2>/dev/null || true
+cp /lib/udev/rules.d/60-block.rules initrd/lib/udev/rules.d/ 2>/dev/null || true
+cp /lib/udev/rules.d/80-drivers.rules initrd/lib/udev/rules.d/ 2>/dev/null || true
 
 # Create busybox symlinks for essential commands
 cd initrd/bin
@@ -64,8 +75,8 @@ chmod +x initrd/usr/bin/*
 echo "Copying required libraries..."
 mkdir -p initrd/lib/x86_64-linux-gnu initrd/lib64
 
-# Copy libraries for bash, jq, xibalba binaries, mkfs tools, zfs tools, and modprobe
-for binary in initrd/bin/bash initrd/usr/bin/jq initrd/usr/bin/pause_controller initrd/usr/bin/simple_chaos_test initrd/sbin/mkfs.* initrd/sbin/zfs initrd/sbin/zpool initrd/sbin/modprobe; do
+# Copy libraries for bash, jq, xibalba binaries, mkfs tools, zfs tools, modprobe, and udev
+for binary in initrd/bin/bash initrd/usr/bin/jq initrd/usr/bin/pause_controller initrd/usr/bin/simple_chaos_test initrd/sbin/mkfs.* initrd/sbin/zfs initrd/sbin/zpool initrd/sbin/modprobe initrd/sbin/udevd initrd/sbin/udevadm; do
     if [ -f "$binary" ]; then
         echo "  Copying libs for $(basename $binary)..."
         # Get list of libraries first, then copy (avoid subshell issues)

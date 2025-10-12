@@ -10,6 +10,21 @@ echo "=== Xibalba Fast VM Init ==="
 mount -t proc none /proc
 mount -t sysfs none /sys
 mount -t devtmpfs none /dev
+mount -t tmpfs -o mode=0755 tmpfs /run
+
+# Start udev for dynamic device node creation (needed by ZFS)
+echo "Starting udev..."
+if command -v udevd >/dev/null 2>&1; then
+    mkdir -p /run/udev
+    /sbin/udevd --daemon 2>/dev/null && sleep 0.5 || echo "  ⚠️  udevd failed"
+    if command -v udevadm >/dev/null 2>&1; then
+        udevadm trigger --action=add 2>/dev/null || true
+        udevadm settle --timeout=5 2>/dev/null || true
+        echo "  ✓ udev running"
+    fi
+else
+    echo "  ⚠️  udev not available"
+fi
 
 # Get test parameters from kernel command line
 FILESYSTEM=$(cat /proc/cmdline | grep -o 'xibalba.fs=[^ ]*' | cut -d= -f2)
@@ -117,8 +132,13 @@ case "$FILESYSTEM" in
         echo "✓ ZFS module loaded"
         
         # ZFS requires a pool (can take longer than other filesystems)
+        echo "Preparing device for ZFS..."
+        # ZFS needs a clean device - wipe any existing signatures
+        dd if=/dev/zero of=/dev/vda bs=1M count=10 2>/dev/null || true
+        
         echo "Creating ZFS pool with 60s timeout..."
-        timeout 60 zpool create -f xibalba-test /dev/vda || {
+        # Use -o feature@... to avoid compatibility warnings, and specify whole disk
+        timeout 60 zpool create -f -o ashift=12 xibalba-test /dev/vda || {
             CODE=$?
             echo "ERROR: zpool create failed (exit: $CODE)"
             echo "ZFS pool creation timed out or failed"
@@ -132,6 +152,15 @@ case "$FILESYSTEM" in
             exit 0
         }
         echo "✓ ZFS pool created"
+        
+        # Trigger udev to create partition device nodes
+        echo "Triggering udev for partition nodes..."
+        if command -v udevadm >/dev/null 2>&1; then
+            udevadm trigger --action=add --subsystem-match=block 2>/dev/null || true
+            udevadm settle --timeout=5 2>/dev/null || true
+            echo "  ✓ Device nodes updated"
+            ls -la /dev/vda* 2>/dev/null || echo "  ⚠️  Partition nodes may not exist"
+        fi
         
         echo "Creating ZFS filesystem..."
         timeout 10 zfs create xibalba-test/testdir || {
