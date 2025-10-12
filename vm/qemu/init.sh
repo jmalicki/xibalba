@@ -267,15 +267,16 @@ fi
 if [ -f /test.output/xibalba-scans.jsonl ]; then
     echo ""
     echo "=== XIBALBA_SCANS_JSONL ==="
-    # Show count and sample
     TOTAL_SCANS=$(wc -l < /test.output/xibalba-scans.jsonl)
     echo "# Total scans exported: $TOTAL_SCANS"
-    echo "# Sample (first 5 scans):"
-    head -5 /test.output/xibalba-scans.jsonl
-    if [ "$TOTAL_SCANS" -gt 10 ]; then
-        echo "# ..."
-        echo "# (Remaining $((TOTAL_SCANS - 5)) scans omitted from console)"
-        echo "# Full data available for post-hoc analysis"
+    
+    # Show all scans if < 100, otherwise show first 50 + last 50
+    if [ "$TOTAL_SCANS" -le 100 ]; then
+        cat /test.output/xibalba-scans.jsonl
+    else
+        head -50 /test.output/xibalba-scans.jsonl
+        echo "# ... ($(($TOTAL_SCANS - 100)) scans omitted) ..."
+        tail -50 /test.output/xibalba-scans.jsonl
     fi
     echo "=== END_XIBALBA_SCANS_JSONL ==="
 fi

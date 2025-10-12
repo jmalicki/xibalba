@@ -39,15 +39,26 @@ TOTAL_SCANS=$(wc -l < "$SCANS_FILE")
 echo "Total scans: $TOTAL_SCANS"
 echo ""
 
-# Analyze based on model
+# Analyze based on model (re-compute from actual vs expected, not pre-computed results!)
 case "$MODEL" in
     posix)
         echo "Applying POSIX model (duplicates only)..."
-        BUGS=$(jq -r 'select(.results.duplicates > 0) | 1' "$SCANS_FILE" | wc -l)
+        # Check for duplicates by comparing actual entries
+        BUGS=$(jq -r '
+            .actual as $arr |
+            ($arr | length) as $len |
+            ($arr | unique | length) as $unique |
+            if $len != $unique then 1 else empty end
+        ' "$SCANS_FILE" | wc -l)
         ;;
     weak)
         echo "Applying WEAK model (missing + phantoms + duplicates)..."
-        BUGS=$(jq -r 'select(.results.duplicates > 0 or .results.missing > 0 or .results.phantoms > 0) | 1' "$SCANS_FILE" | wc -l)
+        # Check if actual != expected (any difference is a bug)
+        BUGS=$(jq -r '
+            (.actual | sort) as $actual_sorted |
+            (.expected | sort) as $expected_sorted |
+            if $actual_sorted != $expected_sorted then 1 else empty end
+        ' "$SCANS_FILE" | wc -l)
         ;;
     *)
         echo "ERROR: Unknown model: $MODEL"
@@ -81,11 +92,28 @@ else
 fi
 
 echo ""
-echo "Breakdown:"
-jq -r '[.results.duplicates, .results.missing, .results.phantoms] | @tsv' "$SCANS_FILE" | \
-    awk 'BEGIN {dup=0; miss=0; phan=0}
-         {dup+=$1; miss+=$2; phan+=$3}
-         END {print "  Duplicates: " dup; print "  Missing: " miss; print "  Phantoms: " phan}'
+echo "Breakdown (re-computed from actual vs expected):"
+
+# Re-compute breakdown based on actual vs expected arrays
+TOTAL_MISSING=$(jq -r '
+    (.expected | length) - (.actual | length) as $diff |
+    if $diff > 0 then $diff else 0 end
+' "$SCANS_FILE" | awk '{s+=$1} END {print s}')
+
+TOTAL_PHANTOM=$(jq -r '
+    (.actual | length) - (.expected | length) as $diff |
+    if $diff > 0 then $diff else 0 end
+' "$SCANS_FILE" | awk '{s+=$1} END {print s}')
+
+# Count duplicate instances
+TOTAL_DUPLICATES=$(jq -r '
+    .actual as $arr |
+    ($arr | length) - ($arr | unique | length)
+' "$SCANS_FILE" | awk '{s+=$1} END {print s}')
+
+echo "  Duplicates: $TOTAL_DUPLICATES"
+echo "  Missing: $TOTAL_MISSING (files expected but not in actual)"
+echo "  Phantom: $TOTAL_PHANTOM (files in actual but not expected)"
 
 echo ""
 echo "This is POST-HOC ANALYSIS - no test re-run needed!"
