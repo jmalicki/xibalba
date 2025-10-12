@@ -73,6 +73,16 @@ int dir_reader_read(struct dir_reader *reader,
             break;  // EOF
         }
         
+        // Skip filesystem metadata entries that aren't real files:
+        // - "." and ".." are present in every directory
+        // - "lost+found" is created by ext2/ext3/ext4 filesystems
+        // These should not be tracked as user-created files
+        if (strcmp(ent->d_name, ".") == 0 ||
+            strcmp(ent->d_name, "..") == 0 ||
+            strcmp(ent->d_name, "lost+found") == 0) {
+            continue;
+        }
+        
         entries[count].ino = ent->d_ino;
         entries[count].type = ent->d_type;
         // Use snprintf for safe string copying with guaranteed null-termination
