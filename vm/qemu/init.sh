@@ -59,20 +59,29 @@ case "$FILESYSTEM" in
     zfs)
         if ! command -v zpool >/dev/null; then
             echo "ERROR: zpool not found (ZFS not available in initramfs)"
-            echo "ZFS requires kernel modules which aren't in minimal initramfs"
             exit 1
         fi
+        
+        # Load ZFS kernel modules
+        echo "Loading ZFS kernel modules..."
+        modprobe zfs 2>/dev/null || {
+            echo "ERROR: Failed to load ZFS kernel module"
+            echo "ZFS may not be available in this kernel"
+            exit 1
+        }
+        
         # ZFS requires a pool
+        echo "Creating ZFS pool..."
         zpool create -f xibalba-test /dev/vda
         zfs create xibalba-test/testdir
         mkdir -p /test
-        mount -t zfs xibalba-test/testdir /test
+        zfs set mountpoint=/test xibalba-test/testdir
         echo "✓ ZFS pool created and mounted"
         # Skip standard mount below
         ;;
     *)
         echo "ERROR: Unknown filesystem: $FILESYSTEM"
-        echo "Supported: ext4, xfs, btrfs (ZFS not in minimal initramfs)"
+        echo "Supported: ext4, xfs, btrfs, zfs"
         exit 1
         ;;
 esac

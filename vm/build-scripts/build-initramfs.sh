@@ -34,14 +34,22 @@ for cmd in sh ash mount umount mkdir cat grep echo cut modprobe lsmod date sleep
 done
 cd ../..
 
-# Install filesystem tools (mkfs.ext4, mkfs.xfs, mkfs.btrfs)
+# Install filesystem tools (mkfs.ext4, mkfs.xfs, mkfs.btrfs, zfs)
 echo "Installing filesystem tools..."
-apt-get install -y -qq e2fsprogs xfsprogs btrfs-progs
+apt-get install -y -qq e2fsprogs xfsprogs btrfs-progs zfsutils-linux kmod
 
 # Copy mkfs tools to initrd
+echo "Copying filesystem utilities..."
 cp /sbin/mkfs.ext4 /sbin/mke2fs initrd/sbin/ || true
 cp /sbin/mkfs.xfs initrd/sbin/ || true
 cp /sbin/mkfs.btrfs initrd/sbin/ || true
+
+# Copy ZFS tools
+cp /sbin/zfs /sbin/zpool initrd/sbin/ || true
+
+# Copy modprobe (needed for ZFS kernel modules)
+cp /sbin/modprobe /sbin/insmod /sbin/rmmod initrd/sbin/ || true
+cp /sbin/depmod initrd/sbin/ || true
 
 # Copy xibalba binaries into initramfs FIRST
 echo "Installing xibalba binaries..."
@@ -55,8 +63,8 @@ chmod +x initrd/usr/bin/*
 echo "Copying required libraries..."
 mkdir -p initrd/lib/x86_64-linux-gnu initrd/lib64
 
-# Copy libraries for bash, jq, xibalba binaries, and all mkfs tools
-for binary in initrd/bin/bash initrd/usr/bin/jq initrd/usr/bin/pause_controller initrd/usr/bin/simple_chaos_test initrd/sbin/mkfs.*; do
+# Copy libraries for bash, jq, xibalba binaries, mkfs tools, zfs tools, and modprobe
+for binary in initrd/bin/bash initrd/usr/bin/jq initrd/usr/bin/pause_controller initrd/usr/bin/simple_chaos_test initrd/sbin/mkfs.* initrd/sbin/zfs initrd/sbin/zpool initrd/sbin/modprobe; do
     if [ -f "$binary" ]; then
         echo "  Copying libs for $(basename $binary)..."
         # Get list of libraries first, then copy (avoid subshell issues)
@@ -71,6 +79,37 @@ done
 
 # Add ld-linux linker
 cp -L /lib64/ld-linux-x86-64.so.2 initrd/lib64/
+
+# Copy kernel modules for btrfs and ZFS
+echo "Copying kernel modules..."
+KERNEL_VERSION=$(ls /lib/modules/ | head -1)
+mkdir -p initrd/lib/modules/$KERNEL_VERSION/kernel/fs
+
+# Copy btrfs modules (in mainline kernel)
+if [ -d /lib/modules/$KERNEL_VERSION/kernel/fs/btrfs ]; then
+    cp -r /lib/modules/$KERNEL_VERSION/kernel/fs/btrfs initrd/lib/modules/$KERNEL_VERSION/kernel/fs/
+    echo "  ✓ btrfs modules copied"
+fi
+
+# Copy ZFS modules (external DKMS module)
+if [ -d /lib/modules/$KERNEL_VERSION/extra/zfs ]; then
+    mkdir -p initrd/lib/modules/$KERNEL_VERSION/extra
+    cp -r /lib/modules/$KERNEL_VERSION/extra/zfs initrd/lib/modules/$KERNEL_VERSION/extra/
+    echo "  ✓ ZFS modules copied (extra/zfs)"
+elif [ -d /lib/modules/$KERNEL_VERSION/updates/dkms ]; then
+    mkdir -p initrd/lib/modules/$KERNEL_VERSION/updates
+    cp -r /lib/modules/$KERNEL_VERSION/updates/dkms initrd/lib/modules/$KERNEL_VERSION/updates/ || true
+    echo "  ✓ DKMS modules copied (may include ZFS)"
+fi
+
+# Copy modules.* dependency files for modprobe
+cp /lib/modules/$KERNEL_VERSION/modules.dep initrd/lib/modules/$KERNEL_VERSION/ 2>/dev/null || true
+cp /lib/modules/$KERNEL_VERSION/modules.dep.bin initrd/lib/modules/$KERNEL_VERSION/ 2>/dev/null || true
+cp /lib/modules/$KERNEL_VERSION/modules.alias initrd/lib/modules/$KERNEL_VERSION/ 2>/dev/null || true
+cp /lib/modules/$KERNEL_VERSION/modules.alias.bin initrd/lib/modules/$KERNEL_VERSION/ 2>/dev/null || true
+cp /lib/modules/$KERNEL_VERSION/modules.symbols initrd/lib/modules/$KERNEL_VERSION/ 2>/dev/null || true
+cp /lib/modules/$KERNEL_VERSION/modules.symbols.bin initrd/lib/modules/$KERNEL_VERSION/ 2>/dev/null || true
+echo "  ✓ Module dependency files copied"
 
 # Copy our custom init script
 echo "Installing custom init..."
