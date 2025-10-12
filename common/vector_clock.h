@@ -32,7 +32,7 @@
 extern "C" {
 #endif
 
-#define MAX_THREADS 64  // Maximum concurrent threads to track
+#define MAX_THREADS 128  // Maximum concurrent threads to track (increased for extreme stress tests)
 
 // Vector clock: one counter per thread
 typedef struct {
