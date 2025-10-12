@@ -16,9 +16,11 @@ FILESYSTEM=$(cat /proc/cmdline | grep -o 'xibalba.fs=[^ ]*' | cut -d= -f2)
 DURATION=$(cat /proc/cmdline | grep -o 'xibalba.duration=[^ ]*' | cut -d= -f2 || echo "300")
 READERS=$(cat /proc/cmdline | grep -o 'xibalba.readers=[^ ]*' | cut -d= -f2 || echo "10")
 WRITERS=$(cat /proc/cmdline | grep -o 'xibalba.writers=[^ ]*' | cut -d= -f2 || echo "3")
+MODEL=$(cat /proc/cmdline | grep -o 'xibalba.model=[^ ]*' | cut -d= -f2 || echo "posix")
 
 echo "Test configuration:"
 echo "  Filesystem: $FILESYSTEM"
+echo "  Consistency model: $MODEL"
 echo "  Duration: $DURATION seconds"
 echo "  Readers: $READERS"
 echo "  Writers: $WRITERS"
@@ -30,27 +32,59 @@ echo "✓ Xibalba binaries ready (embedded in initramfs)"
 
 # Format test device (/dev/vda)
 echo "Formatting /dev/vda as ${FILESYSTEM}..."
+
+# Check if mkfs tool exists
 case "$FILESYSTEM" in
     ext4)
+        if ! command -v mkfs.ext4 >/dev/null; then
+            echo "ERROR: mkfs.ext4 not found"
+            exit 1
+        fi
         mkfs.ext4 -F /dev/vda
         ;;
     xfs)
+        if ! command -v mkfs.xfs >/dev/null; then
+            echo "ERROR: mkfs.xfs not found"
+            exit 1
+        fi
         mkfs.xfs -f /dev/vda
         ;;
     btrfs)
+        if ! command -v mkfs.btrfs >/dev/null; then
+            echo "ERROR: mkfs.btrfs not found"
+            exit 1
+        fi
         mkfs.btrfs -f /dev/vda
+        ;;
+    zfs)
+        if ! command -v zpool >/dev/null; then
+            echo "ERROR: zpool not found (ZFS not available in initramfs)"
+            echo "ZFS requires kernel modules which aren't in minimal initramfs"
+            exit 1
+        fi
+        # ZFS requires a pool
+        zpool create -f xibalba-test /dev/vda
+        zfs create xibalba-test/testdir
+        mkdir -p /test
+        mount -t zfs xibalba-test/testdir /test
+        echo "✓ ZFS pool created and mounted"
+        # Skip standard mount below
         ;;
     *)
         echo "ERROR: Unknown filesystem: $FILESYSTEM"
-        echo "Supported: ext4, xfs, btrfs"
+        echo "Supported: ext4, xfs, btrfs (ZFS not in minimal initramfs)"
         exit 1
         ;;
 esac
 
-# Mount test filesystem
-echo "Mounting test filesystem..."
-mkdir -p /test
-mount /dev/vda /test
+echo "✓ Filesystem formatted"
+
+# Mount test filesystem (unless already mounted by ZFS)
+if [ "$FILESYSTEM" != "zfs" ]; then
+    echo "Mounting test filesystem..."
+    mkdir -p /test
+    mount /dev/vda /test
+fi
 echo "✓ Test filesystem ready"
 
 # Run xibalba tests directly
@@ -58,9 +92,10 @@ echo "✓ Test filesystem ready"
 echo ""
 echo "=== Running Xibalba Tests ==="
 echo "Running simple_chaos_test for $DURATION seconds with $READERS readers and $WRITERS writers..."
+echo "Consistency model: ${MODEL:-posix}"
 cd /test
 EXIT_CODE=0
-simple_chaos_test --duration $DURATION --readers $READERS --writers $WRITERS /test || EXIT_CODE=$?
+simple_chaos_test --${MODEL:-posix} --duration $DURATION --readers $READERS --writers $WRITERS /test || EXIT_CODE=$?
 
 echo ""
 echo "Test completed with exit code: $EXIT_CODE"

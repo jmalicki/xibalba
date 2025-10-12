@@ -101,6 +101,65 @@ qemu_filesystem_suite(
     duration = 60,
 )
 
+# ============================================================================
+# Consistency Model Comparison Tests
+# ============================================================================
+# Test ext4 and ZFS with both POSIX and WEAK models to empirically validate:
+# 1. Both have 0 bugs with --posix (POSIX compliance)
+# 2. ZFS has fewer bugs than ext4 with --weak (COW advantage)
+
+# ext4 POSIX compliance (should be 0 bugs)
+qemu_filesystem_test(
+    name = "ext4_posix_compliance",
+    filesystem = "ext4",
+    model = "posix",
+    duration = 120,
+    readers = 5,
+    writers = 2,
+)
+
+# ext4 weak consistency (natural race windows)
+qemu_filesystem_test(
+    name = "ext4_weak_consistency",
+    filesystem = "ext4",
+    model = "weak",
+    duration = 120,
+    readers = 5,
+    writers = 2,
+)
+
+# ZFS POSIX compliance (should be 0 bugs)
+qemu_filesystem_test(
+    name = "zfs_posix_compliance",
+    filesystem = "zfs",
+    model = "posix",
+    duration = 120,
+    readers = 5,
+    writers = 2,
+)
+
+# ZFS weak consistency (should have fewer bugs than ext4)
+qemu_filesystem_test(
+    name = "zfs_weak_consistency",
+    filesystem = "zfs",
+    model = "weak",
+    duration = 120,
+    readers = 5,
+    writers = 2,
+)
+
+# Test suite: Run all comparisons
+test_suite(
+    name = "consistency_model_comparison",
+    tests = [
+        ":ext4_posix_compliance",
+        ":ext4_weak_consistency",
+        ":zfs_posix_compliance",
+        ":zfs_weak_consistency",
+    ],
+    tags = ["comparison", "research"],
+)
+
 # === Pre-built VM Image (Xibalba already installed) - OLD APPROACH ===
 
 # Build a VM image with xibalba and all dependencies pre-installed

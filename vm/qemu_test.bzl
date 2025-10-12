@@ -1,6 +1,6 @@
 """Bazel rules for fast QEMU-based filesystem testing."""
 
-def qemu_filesystem_test(name, filesystem, duration = 60, readers = 10, writers = 3, **kwargs):
+def qemu_filesystem_test(name, filesystem, duration = 60, readers = 10, writers = 3, model = "posix", **kwargs):
     """Create a fast QEMU VM test for a specific filesystem.
     
     This runs xibalba tests in a lightweight QEMU VM that boots in ~1 second.
@@ -12,6 +12,7 @@ def qemu_filesystem_test(name, filesystem, duration = 60, readers = 10, writers 
         duration: Test duration in seconds (default: 60)
         readers: Number of reader threads (default: 10)
         writers: Number of writer threads (default: 3)
+        model: Consistency model (posix, weak, strict, eventual - default: posix)
         **kwargs: Additional sh_test() kwargs (size, timeout, tags, etc.)
     """
     native.sh_test(
@@ -22,6 +23,7 @@ def qemu_filesystem_test(name, filesystem, duration = 60, readers = 10, writers 
             "--duration", str(duration),
             "--readers", str(readers),
             "--writers", str(writers),
+            "--model", model,
         ],
         data = [
             ":qemu_test_runner",
