@@ -52,9 +52,10 @@
 
 /* Consistency models for validation */
 typedef enum {
-    CONSISTENCY_STRICT,       // Linearizable: all ops instantly visible (strict ordering)
-    CONSISTENCY_WEAK_POSIX,   // POSIX weak: snapshot at read start, ops during read may/may not appear
-    CONSISTENCY_EVENTUAL,     // Eventual: operations may take time to appear
+    CONSISTENCY_POSIX_MINIMAL,  // POSIX minimum: only duplicates are bugs (what POSIX actually forbids)
+    CONSISTENCY_WEAK_POSIX,     // POSIX weak: causally-ordered ops should be visible (stronger than POSIX)
+    CONSISTENCY_STRICT,         // Linearizable: all ops instantly visible (academic/research)
+    CONSISTENCY_EVENTUAL,       // Eventual: operations may take time to appear (distributed FS)
 } consistency_model_t;
 
 /* Operation types for history tracking */
