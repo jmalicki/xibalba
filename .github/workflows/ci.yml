@@ -59,9 +59,7 @@ jobs:
           clang-20 \
           libbpf-dev \
           libelf-dev \
-          linux-headers-generic \
-          qemu-system-x86 \
-          docker.io
+          linux-headers-generic
     
     - name: Setup Bazelisk
       uses: bazelbuild/setup-bazelisk@v3
@@ -98,8 +96,7 @@ jobs:
           libbpf-dev \
           libelf-dev \
           linux-headers-generic \
-          qemu-system-x86 \
-          docker.io
+          qemu-system-x86
     
     - name: Enable KVM
       run: |
