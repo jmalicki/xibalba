@@ -100,3 +100,21 @@ oci_push(
     remote_tags = ["latest"],
 )
 
+# ============================================================================
+# Utilities
+# ============================================================================
+
+# Generate cache key from lock files
+sh_binary(
+    name = "generate_cache_key",
+    srcs = ["generate_cache_key.sh"],
+    args = [
+        "$(location //:MODULE.bazel.lock)",
+        "$(location :packages.lock.json)",
+    ],
+    data = [
+        "//:MODULE.bazel.lock",
+        ":packages.lock.json",
+    ],
+)
+
