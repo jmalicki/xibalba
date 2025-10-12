@@ -549,11 +549,48 @@ Namespace and permission edge cases are testable with Xibalba's framework.
 - Linux 6.11 VFS fix: https://www.phoronix.com/news/Linux-6.11-VFS-Fix-5-Year-Bug
 
 ### Bug Trackers:
-- Debian ext4 bug: https://bugs.launchpad.net/bugs/1806755
-- Ubuntu 24.04 corruption: https://bugs.launchpad.net/bugs/2078283
+- Debian #1055005 (ext4 iomap): https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1055005
+- Ubuntu #1806755 (ext4 4.19): https://bugs.launchpad.net/bugs/1806755
+- Ubuntu #2078283 (24.04 corruption): https://bugs.launchpad.net/bugs/2078283
+- Ubuntu #1796542 (silent corruption): https://bugs.launchpad.net/bugs/1796542
+- Kernel Bugzilla #201685 (block layer): https://bugzilla.kernel.org/show_bug.cgi?id=201685
+- Arch Linux Forums (ext4 3.6): https://bbs.archlinux.org/viewtopic.php?id=151341
+
+### LWN.net Articles (Highly Recommended Reading):
+- ext4 data corruption in stable kernels: https://lwn.net/Articles/954770/
+- Another ext4 stable discussion: https://lwn.net/Articles/954285/
+- Block layer corruption bug (2018): https://lwn.net/Articles/774440/
+- RAID 0 corruption (2015): https://lwn.net/Articles/645720/
+- Trust in and maintenance of filesystems (2023): https://lwn.net/Articles/951846/
+
+### Community Discussions:
+- Hacker News - ext4 corruption: https://news.ycombinator.com/item?id=38589389
+- Phoronix Forums - ext4 bug: https://www.phoronix.com/forums/forum/software/general-linux-open-source/32852-ext4-data-corruption-bug-hits-stable-linux-kernels
+
+### Wikipedia:
+- ext4 delayed allocation: https://en.wikipedia.org/wiki/Ext4#Delayed_allocation_and_potential_data_loss
+- ReiserFS: https://en.wikipedia.org/wiki/ReiserFS
+- Bcachefs: https://en.wikipedia.org/wiki/Bcachefs
+- ZFS: https://en.wikipedia.org/wiki/ZFS
+
+### Filesystem-Specific Resources:
+- Btrfs Wiki: https://btrfs.wiki.kernel.org
+- Btrfs RAID56: https://btrfs.wiki.kernel.org/index.php/RAID56
+- OpenZFS GitHub: https://github.com/openzfs/zfs
+
+### Research & Tools:
+- CrashMonkey GitHub: https://github.com/utsaslab/crashmonkey
+- Syzkaller: https://github.com/google/syzkaller
+- xfstests: https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+- Vijay Chidambaram's page: https://www.cs.utexas.edu/~vijay/
 
 ---
 
 *Last Updated: October 12, 2025*
 *Compiled for Xibalba Filesystem Testing Framework*
+
+**Navigation:**
+- For test implementation details, see: `PRIORITY-BUGS-FOR-TESTING.md`
+- For Xibalba architecture, see: `design/TESTING-FRAMEWORK.md`
+- For eBPF implementation, see: `design/EBPF-FAULT-INJECTION-FOR-POSIX-BUGS.md`
 

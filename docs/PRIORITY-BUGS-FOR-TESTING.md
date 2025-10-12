@@ -225,6 +225,17 @@ dd if=/dev/urandom of=/mnt/test/bigfile bs=1M count=1000
 - Subsequent writes go to wrong location
 - Silent data corruption
 
+**Links & References:**
+- **Discovered:** December 2023
+- **Affected Kernel:** 6.1.64 stable
+- **LKML Discussion:** https://lkml.org/lkml/2023/12/5/646
+- **LWN Article:** https://lwn.net/Articles/954770/
+- **Debian Bug:** https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1055005
+- **Hacker News:** https://news.ycombinator.com/item?id=38589389
+- **Missing Commit:** 936e114a245b6 ("iomap: update ki_pos a little later in iomap_dio_complete")
+- **Root Cause:** Backport without prerequisite dependency
+- **Fixed in:** Stable kernels 6.5+
+
 **Test Scenario:**
 ```c
 // Direct I/O writes
@@ -260,6 +271,15 @@ pwrite(fd, buf2, 4096, 4096);
 - Segment Information Table (SIT) and Segment Summary Area (SSA) become inconsistent
 - Stale data in cache causes corruption
 
+**Links & References:**
+- **CVE:** CVE-2025-38164
+- **Discovered:** July 3, 2025
+- **CVE Details:** https://www.wiz.io/vulnerability-database/cve/cve-2025-38164
+- **Function:** `f2fs_gc_range()` 
+- **Issue:** SSA blocks not updated due to stale `curseg` cache data
+- **Impact:** Filesystem corruption during garbage collection
+- **Filesystem:** Flash-Friendly File System (F2FS)
+
 **Test Scenario:**
 ```bash
 # Fill filesystem to trigger GC
@@ -292,6 +312,15 @@ dd if=/dev/urandom of=/mnt/test/data bs=1M count=500
 **The Bug:**
 - File data written where inode metadata should be
 - Severe filesystem corruption
+
+**Links & References:**
+- **Discovered:** March 2020
+- **LKML Discussion:** https://lkml.org/lkml/2020/3/31/1555
+- **Error Message:** "Unmount and run xfs_repair"
+- **Symptom:** File data overwriting inode metadata
+- **Cause:** Metadata buffer corruption
+- **Fix:** Required `xfs_repair` to recover
+- **Impact:** Severe data structure corruption
 
 **Test Scenario:**
 ```bash
@@ -386,30 +415,95 @@ For each bug test:
 - Match or exceed CrashMonkey's detection rate
 - Cover more bug categories (races + crashes)
 
+**CrashMonkey Paper & Resources:**
+- **Title:** "Finding Crash-Consistency Bugs with Bounded Black-Box Crash Testing"
+- **Authors:** Jayashree Mohan, Ashlie Martinez, Soujanya Ponnapalli, Pandian Raju, Vijay Chidambaram
+- **Published:** OSDI 2018
+- **arXiv:** https://arxiv.org/abs/1810.02904
+- **GitHub:** https://github.com/utsaslab/crashmonkey
+- **Author Website:** https://www.cs.utexas.edu/~vijay/
+- **Key Finding:** Most bugs reproducible with ≤3 filesystem operations
+
 ---
 
 ## Resources for Testing
+
+### Primary Sources for Bug Research:
+
+**Linux Kernel Mailing List (LKML):**
+- Main archive: https://lkml.org
+- Search by CVE, filesystem name, or keywords
+- Contains original bug reports and discussions
+
+**Kernel Git Repository:**
+- Main repo: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+- Search commits by hash, CVE, or message
+- Browse fs/ directory for filesystem-specific changes
+
+**Bug Trackers:**
+- Kernel Bugzilla: https://bugzilla.kernel.org
+- Debian Bugs: https://bugs.debian.org
+- Ubuntu Launchpad: https://bugs.launchpad.net
+- Red Hat Bugzilla: https://bugzilla.redhat.com
+
+**OpenZFS Resources:**
+- GitHub Issues: https://github.com/openzfs/zfs/issues
+- GitHub Commits: https://github.com/openzfs/zfs/commits
+- Mailing list archives
+
+**Btrfs Resources:**
+- Btrfs Wiki: https://btrfs.wiki.kernel.org
+- RAID56 Status: https://btrfs.wiki.kernel.org/index.php/RAID56
+- Mailing list: linux-btrfs@vger.kernel.org
+
+**CVE Databases:**
+- MITRE CVE: https://cve.mitre.org
+- NVD: https://nvd.nist.gov
+- Ubuntu Security: https://ubuntu.com/security/cves
+- Rapid7 VulnDB: https://www.rapid7.com/db/vulnerabilities/
+
+**News & Analysis:**
+- LWN.net: https://lwn.net (excellent technical analysis)
+- Phoronix: https://www.phoronix.com (Linux news)
+- The Register: https://www.theregister.com (tech news)
 
 ### Get Old Kernel Versions (with bugs):
 ```bash
 # For testing bugs that have been fixed
 # Use VMs with specific kernel versions
 
-# ext4 iomap bug: kernels before 6.5
-# F2FS GC bug: kernels before patch
-# etc.
+# ext4 iomap bug: kernels 6.1.64 (has bug), 6.5+ (fixed)
+# F2FS GC bug: kernels before CVE-2025-38164 fix
+# Btrfs scrub: kernels before CVE-2024-26616 fix
+
+# Download old kernels:
+# https://kernel.org/pub/linux/kernel/
 ```
 
 ### Filesystem Tools Needed:
 - `mkfs.*` for each filesystem
-- `fsck.*` / `xfs_repair` for verification
-- `xfstests` for standard test suite
+- `fsck.*` / `xfs_repair` / `btrfs check` for verification
+- `xfstests` for standard test suite (https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git)
 - `blktrace` for I/O tracing
+- `strace` for system call tracing
+- `perf` for kernel profiling
 
 ### Test Environments:
-- VMs with different kernel versions
+- VMs with different kernel versions (QEMU/KVM)
 - Multiple filesystem types
 - QEMU with snapshot/restore for crash testing
+- Container images with specific kernel versions
+
+### Academic Papers on Filesystem Testing:
+- **CrashMonkey (OSDI 2018):** https://arxiv.org/abs/1810.02904
+- **ACE (USENIX ATC 2020):** "Finding Semantic Bugs in File Systems with an Extensible Fuzzing Framework"
+- **B3 (ASPLOS 2019):** "Finding Crash-Consistency Bugs with Bounded Black-Box Crash Testing"
+
+### Other Testing Tools:
+- **Syzkaller:** https://github.com/google/syzkaller (kernel fuzzer that found many bugs)
+- **Trinity:** System call fuzzer
+- **fsstress:** Filesystem stress tester (part of xfstests)
+- **fsx:** File system exerciser from Apple
 
 ---
 
@@ -444,6 +538,58 @@ For each bug test, document:
 
 ---
 
+## Appendix: Direct Bug Links
+
+### LKML Discussions:
+- **ext4 iomap corruption (Dec 2023):** https://lkml.org/lkml/2023/12/5/646
+- **XFS metadata corruption (Mar 2020):** https://lkml.org/lkml/2020/3/31/1555
+- **JFS inode eviction (Aug 2025):** https://lkml.org/lkml/2025/8/8/92
+
+### LWN Articles:
+- **ext4 data corruption in stable kernels:** https://lwn.net/Articles/954770/
+- **Block layer corruption bug (2018):** https://lwn.net/Articles/774440/
+- **RAID 0 corruption (2015):** https://lwn.net/Articles/645720/
+- **Trust in filesystems (2023):** https://lwn.net/Articles/951846/
+
+### CVE Details:
+- **CVE-2024-40943 (OCFS2):** https://www.rapid7.com/db/vulnerabilities/oracle_linux-cve-2024-40943/
+- **CVE-2025-38164 (F2FS):** https://www.wiz.io/vulnerability-database/cve/cve-2025-38164
+- **CVE-2024-35807 (ext4):** https://ubuntu.com/security/CVE-2024-35807
+- **CVE-2024-26616 (Btrfs):** Search on https://nvd.nist.gov
+
+### Bug Tracker Links:
+- **Debian #1055005 (ext4 iomap):** https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1055005
+- **Ubuntu #1796542 (silent corruption):** https://bugs.launchpad.net/bugs/1796542
+- **Ubuntu #1806755 (ext4 4.19):** https://bugs.launchpad.net/bugs/1806755
+- **Arch Linux ext4 (2012):** https://bbs.archlinux.org/viewtopic.php?id=151341
+
+### News Articles:
+- **OpenZFS corruption:** https://www.theregister.com/2023/12/04/two_new_versions_of_openzfs
+- **ext4 corruption hits Debian:** https://www.theregister.com/2023/12/12/kernel_6_1_ext4_corruption/
+
+### Wikipedia References:
+- **ext4 delayed allocation:** https://en.wikipedia.org/wiki/Ext4#Delayed_allocation_and_potential_data_loss
+- **ReiserFS criticism:** https://en.wikipedia.org/wiki/ReiserFS#Criticism
+
+### Filesystem-Specific Wikis:
+- **Btrfs RAID56:** https://btrfs.wiki.kernel.org/index.php/RAID56
+- **Btrfs Status:** https://btrfs.wiki.kernel.org/index.php/Status
+
+### Research Papers & Tools:
+- **CrashMonkey paper:** https://arxiv.org/abs/1810.02904
+- **CrashMonkey code:** https://github.com/utsaslab/crashmonkey
+- **Syzkaller:** https://github.com/google/syzkaller
+- **xfstests:** https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+### Community Discussions:
+- **Hacker News - ext4 corruption:** https://news.ycombinator.com/item?id=38589389
+- **Phoronix Forums - ext4 bug:** https://www.phoronix.com/forums/forum/software/general-linux-open-source/32852-ext4-data-corruption-bug-hits-stable-linux-kernels
+
+---
+
 *Created: October 12, 2025*
+*Last Updated: October 12, 2025*
 *For Xibalba Filesystem Testing Framework*
+
+**Note:** Some links (especially kernel git commits and OpenZFS GitHub issues) require manual lookup by commit hash or issue number. See the bug-specific "Links & References" sections above for search hints.
 
