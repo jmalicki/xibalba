@@ -104,17 +104,9 @@ oci_push(
 # Utilities
 # ============================================================================
 
-# Generate cache key from lock files
+# Get Bazel's action hash for the image (truly hermetic cache key)
 sh_binary(
-    name = "generate_cache_key",
-    srcs = ["generate_cache_key.sh"],
-    args = [
-        "$(location //:MODULE.bazel.lock)",
-        "$(location :packages.lock.json)",
-    ],
-    data = [
-        "//:MODULE.bazel.lock",
-        ":packages.lock.json",
-    ],
+    name = "get_image_hash",
+    srcs = ["get_image_hash.sh"],
 )
 
