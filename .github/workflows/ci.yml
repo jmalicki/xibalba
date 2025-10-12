@@ -49,9 +49,9 @@ jobs:
     runs-on: ubuntu-24.04
     
     # Run entire job inside the container (has Bazel, clang, all build deps)
+    # NOTE: Must run as non-root - rules_python refuses to run as root
     container:
       image: ghcr.io/jmalicki/xibalba-dev-env:latest
-      options: --user root
     
     steps:
     - uses: actions/checkout@v4
@@ -82,9 +82,9 @@ jobs:
     runs-on: ubuntu-24.04
     
     # Run entire job inside the container (has Bazel, clang, all build deps)
+    # NOTE: Must run as non-root - rules_python refuses to run as root
     container:
       image: ghcr.io/jmalicki/xibalba-dev-env:latest
-      options: --user root
     
     steps:
     - uses: actions/checkout@v4
@@ -138,9 +138,9 @@ jobs:
     
     # Use container for build deps (clang, Bazel, etc.)
     # But QEMU/KVM must be installed on host for VM tests
+    # NOTE: Must run as non-root - rules_python refuses to run as root
     container:
       image: ghcr.io/jmalicki/xibalba-dev-env:latest
-      options: --user root
     
     steps:
     - uses: actions/checkout@v4
