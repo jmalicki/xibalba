@@ -87,6 +87,7 @@ struct test_state {
     _Atomic uint64_t bugs_found;
     _Atomic uint64_t reads_completed;
     bug_queue_t *bug_queue;  // Lock-free queue for bug events
+    FILE *scan_export;        // JSONL export for post-hoc analysis
 };
 
 /* Reader thread: Continuously scans directory and validates results */
@@ -141,8 +142,8 @@ static void *reader_thread(void *arg) {
             total_read,
             read_start_ns,
             read_end_ns,
-            state->model,  // Use configured consistency model
-            NULL            // TODO: Add scan export file for post-hoc analysis
+            state->model,       // Use configured consistency model
+            state->scan_export  // Export for post-hoc analysis
         );
         
         // Report bugs found
@@ -438,6 +439,14 @@ int main(int argc, char *argv[]) {
     atomic_init(&bug_queue->write_idx, 0);
     atomic_init(&bug_queue->read_idx, 0);
     
+    // Open scan export file for post-hoc analysis
+    char scan_export_path[512];
+    snprintf(scan_export_path, sizeof(scan_export_path), "%s/.output/xibalba-scans.jsonl", test_dir);
+    FILE *scan_export = fopen(scan_export_path, "w");
+    if (!scan_export) {
+        fprintf(stderr, "Warning: Could not open scan export file: %s\n", scan_export_path);
+    }
+    
     struct test_state state = {
         .test_dir = test_dir,
         .tracker = tracker,
@@ -447,6 +456,7 @@ int main(int argc, char *argv[]) {
         .bugs_found = 0,
         .reads_completed = 0,
         .bug_queue = bug_queue,
+        .scan_export = scan_export,
     };
     
     if (!json_output) {
@@ -644,6 +654,14 @@ int main(int argc, char *argv[]) {
     printf("  Full history: %s (detailed operation log)\n", history_file);
     
     // Cleanup
+    if (scan_export) {
+        fclose(scan_export);
+        if (!json_output) {
+            printf("Scan data exported to: %s\n", scan_export_path);
+            printf("Re-analyze with: tools/analyze-scans.sh %s <model>\n", scan_export_path);
+        }
+    }
+    
     tracker_cleanup(tracker);
     
     printf("\n");
