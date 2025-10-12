@@ -24,12 +24,8 @@ jobs:
       uses: lycheeverse/lychee-action@v1
       with:
         # Check all markdown files
-        args: '--verbose --no-progress **/*.md'
-        # Accept these status codes as valid (bot protection, not broken links):
-        # 200: OK
-        # 403: Forbidden (DOI/ACM bot protection)
-        # 429: Too Many Requests (rate limiting)
-        accept: '200,403,429'
+        # Accept 403/429 as valid (bot protection, not broken links)
+        args: '--verbose --no-progress --accept 200,403,429 **/*.md'
         # Fail on actual broken links (404, 500, etc.)
         fail: true
         # Format output
