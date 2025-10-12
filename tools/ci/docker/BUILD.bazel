@@ -61,6 +61,11 @@ genrule(
         ln -sf clang-18 tmp/usr/bin/clang
         ln -sf clang++-18 tmp/usr/bin/clang++
         
+        # Create non-root user (rules_python refuses to run as root)
+        mkdir -p tmp/home/runner
+        echo "runner:x:1001:1001:Runner:/home/runner:/bin/bash" >> tmp/etc/passwd
+        echo "runner:x:1001:" >> tmp/etc/group
+        
         tar -C tmp -cf $@ --transform='s|^\\./||' .
         rm -rf tmp
     """,
@@ -82,7 +87,10 @@ oci_image(
         "CC": "clang-18",
         "CXX": "clang++-18",
         "PATH": "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+        "HOME": "/home/runner",
     },
+    user = "runner",  # Run as non-root (rules_python requirement)
+    workdir = "/workspace",
 )
 
 # Tarball for local testing
