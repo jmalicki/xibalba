@@ -243,9 +243,9 @@ With the correct model (`--posix-minimal`): **0 bugs detected** ✅
 
 ## Documentation
 
-- [`docs/design/POSIX-GUARANTEES-DEEP-DIVE.md`](docs/design/POSIX-GUARANTEES-DEEP-DIVE.md) - Full POSIX spec analysis
-- [`docs/design/FILESYSTEM-CONSISTENCY-MODELS.md`](docs/design/FILESYSTEM-CONSISTENCY-MODELS.md) - Filesystem-specific behavior
-- [`docs/TESTING-GUIDE.md`](docs/TESTING-GUIDE.md) - Usage guide
+- [`docs/design/POSIX-GUARANTEES-DEEP-DIVE.md`](design/POSIX-GUARANTEES-DEEP-DIVE.md) - Full POSIX spec analysis
+- [`docs/design/FILESYSTEM-CONSISTENCY-MODELS.md`](design/FILESYSTEM-CONSISTENCY-MODELS.md) - Filesystem-specific behavior
+- [`docs/TESTING-GUIDE.md`](TESTING-GUIDE.md) - Usage guide
 
 ---
 
