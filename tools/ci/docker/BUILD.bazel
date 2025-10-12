@@ -92,18 +92,7 @@ oci_tarball(
     repo_tags = ["xibalba-dev:local"],
 )
 
-# Script to push container to GitHub Container Registry
-sh_binary(
-    name = "push_to_ghcr",
-    srcs = ["push_to_ghcr.sh"],
-    data = [
-        ":xibalba_dev_env_tarball",
-        "//:MODULE.bazel.lock",
-        ":packages.lock.json",
-    ],
-)
-
-# Push to GitHub Container Registry
+# Push to GitHub Container Registry (standard oci_push rule)
 oci_push(
     name = "push_dev_env",
     image = ":xibalba_dev_env",
