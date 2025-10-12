@@ -10,6 +10,7 @@ echo "=== Xibalba Fast VM Init ==="
 mount -t proc none /proc
 mount -t sysfs none /sys
 mount -t devtmpfs none /dev
+mkdir -p /run
 mount -t tmpfs -o mode=0755 tmpfs /run
 
 # Start udev for dynamic device node creation (needed by ZFS)
@@ -137,7 +138,8 @@ case "$FILESYSTEM" in
         dd if=/dev/zero of=/dev/vda bs=1M count=10 2>/dev/null || true
         
         echo "Creating ZFS pool with 60s timeout..."
-        # Use -o feature@... to avoid compatibility warnings, and specify whole disk
+        # Use whole disk mode to avoid partition management issues
+        # The -f flag forces creation even without EFI label
         timeout 60 zpool create -f -o ashift=12 xibalba-test /dev/vda || {
             CODE=$?
             echo "ERROR: zpool create failed (exit: $CODE)"

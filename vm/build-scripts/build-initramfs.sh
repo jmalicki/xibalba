@@ -19,7 +19,7 @@ KERNEL_MODULES_TAR="${6:-}"
 echo "Building minimal initramfs with embedded xibalba binaries and kernel modules..."
 
 cd /tmp
-mkdir -p initrd/{bin,sbin,usr/bin,usr/sbin,dev,proc,sys,test,opt/xibalba}
+mkdir -p initrd/{bin,sbin,usr/bin,usr/sbin,dev,proc,sys,run,test,opt/xibalba}
 
 # Install busybox, bash, jq, and udev (for ZFS)
 echo "Installing busybox, bash, jq, and udev..."
