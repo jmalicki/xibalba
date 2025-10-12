@@ -221,8 +221,9 @@ validation_result_t tracker_validate_read(state_tracker_t *tracker,
     uint64_t read_vc[MAX_THREADS];
     vclock_snapshot(tracker->vclock, read_vc);
     
-    // Note: read_end_ns kept for API compatibility but not used with vector clocks
-    // Causality is determined by happens-before relationships, not timestamps
+    // Note: Timestamps kept for API compatibility and JSON export
+    // but NOT used for validation - we use vector clocks for causality!
+    (void)read_start_ns;
     (void)read_end_ns;
     
     // Check for duplicates (ALWAYS a bug in all consistency models)
@@ -250,20 +251,12 @@ validation_result_t tracker_validate_read(state_tracker_t *tracker,
         // This is MUCH more precise than timestamps!
         // ========================================================================
         
+        // Use vector clocks to establish causality (happens-before relationships)
         bool create_happens_before_read = vclock_happens_before(
             file->create_vc, read_vc, tracker->vclock->num_threads);
         
         bool delete_happens_before_read = file->has_delete_vc && vclock_happens_before(
             file->delete_vc, read_vc, tracker->vclock->num_threads);
-        
-        // Fallback to timestamps for operations that might not have VC yet
-        // (during transition or for backward compatibility)
-        if (!create_happens_before_read && file->create_time < read_start_ns) {
-            create_happens_before_read = true;  // Use timestamp as fallback
-        }
-        if (!delete_happens_before_read && file->delete_time > 0 && file->delete_time < read_start_ns) {
-            delete_happens_before_read = true;  // Use timestamp as fallback
-        }
         
         // Check if file was actually read
         bool was_read = false;

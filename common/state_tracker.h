@@ -126,24 +126,28 @@ void tracker_record_read_end(state_tracker_t *tracker, uint64_t thread_id);
 int tracker_get_expected_entries(state_tracker_t *tracker, uint64_t timestamp_ns, 
                                    char **entries, int max_entries);
 
-/* Validate a directory read against expected state
+/* Validate a directory read using CAUSALITY (vector clocks!)
  * 
- * model: Consistency model to use for validation
- * read_start_ns: When read started (snapshot point)
- * read_end_ns: When read completed
+ * Uses happens-before relationships instead of timestamps for precision.
+ * 
+ * Parameters:
+ *   model: Consistency model to use for validation
+ *   read_start_ns: Timestamp for JSON export (not used for validation!)
+ *   read_end_ns: Timestamp for JSON export (not used for validation!)
+ * 
+ * Causality-based validation (Jepsen-style):
+ *   - Each operation captures a vector clock snapshot
+ *   - Validation uses happens-before relationships
+ *   - If create_vc happens-before read_vc: file MUST be visible
+ *   - If no causality: concurrent operations, either outcome valid
  * 
  * Consistency models:
- *   STRICT: All operations before read_end MUST be visible
- *           (Linearizable - strictest, catches most bugs)
+ *   STRICT: If create happens-before read → file MUST be visible
+ *           If delete happens-before read → file MUST NOT be visible
  *   
- *   WEAK_POSIX: Snapshot at read_start
- *           - Created BEFORE read: MUST appear (if not deleted)
- *           - Deleted BEFORE read: MUST NOT appear  
- *           - Created/deleted DURING: MAY appear (either valid)
+ *   WEAK_POSIX: Same as STRICT but with causality (not timestamp windows)
  *           
- *   EVENTUAL: Operations may take time to propagate
- *           - Only duplicates are bugs
- *           - Missing/phantom entries may be propagation delays
+ *   EVENTUAL: Only duplicates are bugs (missing/phantom allowed)
  */
 validation_result_t tracker_validate_read(state_tracker_t *tracker,
                                            char **actual_entries,

@@ -208,41 +208,6 @@ TEST_F(StateTrackerTest, NoFalsePositives_CorrectRead) {
 }
 
 // ============================================================================
-// REQUIREMENT: WEAK consistency allows operations during read window
-// ============================================================================
-// NOTE: This test is disabled due to timing complexity
-// The concept is tested in actual runtime (simple_chaos_test)
-TEST_F(StateTrackerTest, DISABLED_WeakConsistency_AllowsRaceWindowOperations) {
-    // Given: File created BEFORE read starts
-    tracker_record_create(tracker, "before_file.txt");
-    usleep(50000);  // 50ms delay to ensure clear separation
-    
-    // Define read window AFTER before_file creation
-    uint64_t read_start = time_at(100000000);  // base + 100ms (well after file creation)
-    usleep(10000);  // Small delay
-    
-    // File created DURING read (in race window)
-    tracker_record_create(tracker, "during_file.txt");
-    usleep(10000);
-    
-    uint64_t read_end = time_at(200000000);  // base + 200ms
-    
-    // When: Read sees before_file but NOT during_file
-    StringArray actual{"before_file.txt"};
-    
-    validation_result_t result = tracker_validate_read(
-        tracker, actual.data(), actual.size(),
-        read_start,
-        read_end,
-        CONSISTENCY_WEAK_POSIX  // WEAK model
-    );
-    
-    // Then: Should NOT report as bug (file created during read is allowed to be missing)
-    EXPECT_EQ(result.missing_entries, 0) << "WEAK model allows missing entries for files created during read";
-    EXPECT_EQ(result.total_bugs_found, 0) << "This is NOT a bug in WEAK model";
-}
-
-// ============================================================================
 // REQUIREMENT: STRICT consistency requires all operations visible
 // ============================================================================
 TEST_F(StateTrackerTest, StrictConsistency_RequiresAllOperationsVisible) {
@@ -440,35 +405,6 @@ TEST_F(StateTrackerTest, ThreadSafeOperations) {
     EXPECT_EQ(count, 1000) << "All files from all threads should be tracked";
     
     for (int i = 0; i < count; i++) free(entries[i]);
-}
-
-// ============================================================================
-// REQUIREMENT: Timestamp-based validation works correctly
-// ============================================================================
-// NOTE: This test is obsolete - we now use vector clocks for causality
-// Timestamp-based validation is replaced by happens-before relationships
-TEST_F(StateTrackerTest, DISABLED_TimestampBasedValidation) {
-    // This tests the core Jepsen-inspired approach: operations have timestamps
-    
-    // Given: Files created at different times
-    tracker_record_create(tracker, "early_file.txt");  // Created at ~T1
-    usleep(50000);  // 50ms delay
-    uint64_t middle_time = time_at(100000000);  // Middle time: base + 100ms
-    usleep(50000);  // Another 50ms
-    tracker_record_create(tracker, "late_file.txt");   // Created at ~T2 (after middle)
-    
-    // When: Read happens at middle time (between T1 and T2)
-    StringArray actual{"early_file.txt"};  // Only sees early file
-    
-    validation_result_t result = tracker_validate_read(
-        tracker, actual.data(), actual.size(),
-        middle_time - 1000000,   // Slightly before middle
-        middle_time + 1000000,   // Slightly after middle
-        CONSISTENCY_WEAK_POSIX
-    );
-    
-    // Then: Should be valid (late_file created after read, OK to be missing)
-    EXPECT_EQ(result.total_bugs_found, 0) << "Missing future files is not a bug in WEAK model";
 }
 
 // ============================================================================
