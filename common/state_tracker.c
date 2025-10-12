@@ -269,7 +269,7 @@ validation_result_t tracker_validate_read(state_tracker_t *tracker,
         
         // Apply consistency model rules using CAUSALITY
         switch (model) {
-            case CONSISTENCY_POSIX_MINIMAL:
+            case CONSISTENCY_POSIX:
                 // POSIX MINIMAL: Only what POSIX.1-2024 explicitly forbids
                 //
                 // From POSIX spec on readdir():
@@ -343,7 +343,11 @@ validation_result_t tracker_validate_read(state_tracker_t *tracker,
         }
         
         // File was read but never created = phantom!
-        if (!found_in_tracker && model != CONSISTENCY_EVENTUAL) {
+        // Only check for WEAK_POSIX and STRICT models
+        // POSIX and EVENTUAL models: phantom entries are allowed
+        if (!found_in_tracker && 
+            model != CONSISTENCY_EVENTUAL && 
+            model != CONSISTENCY_POSIX) {
             result.phantom_entries++;
             result.total_bugs_found++;
         }

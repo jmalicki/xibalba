@@ -50,12 +50,12 @@
 
 #define MAX_ENTRIES 10000
 
-/* Consistency models for validation */
+/* Consistency models for validation (WEAKEST → STRONGEST) */
 typedef enum {
-    CONSISTENCY_POSIX_MINIMAL,  // POSIX minimum: only duplicates are bugs (what POSIX actually forbids)
+    CONSISTENCY_EVENTUAL,       // Eventual: only duplicates are bugs (weakest - distributed FS)
+    CONSISTENCY_POSIX,          // POSIX: only duplicates are bugs (what POSIX.1-2024 actually forbids)
     CONSISTENCY_WEAK_POSIX,     // POSIX weak: causally-ordered ops should be visible (stronger than POSIX)
-    CONSISTENCY_STRICT,         // Linearizable: all ops instantly visible (academic/research)
-    CONSISTENCY_EVENTUAL,       // Eventual: operations may take time to appear (distributed FS)
+    CONSISTENCY_STRICT,         // Linearizable: all ops instantly visible (strongest - academic/research)
 } consistency_model_t;
 
 /* Operation types for history tracking */

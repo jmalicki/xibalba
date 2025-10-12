@@ -63,7 +63,7 @@ typedef struct {
  * and validates that all reads are correct using ground truth state tracking.
  * 
  * Supports multiple consistency models (from weakest to strictest):
- *   --posix-minimal: POSIX minimum (only duplicates are bugs) - DEFAULT
+ *   --posix:         POSIX compliance (only duplicates are bugs) - DEFAULT
  *   --weak:          POSIX weak (causally-ordered ops should be visible)
  *   --strict:        Linearizable (all ops instantly visible)
  *   --eventual:      Eventual (operations may propagate slowly)
@@ -162,7 +162,7 @@ static void *reader_thread(void *arg) {
             // Send bug event to writer thread (lock-free queue push)
             if (state->bug_queue) {
                 const char *model_name = 
-            state->model == CONSISTENCY_POSIX_MINIMAL ? "posix" :
+            state->model == CONSISTENCY_POSIX ? "posix" :
             state->model == CONSISTENCY_WEAK_POSIX ? "weak" :
             state->model == CONSISTENCY_STRICT ? "strict" : "eventual";
                 
@@ -317,7 +317,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Tests concurrent directory operations with validation.\n");
         fprintf(stderr, "\n");
         fprintf(stderr, "Consistency Models (weakest → strictest):\n");
-        fprintf(stderr, "  --posix-minimal  POSIX minimum: only duplicates are bugs (DEFAULT)\n");
+        fprintf(stderr, "  --posix          POSIX compliance: only duplicates are bugs (DEFAULT)\n");
         fprintf(stderr, "  --weak           POSIX weak: causally-ordered ops should be visible\n");
         fprintf(stderr, "  --strict         Linearizable: all ops instantly visible (research)\n");
         fprintf(stderr, "  --eventual       Eventual: operations may propagate slowly (distributed FS)\n");
@@ -330,7 +330,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "\n");
         fprintf(stderr, "Examples:\n");
         fprintf(stderr, "  # POSIX compliance test (should find ~0 bugs on stable kernel):\n");
-        fprintf(stderr, "  %s --posix-minimal /tmp/xibalba_test\n", argv[0]);
+        fprintf(stderr, "  %s --posix /tmp/xibalba_test\n", argv[0]);
         fprintf(stderr, "\n");
         fprintf(stderr, "  # Causality-based testing (may find POSIX-compliant weak consistency):\n");
         fprintf(stderr, "  %s --weak /tmp/test\n", argv[0]);
@@ -344,7 +344,7 @@ int main(int argc, char *argv[]) {
     }
     
     // Parse arguments
-    consistency_model_t model = CONSISTENCY_POSIX_MINIMAL;  // Default: POSIX minimum guarantees
+    consistency_model_t model = CONSISTENCY_POSIX;  // Default: POSIX compliance
     const char *test_dir = NULL;
     bool json_output = false;
     int test_duration = DEFAULT_TEST_DURATION;
@@ -352,8 +352,8 @@ int main(int argc, char *argv[]) {
     int num_writers = DEFAULT_NUM_WRITER_THREADS;
     
     for (int i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "--posix-minimal") == 0 || strcmp(argv[i], "--posix") == 0) {
-            model = CONSISTENCY_POSIX_MINIMAL;
+        if (strcmp(argv[i], "--posix") == 0) {
+            model = CONSISTENCY_POSIX;
         } else if (strcmp(argv[i], "--weak") == 0) {
             model = CONSISTENCY_WEAK_POSIX;
         } else if (strcmp(argv[i], "--strict") == 0) {
@@ -398,13 +398,13 @@ int main(int argc, char *argv[]) {
     }
     
     const char *model_name = 
-        model == CONSISTENCY_POSIX_MINIMAL ? "POSIX Minimal (duplicates only)" :
+        model == CONSISTENCY_POSIX ? "POSIX Compliance (duplicates only)" :
         model == CONSISTENCY_WEAK_POSIX ? "POSIX Weak (causally-ordered)" :
         model == CONSISTENCY_STRICT ? "Strict/Linearizable" :
         "Eventual";
     
     const char *model_short =
-        model == CONSISTENCY_POSIX_MINIMAL ? "posix" :
+        model == CONSISTENCY_POSIX ? "posix" :
         model == CONSISTENCY_WEAK_POSIX ? "weak" :
         model == CONSISTENCY_STRICT ? "strict" :
         "eventual";
