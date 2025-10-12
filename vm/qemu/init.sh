@@ -86,12 +86,20 @@ case "$FILESYSTEM" in
         
         # Load ZFS kernel modules
         echo "Loading ZFS kernel modules..."
-        timeout 10 modprobe zfs 2>/dev/null || {
+        if ! timeout 10 modprobe zfs 2>/dev/null; then
             CODE=$?
             echo "ERROR: Failed to load ZFS kernel module (exit: $CODE)"
             echo "ZFS may not be available in this kernel"
-            exit $CODE
-        }
+            echo "Skipping test execution..."
+            echo ""
+            echo "=== XIBALBA_TEST_COMPLETE ==="
+            echo "EXIT_CODE=255"
+            echo "FILESYSTEM=zfs"
+            echo "ERROR=module_load_failed"
+            echo "=========================="
+            poweroff
+            exit 0
+        fi
         echo "✓ ZFS module loaded"
         
         # ZFS requires a pool
