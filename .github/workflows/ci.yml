@@ -87,6 +87,11 @@ jobs:
       options: --user root --privileged -v /var/run/docker.sock:/var/run/docker.sock
     
     steps:
+    # Fix Docker socket permissions BEFORE container starts (must run on host)
+    # GitHub Actions containers can't change host socket permissions
+    - name: Fix Docker socket permissions  
+      run: sudo chmod 666 /var/run/docker.sock
+    
     - uses: actions/checkout@v4
     
     - name: Build all chaos testing targets
