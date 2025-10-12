@@ -9,7 +9,7 @@ Xibalba creates output files during test execution:
 
 **Issue:** If these are created IN the test directory, they appear as "phantom entries" during validation:
 1. Output files are created during the test run
-2. They're never tracked via `tracker_record_create()`
+2. They're never tracked via [`tracker_record_create()`](../../common/state_tracker.c#L62)
 3. Directory readers see them and report as phantom entries
 4. Result: 2,000+ false bugs per 1,000 scans
 

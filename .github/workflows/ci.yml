@@ -8,6 +8,36 @@ on:
 
 jobs:
   # ============================================================================
+  # Documentation Validation - Check markdown links
+  # ============================================================================
+  markdown-links:
+    name: Validate Markdown Links
+    runs-on: ubuntu-24.04
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Check markdown links
+      uses: lycheeverse/lychee-action@v1
+      with:
+        # Check all markdown files
+        args: --verbose --no-progress '**/*.md'
+        # Fail on broken links
+        fail: true
+        # Format output
+        format: markdown
+        # GitHub token for API rate limiting
+        token: ${{ secrets.GITHUB_TOKEN }}
+      
+    - name: Create issue on link failure
+      if: failure()
+      uses: peter-evans/create-issue-from-file@v5
+      with:
+        title: 'Broken links detected in documentation'
+        content-filepath: ./lychee/out.md
+        labels: documentation, bug
+
+  # ============================================================================
   # Unit Tests - Fast feedback on core validation logic
   # ============================================================================
   unit-tests:

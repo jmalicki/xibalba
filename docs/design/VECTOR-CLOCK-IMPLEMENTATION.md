@@ -56,6 +56,8 @@ We evaluated three approaches:
 
 ### Code Structure
 
+The [`vector_clock_t`](../../common/vector_clock.h#L38) struct:
+
 ```c
 typedef struct {
     uint64_t clocks[MAX_THREADS];        // One clock per thread
@@ -68,6 +70,8 @@ typedef struct {
 ```
 
 ### Fast Path (99.99% of calls)
+
+The [`vclock_get_thread_idx()`](../../common/vector_clock.c#L34) function:
 
 ```c
 uint32_t vclock_get_thread_idx(vector_clock_t *vc, pthread_t thread_id) {
@@ -114,9 +118,9 @@ Mutex only held during registration, not during ticks!
 - `.` and `..` (present in every directory)
 - `lost+found` (created by ext2/ext3/ext4)
 
-These were never tracked via `tracker_record_create()`, so validation reported them as "phantom entries."
+These were never tracked via [`tracker_record_create()`](../../common/state_tracker.c#L62), so validation reported them as "phantom entries."
 
-**Fix:** Filter in `dir_reader_read()`:
+**Fix:** Filter in [`dir_reader_read()`](../../common/dir_reader.c#L61):
 ```c
 if (strcmp(ent->d_name, ".") == 0 ||
     strcmp(ent->d_name, "..") == 0 ||
@@ -167,7 +171,7 @@ Result: False causality (A thinks B happened-before A's read)
 
 These files:
 1. Are created during the test run
-2. Never tracked via `tracker_record_create()`
+2. Never tracked via [`tracker_record_create()`](../../common/state_tracker.c#L62)
 3. Appear as "phantom entries" when readers scan the directory
 
 **Fix:** (TODO) Either:
