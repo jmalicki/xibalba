@@ -4,6 +4,11 @@
 
 set -euo pipefail
 
+# Ensure we're in the workspace root
+if [ -n "${BUILD_WORKSPACE_DIRECTORY:-}" ]; then
+    cd "$BUILD_WORKSPACE_DIRECTORY"
+fi
+
 # Configuration
 DURATION=${DURATION:-30}
 READERS=${READERS:-4}
@@ -13,7 +18,11 @@ FILESYSTEMS=("ext4" "xfs" "btrfs")
 MODELS=("posix" "weak")
 
 # Create results directory
-mkdir -p "$RESULTS_DIR"
+mkdir -p "$RESULTS_DIR" || {
+    echo "ERROR: Failed to create results directory: $RESULTS_DIR"
+    echo "PWD: $(pwd)"
+    exit 1
+}
 
 echo "========================================="
 echo " FILESYSTEM CONSISTENCY COMPARISON"
@@ -44,6 +53,7 @@ run_test() {
     
     echo "  Starting: $fs --$model"
     
+    # Always use bazel run (works from anywhere)
     bazel run //vm:qemu_test_runner -- \
         --filesystem "$fs" \
         --model "$model" \

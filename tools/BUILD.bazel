@@ -26,11 +26,10 @@ sh_binary(
     name = "filesystem_comparison",
     srcs = ["run-filesystem-comparison.sh"],
     data = [
-        "//vm:qemu_test_runner",
+        "//vm:build_initramfs",
+        "//vm:extract_kernel",
     ],
-    env = {
-        "BAZEL": "bazel",
-    },
     visibility = ["//visibility:public"],
+    tags = ["local", "no-cache", "no-sandbox"],
 )
 
