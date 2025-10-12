@@ -32,20 +32,20 @@
 extern "C" {
 #endif
 
-#define MAX_THREADS 128  // Maximum concurrent threads to track (increased for extreme stress tests)
-
-// Vector clock: one counter per thread
+// Vector clock: one counter per thread (dynamically allocated for runtime configuration)
 typedef struct {
-    uint64_t clocks[MAX_THREADS];
+    uint64_t *clocks;                  // Dynamic array of clocks [max_threads]
     uint32_t num_registered;           // Number of threads registered
-    pthread_t thread_ids[MAX_THREADS]; // Thread ID registry (for debugging)
+    uint32_t max_threads;              // Maximum threads (configured at init)
+    pthread_t *thread_ids;             // Dynamic array of thread IDs [max_threads]
     pthread_mutex_t lock;              // Protects clocks array
     pthread_mutex_t registry_lock;     // Protects thread registration
     pthread_key_t tls_key;             // Thread-local storage key for fast lookup
 } vector_clock_t;
 
-// Initialize a vector clock
-vector_clock_t* vclock_init(void);
+// Initialize a vector clock with specified max threads
+// If max_threads == 0, uses default (1024)
+vector_clock_t* vclock_init(uint32_t max_threads);
 
 // Get clock index for current thread (creates if needed)
 // Uses thread-local storage for O(1) lookup after first call

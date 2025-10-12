@@ -45,10 +45,12 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <pthread.h>
 #include "vector_clock.h"
 
 #define MAX_ENTRIES 10000
+#define MAX_THREADS 1024  // For fixed-size struct arrays (vector_clock uses runtime allocation)
 
 /* Consistency models for validation (WEAKEST → STRONGEST) */
 typedef enum {
@@ -99,6 +101,30 @@ typedef struct {
     uint64_t total_operations;
     uint64_t total_bugs_found;
 } validation_result_t;
+
+/* Scan result for export (allows post-hoc analysis with different models) */
+typedef struct {
+    uint64_t scan_id;                    // Sequential scan number
+    uint64_t thread_id;                  // Thread that performed scan
+    uint64_t timestamp_ns;               // Wall-clock time
+    uint64_t read_vc[MAX_THREADS];       // Vector clock at scan time
+    
+    // Ground truth (what SHOULD exist based on causality)
+    uint64_t expected_count;
+    char expected_files[MAX_ENTRIES][256];
+    uint64_t expected_create_vc[MAX_ENTRIES][MAX_THREADS];
+    uint64_t expected_delete_vc[MAX_ENTRIES][MAX_THREADS];
+    bool expected_has_delete[MAX_ENTRIES];
+    
+    // Actual scan results (what WAS seen)
+    uint64_t actual_count;
+    char actual_files[MAX_ENTRIES][256];
+    
+    // Quick validation flags (computed during scan)
+    bool has_duplicates;
+    bool has_missing;
+    bool has_phantoms;
+} scan_result_t;
 
 /* State tracker with vector clock for causality */
 typedef struct {
@@ -155,7 +181,8 @@ validation_result_t tracker_validate_read(state_tracker_t *tracker,
                                            int num_actual,
                                            uint64_t read_start_ns,
                                            uint64_t read_end_ns,
-                                           consistency_model_t model);
+                                           consistency_model_t model,
+                                           FILE *scan_export_file);  // Optional: export for post-hoc analysis
 
 /* Check for duplicate entries in a single read */
 bool tracker_has_duplicates(char **entries, int num_entries);

@@ -45,8 +45,8 @@ state_tracker_t* tracker_init(void) {
         return NULL;
     }
     
-    // Initialize vector clock for causality tracking
-    tracker->vclock = vclock_init();
+    // Initialize vector clock for causality tracking (0 = use default max_threads)
+    tracker->vclock = vclock_init(0);
     if (!tracker->vclock) {
         free(tracker);
         return NULL;
@@ -208,9 +208,15 @@ validation_result_t tracker_validate_read(state_tracker_t *tracker,
                                            int num_actual,
                                            uint64_t read_start_ns,
                                            uint64_t read_end_ns,
-                                           consistency_model_t model) {
+                                           consistency_model_t model,
+                                           FILE *scan_export_file) {
     validation_result_t result = {0};
     result.total_operations = 1;
+    
+    // Suppress unused parameter warnings (used for export, not validation yet)
+    (void)read_start_ns;
+    (void)read_end_ns;
+    (void)scan_export_file;  // TODO: Implement scan export
     
     pthread_mutex_lock(&tracker->lock);
     

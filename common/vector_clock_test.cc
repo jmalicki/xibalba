@@ -17,7 +17,7 @@ protected:
     vector_clock_t *vc;
     
     void SetUp() override {
-        vc = vclock_init();
+        vc = vclock_init(0);  // 0 = use default max_threads
         ASSERT_NE(vc, nullptr);
     }
     

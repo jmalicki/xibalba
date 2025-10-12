@@ -141,7 +141,8 @@ static void *reader_thread(void *arg) {
             total_read,
             read_start_ns,
             read_end_ns,
-            state->model  // Use configured consistency model
+            state->model,  // Use configured consistency model
+            NULL            // TODO: Add scan export file for post-hoc analysis
         );
         
         // Report bugs found

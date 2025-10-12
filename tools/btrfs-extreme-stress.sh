@@ -15,8 +15,8 @@ FILESYSTEM="btrfs"
 MODEL="posix"
 DURATION=${DURATION:-60}
 CPUS=${CPUS:-32}
-READERS=${READERS:-64}  # 2x CPUs
-WRITERS=${WRITERS:-32}  # 1x CPUs
+READERS=${READERS:-512}  # 16x CPUs (MASSIVE oversubscription!)
+WRITERS=${WRITERS:-256}  # 8x CPUs (MASSIVE oversubscription!)
 RESULTS_DIR=${RESULTS_DIR:-"test-results/btrfs-extreme-$(date +%Y%m%d-%H%M%S)"}
 
 mkdir -p "$RESULTS_DIR"
