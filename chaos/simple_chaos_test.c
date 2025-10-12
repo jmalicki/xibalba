@@ -371,14 +371,14 @@ int main(int argc, char *argv[]) {
             }
         } else if (strcmp(argv[i], "--readers") == 0 && i + 1 < argc) {
             num_readers = atoi(argv[++i]);
-            if (num_readers < 1 || num_readers > 100) {
-                fprintf(stderr, "Error: Readers must be 1-100\n");
+            if (num_readers < 1 || num_readers > 1000) {
+                fprintf(stderr, "Error: Readers must be 1-1000\n");
                 return 1;
             }
         } else if (strcmp(argv[i], "--writers") == 0 && i + 1 < argc) {
             num_writers = atoi(argv[++i]);
-            if (num_writers < 1 || num_writers > 100) {
-                fprintf(stderr, "Error: Writers must be 1-100\n");
+            if (num_writers < 1 || num_writers > 1000) {
+                fprintf(stderr, "Error: Writers must be 1-1000\n");
                 return 1;
             }
         } else {
