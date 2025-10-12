@@ -172,11 +172,6 @@ But if your code survives—like the Hero Twins—it doesn't just work. It has b
   - Strengths and weaknesses of both tools
   - Use case analysis and recommendations
   - TL;DR: Complementary tools, use both for comprehensive testing
-- **🆕 [Untested Filesystems](docs/UNTESTED-FILESYSTEMS.md)** - Up-and-coming filesystems to test
-  - bcachefs, F2FS, OCFS2, and 10+ more
-  - Priority ranking and expected bug yield
-  - Implementation roadmap
-  - TL;DR: bcachefs is highest priority (NEW + complex = bugs!)
 
 ---
 

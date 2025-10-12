@@ -124,7 +124,8 @@ TEST_F(StateTrackerTest, DetectsMissingEntries_TruePositive) {
         tracker, actual.data(), actual.size(),
         time_at(50000000),   // read start: base + 50ms
         time_at(100000000),  // read end: base + 100ms
-        CONSISTENCY_WEAK_POSIX
+        CONSISTENCY_WEAK_POSIX,
+        NULL  // No scan export
     );
     
     // Then: Should detect missing entries as bugs
@@ -149,7 +150,8 @@ TEST_F(StateTrackerTest, DetectsDuplicateEntries_TruePositive) {
         tracker, actual.data(), actual.size(),
         time_at(50000000),
         time_at(100000000),
-        CONSISTENCY_WEAK_POSIX
+        CONSISTENCY_WEAK_POSIX,
+        NULL  // No scan export
     );
     
     // Then: Should detect duplicates as bugs
@@ -170,7 +172,8 @@ TEST_F(StateTrackerTest, DetectsPhantomEntries_TruePositive) {
         tracker, actual.data(), actual.size(),
         time_at(50000000),
         time_at(100000000),
-        CONSISTENCY_WEAK_POSIX
+        CONSISTENCY_WEAK_POSIX,
+        NULL  // No scan export
     );
     
     // Then: Should detect phantom entry as bug
@@ -197,7 +200,8 @@ TEST_F(StateTrackerTest, NoFalsePositives_CorrectRead) {
         tracker, actual.data(), actual.size(),
         time_at(50000000),
         time_at(100000000),
-        CONSISTENCY_WEAK_POSIX
+        CONSISTENCY_WEAK_POSIX,
+        NULL  // No scan export
     );
     
     // Then: Should NOT report any bugs
@@ -222,7 +226,8 @@ TEST_F(StateTrackerTest, StrictConsistency_RequiresAllOperationsVisible) {
         tracker, nullptr, 0,
         time_at(50000000),   // read start
         time_at(100000000),  // read end (AFTER file creation)
-        CONSISTENCY_STRICT  // STRICT model
+        CONSISTENCY_STRICT,  // STRICT model
+        NULL  // No scan export
     );
     
     // Then: Should report as bug (STRICT requires all ops before read_end visible)
@@ -245,7 +250,8 @@ TEST_F(StateTrackerTest, EventualConsistency_OnlyDetectsDuplicates) {
         tracker, nullptr, 0,
         time_at(50000000), 
         time_at(100000000),
-        CONSISTENCY_EVENTUAL
+        CONSISTENCY_EVENTUAL,
+        NULL  // No scan export
     );
     
     // Then: Should NOT report missing as bug (eventual allows delays)
@@ -258,7 +264,8 @@ TEST_F(StateTrackerTest, EventualConsistency_OnlyDetectsDuplicates) {
         tracker, actual_duplicate.data(), actual_duplicate.size(),
         time_at(50000000), 
         time_at(100000000),
-        CONSISTENCY_EVENTUAL
+        CONSISTENCY_EVENTUAL,
+        NULL  // No scan export
     );
     
     EXPECT_GT(result2.duplicate_entries, 0) << "EVENTUAL detects duplicates";
@@ -278,7 +285,8 @@ TEST_F(StateTrackerTest, HandlesEmptyDirectory) {
         tracker, nullptr, 0,
         time_at(50000000), 
         time_at(100000000),
-        CONSISTENCY_WEAK_POSIX
+        CONSISTENCY_WEAK_POSIX,
+        NULL  // No scan export
     );
     
     // Then: Should be valid (no bugs)
@@ -315,7 +323,8 @@ TEST_F(StateTrackerTest, HandlesHighConcurrencyScenario) {
         tracker, actual.data(), (int)actual.size(),
         time_at(500000000), 
         time_at(600000000),
-        CONSISTENCY_WEAK_POSIX
+        CONSISTENCY_WEAK_POSIX,
+        NULL  // No scan export
     );
     
     // Then: Should be valid (correct state)
@@ -343,7 +352,8 @@ TEST_F(StateTrackerTest, DetectsStaleCache_DeletedFileStillVisible) {
         tracker, actual.data(), actual.size(),
         time_at(50000000),   // After deletion
         time_at(100000000),
-        CONSISTENCY_WEAK_POSIX
+        CONSISTENCY_WEAK_POSIX,
+        NULL  // No scan export
     );
     
     // Then: Should detect as phantom entry
@@ -368,7 +378,8 @@ TEST_F(StateTrackerTest, DetectsCacheMiss_CreatedFileMissing) {
         tracker, nullptr, 0,
         time_at(50000000),   // After creation
         time_at(100000000),
-        CONSISTENCY_WEAK_POSIX
+        CONSISTENCY_WEAK_POSIX,
+        NULL  // No scan export
     );
     
     // Then: Should detect as missing entry
@@ -445,7 +456,8 @@ TEST_F(StateTrackerTest, HandlesLostAndFound) {
         tracker, actual.data(), actual.size(),
         time_at(50000000), 
         time_at(100000000),
-        CONSISTENCY_WEAK_POSIX
+        CONSISTENCY_WEAK_POSIX,
+        NULL  // No scan export
     );
     
     // Then: Check if validation handles special directories
