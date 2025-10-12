@@ -93,6 +93,8 @@ TEST_F(VectorClockTest, TickIncrementsCorrectSlot) {
     EXPECT_EQ(snapshot[idx1], 2) << "Thread 1 clock not incremented correctly";
     EXPECT_EQ(snapshot[idx2], 1) << "Thread 2 clock not incremented correctly";
     EXPECT_NE(idx1, idx2) << "Threads should have different indices";
+    
+    delete[] snapshot;
 }
 
 TEST_F(VectorClockTest, SnapshotCapturesCurrentState) {
