@@ -25,12 +25,19 @@
  * Tracks the expected state of a directory based on operations performed.
  * This is the "ground truth" used to validate directory reads for correctness.
  *
- * Jepsen-inspired approach:
- *   1. Track all CREATE operations (files we added)
- *   2. Track all DELETE operations (files we removed)
- *   3. Compute expected state at any point in time
+ * Jepsen-inspired approach with VECTOR CLOCKS:
+ *   1. Track all CREATE operations with vector clocks (not timestamps!)
+ *   2. Track all DELETE operations with vector clocks
+ *   3. Use happens-before relationships (causality)
  *   4. Compare actual directory reads with expected state
  *   5. Find bugs: missing entries, duplicates, phantom entries
+ * 
+ * Why vector clocks?
+ *   - Timestamps can't detect causality (clock skew, concurrent events)
+ *   - Vector clocks capture true happens-before relationships
+ *   - Example: If read's VC shows it happened-after create's VC,
+ *     then file MUST be visible (not "probably should be")
+ *   - This is how Jepsen detects linearizability violations!
  */
 
 #ifndef STATE_TRACKER_H
@@ -39,6 +46,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <pthread.h>
+#include "vector_clock.h"
 
 #define MAX_ENTRIES 10000
 
@@ -66,12 +74,20 @@ typedef struct {
     uint64_t thread_id;
 } operation_t;
 
-/* Expected file state */
+/* Expected file state with causality tracking */
 typedef struct {
     char filename[256];
     bool exists;            // Currently exists
-    uint64_t create_time;   // When created
-    uint64_t delete_time;   // When deleted (0 if not deleted)
+    
+    // Timestamps (for JSON export and debugging)
+    uint64_t create_time;   // Wall-clock when created
+    uint64_t delete_time;   // Wall-clock when deleted (0 if not deleted)
+    
+    // Vector clocks (for causality-based validation!)
+    uint64_t create_vc[MAX_THREADS];  // Vector clock snapshot at creation
+    uint64_t delete_vc[MAX_THREADS];  // Vector clock snapshot at deletion
+    bool has_create_vc;     // Whether create_vc is valid
+    bool has_delete_vc;     // Whether delete_vc is valid
 } file_state_t;
 
 /* Validation results */
@@ -83,13 +99,15 @@ typedef struct {
     uint64_t total_bugs_found;
 } validation_result_t;
 
-/* State tracker */
+/* State tracker with vector clock for causality */
 typedef struct {
     file_state_t files[MAX_ENTRIES];
     uint64_t file_count;
     
     operation_t history[MAX_ENTRIES * 10];
     uint64_t history_count;
+    
+    vector_clock_t *vclock;  // Global vector clock for all operations
     
     pthread_mutex_t lock;
 } state_tracker_t;

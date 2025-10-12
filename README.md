@@ -2,7 +2,7 @@
 
 [![Xibalba CI](https://github.com/jmalicki/xibalba/actions/workflows/ci.yml/badge.svg)](https://github.com/jmalicki/xibalba/actions/workflows/ci.yml)
 [![eBPF Build](https://github.com/jmalicki/xibalba/actions/workflows/ebpf.yml/badge.svg)](https://github.com/jmalicki/xibalba/actions/workflows/ebpf.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 *The Underworld of Trials*
 
@@ -143,89 +143,13 @@ But if your code survives—like the Hero Twins—it doesn't just work. It has b
 - VM testing requires KVM (run locally or self-hosted)
 - **Why**: We test CUSTOM KERNELS - containers can't do this!
 
-### Two Paths Forward:
-
----
-
-### **Path 1: Tech De-Risking (RECOMMENDED)** 🚀
-
-**→ [Tech De-Risking Plan](docs/TECH-DERISKING-PLAN.md)** ⭐ **START HERE!**
-
-**Why this first**: Validate eBPF fault injection works in 2-3 weeks before committing to 12-16 week full build
-
-**What you'll build**:
-- Minimal DirectoryReader (~200 lines)
-- Simple chaos test (~100 lines)
-- Basic eBPF pause injection (~50 lines eBPF + ~150 lines userspace)
-- Total: ~500 lines of code
-
-**What you'll prove**:
-- ✅ eBPF toolchain works on your machine
-- ✅ Can inject pauses via eBPF → userspace coordination
-- ✅ Pauses increase race detection (find at least one bug)
-- ✅ Approach is viable
-
-**Investment**: 2-3 weeks | **Risk reduction**: 80%+
-
-**Then**: If successful, proceed to full implementation with confidence!
-
----
-
-### **Path 2: Full Implementation**
-
-**→ [Full Implementation Plan](docs/IMPLEMENTATION-PLAN.md)**
-
-**Choose this if**: You're already confident in eBPF and ready to commit 12-16 weeks
-
-**What you'll build**: Complete Xibalba with VMs, 5 filesystems, full automation
-
-**265 checkboxes** across 9 phases
-
----
-
-### **Supporting Documents**
-
-**Must read**:
-- **⚠️ [Risks & Open Questions](docs/RISKS-AND-OPEN-QUESTIONS.md)** - Critical decisions needed
-
-**Good news**: Most risks resolved! VMs + custom kernels = full control ✅
-
----
 
 ### Documentation
 
-**Start Here**:
-1. **📖 [START HERE Guide](docs/guides/START-HERE.md)** - Navigation hub ⭐
-2. **⚠️ [Risks & Open Questions](docs/plans/RISKS-AND-OPEN-QUESTIONS.md)** - Critical decisions
-3. **🚀 [Tech De-Risking Plan](docs/plans/TECH-DERISKING-PLAN.md)** - 2-3 week PoC (RECOMMENDED)
-4. **📋 [Full Implementation Plan](docs/plans/IMPLEMENTATION-PLAN.md)** - Complete 12-16 week guide
-
-**Recommended path**: Start with tech de-risking (2-3 weeks) to prove eBPF fault injection works, THEN commit to full implementation.
-
-**Getting Started** (`docs/guides/`):
-- **📖 [START HERE](docs/guides/START-HERE.md)** - Navigation hub ⭐
-- **⚡ [Quick Start](docs/guides/QUICK-START.md)** - Run tests in 15 minutes
-- **🖥️ [VM Setup Guide](docs/VM-SETUP.md)** - Complete system setup for VM testing
-- **🧪 [Run Test Now](docs/guides/RUN-TEST-NOW.md)** - Two-terminal validation
-- **✅ [Setup Complete](docs/guides/SETUP-COMPLETE.md)** - Initial setup verification
-
-**Implementation Plans** (`docs/plans/`):
-- **🚀 [Tech De-Risking Plan](docs/plans/TECH-DERISKING-PLAN.md)** - 2-3 week PoC (RECOMMENDED)
-- **📋 [Full Implementation Plan](docs/plans/IMPLEMENTATION-PLAN.md)** - Complete 12-16 week guide
-- **🗺️ [After De-Risking](docs/plans/AFTER-DERISKING.md)** - Roadmap for Weeks 4-15
-- **⚠️ [Risks & Open Questions](docs/plans/RISKS-AND-OPEN-QUESTIONS.md)** - Critical decisions
-
-**Design & Concepts** (`docs/design/`):
-- **🎓 [Jepsen Principles](docs/design/JEPSEN-INSPIRED-FILESYSTEM-TESTING.md)** - Conceptual foundation
-- **🔧 [Race Conditions & Fault Injection](docs/design/RACE-CONDITIONS-AND-FAULT-INJECTION.md)** - Technical details
-- **🎯 [Fault Injection Scope](docs/design/FAULT-INJECTION-SCOPE.md)** - What to test vs not test
-- **📊 [Testing Framework](docs/design/TESTING-FRAMEWORK.md)** - Complete specification
-- **🗂️ [Filesystem Consistency Models](docs/design/FILESYSTEM-CONSISTENCY-MODELS.md)** - 10+ filesystems documented
-- **📝 [State Tracking & Validation](docs/design/STATE-TRACKING-AND-VALIDATION.md)** - Ground truth approach
-
-**Status & Progress** (`docs/status/`):
-- **📈 [Tech De-Risking Status](docs/status/TECH-DERISKING-STATUS.md)** - Current progress
-- **🎉 [Completed Today](docs/status/COMPLETED-TODAY.md)** - Day 1 achievements
+**Core Docs**:
+- **🖥️ [VM Setup Guide](docs/VM-SETUP.md)** - QEMU/KVM hermetic VM testing
+- **🔧 [Fast VM Testing Design](docs/design/FAST-VM-TESTING.md)** - Architecture overview
+- **📝 [VM Permissions](docs/VM-PERMISSIONS.md)** - Permission setup details
 
 ---
 

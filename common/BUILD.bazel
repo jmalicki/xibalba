@@ -11,12 +11,23 @@ cc_library(
     # linkopts will include -luring when we add io_uring support
 )
 
+# Vector clock for causality tracking (distributed systems primitive)
+cc_library(
+    name = "vector_clock",
+    srcs = ["vector_clock.c"],
+    hdrs = ["vector_clock.h"],
+    copts = ["-std=gnu11"],  # C11 with GNU extensions
+    linkopts = ["-pthread"],
+    visibility = ["//visibility:public"],
+)
+
 # State tracker for validation (Jepsen-style ground truth)
 cc_library(
     name = "state_tracker",
     srcs = ["state_tracker.c"],
     hdrs = ["state_tracker.h"],
     copts = ["-std=gnu11"],  # C11 with GNU extensions
+    deps = [":vector_clock"],  # Use vector clocks for causality
     linkopts = ["-pthread"],
 )
 

@@ -20,12 +20,14 @@
  * SOFTWARE.
  */
 
-/* State Tracker Implementation
+/* State Tracker Implementation with Vector Clocks
  *
- * Maintains ground truth of directory state for validation
+ * Maintains ground truth of directory state for validation.
+ * Uses vector clocks for precise causality tracking (Jepsen-style!)
  */
 
 #include "state_tracker.h"
+#include "vector_clock.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -43,6 +45,13 @@ state_tracker_t* tracker_init(void) {
         return NULL;
     }
     
+    // Initialize vector clock for causality tracking
+    tracker->vclock = vclock_init();
+    if (!tracker->vclock) {
+        free(tracker);
+        return NULL;
+    }
+    
     pthread_mutex_init(&tracker->lock, NULL);
     tracker->file_count = 0;
     tracker->history_count = 0;
@@ -52,6 +61,9 @@ state_tracker_t* tracker_init(void) {
 
 void tracker_record_create(state_tracker_t *tracker, const char *filename) {
     pthread_mutex_lock(&tracker->lock);
+    
+    // Tick vector clock (this operation happens NOW)
+    vclock_tick(tracker->vclock, pthread_self());
     
     // Find or create file entry
     file_state_t *file = NULL;
@@ -69,8 +81,14 @@ void tracker_record_create(state_tracker_t *tracker, const char *filename) {
     
     if (file) {
         file->exists = true;
-        file->create_time = get_timestamp_ns();
+        file->create_time = get_timestamp_ns();  // Keep timestamp for JSON
         file->delete_time = 0;
+        
+        // Snapshot vector clock at creation (for causality!)
+        vclock_snapshot(tracker->vclock, file->create_vc);
+        file->has_create_vc = true;
+        file->has_delete_vc = false;
+        memset(file->delete_vc, 0, sizeof(file->delete_vc));
     }
     
     // Record in history
@@ -88,11 +106,18 @@ void tracker_record_create(state_tracker_t *tracker, const char *filename) {
 void tracker_record_delete(state_tracker_t *tracker, const char *filename) {
     pthread_mutex_lock(&tracker->lock);
     
+    // Tick vector clock (deletion operation happens NOW)
+    vclock_tick(tracker->vclock, pthread_self());
+    
     // Mark file as deleted
     for (uint64_t i = 0; i < tracker->file_count; i++) {
         if (strcmp(tracker->files[i].filename, filename) == 0) {
             tracker->files[i].exists = false;
-            tracker->files[i].delete_time = get_timestamp_ns();
+            tracker->files[i].delete_time = get_timestamp_ns();  // Keep timestamp for JSON
+            
+            // Snapshot vector clock at deletion (for causality!)
+            vclock_snapshot(tracker->vclock, tracker->files[i].delete_vc);
+            tracker->files[i].has_delete_vc = true;
             break;
         }
     }
@@ -111,6 +136,9 @@ void tracker_record_delete(state_tracker_t *tracker, const char *filename) {
 
 void tracker_record_read_start(state_tracker_t *tracker, uint64_t thread_id) {
     pthread_mutex_lock(&tracker->lock);
+    
+    // Tick vector clock (read operation starts NOW)
+    vclock_tick(tracker->vclock, (pthread_t)thread_id);
     
     if (tracker->history_count < MAX_ENTRIES * 10) {
         operation_t *op = &tracker->history[tracker->history_count++];
@@ -186,31 +214,56 @@ validation_result_t tracker_validate_read(state_tracker_t *tracker,
     
     pthread_mutex_lock(&tracker->lock);
     
+    // Tick vector clock for this read operation
+    vclock_tick(tracker->vclock, pthread_self());
+    
+    // Snapshot vector clock at read time (establishes causality barrier!)
+    uint64_t read_vc[MAX_THREADS];
+    vclock_snapshot(tracker->vclock, read_vc);
+    
+    // Note: read_end_ns kept for API compatibility but not used with vector clocks
+    // Causality is determined by happens-before relationships, not timestamps
+    (void)read_end_ns;
+    
     // Check for duplicates (ALWAYS a bug in all consistency models)
     if (tracker_has_duplicates(actual_entries, num_actual)) {
         result.duplicate_entries++;
         result.total_bugs_found++;
     }
     
-    // Validate based on consistency model
+    // Validate based on consistency model using CAUSALITY (not timestamps!)
     for (uint64_t i = 0; i < tracker->file_count; i++) {
         file_state_t *file = &tracker->files[i];
         
         // Skip if file never existed
-        if (file->create_time == 0) {
+        if (!file->has_create_vc) {
             continue;
         }
         
-        // Determine timing
-        bool created_before_read = file->create_time < read_start_ns;
-        bool created_during_read = (file->create_time >= read_start_ns) && (file->create_time <= read_end_ns);
-        bool created_after_read = file->create_time > read_end_ns;
+        // ========================================================================
+        // CAUSALITY-BASED VALIDATION (Jepsen-style!)
+        // ========================================================================
+        // Instead of comparing timestamps, we use happens-before relationships:
+        //   - If create_vc happens-before read_vc: file DEFINITELY existed before read
+        //   - Otherwise: concurrent or read-before-create (no established causality)
+        //
+        // This is MUCH more precise than timestamps!
+        // ========================================================================
         
-        bool deleted_before_read = (file->delete_time > 0) && (file->delete_time < read_start_ns);
-        bool deleted_during_read = (file->delete_time >= read_start_ns) && (file->delete_time <= read_end_ns && file->delete_time > 0);
+        bool create_happens_before_read = vclock_happens_before(
+            file->create_vc, read_vc, tracker->vclock->num_threads);
         
-        // deleted_after_read not currently used but kept for future validation modes
-        (void)created_after_read;  // Suppress unused warning
+        bool delete_happens_before_read = file->has_delete_vc && vclock_happens_before(
+            file->delete_vc, read_vc, tracker->vclock->num_threads);
+        
+        // Fallback to timestamps for operations that might not have VC yet
+        // (during transition or for backward compatibility)
+        if (!create_happens_before_read && file->create_time < read_start_ns) {
+            create_happens_before_read = true;  // Use timestamp as fallback
+        }
+        if (!delete_happens_before_read && file->delete_time > 0 && file->delete_time < read_start_ns) {
+            delete_happens_before_read = true;  // Use timestamp as fallback
+        }
         
         // Check if file was actually read
         bool was_read = false;
@@ -221,14 +274,14 @@ validation_result_t tracker_validate_read(state_tracker_t *tracker,
             }
         }
         
-        // Apply consistency model rules
+        // Apply consistency model rules using CAUSALITY
         switch (model) {
             case CONSISTENCY_STRICT:
-                // STRICT/Linearizable: All operations completed before read_end MUST be visible
-                if (created_before_read || created_during_read) {
-                    // File was created - should it be visible?
-                    if (deleted_before_read || deleted_during_read) {
-                        // File was deleted - MUST NOT appear
+                // STRICT/Linearizable: If create happens-before read, file MUST be visible
+                if (create_happens_before_read) {
+                    // File DEFINITELY existed before read started
+                    if (delete_happens_before_read) {
+                        // File was deleted before read - MUST NOT appear
                         if (was_read) {
                             result.phantom_entries++;
                             result.total_bugs_found++;
@@ -241,26 +294,25 @@ validation_result_t tracker_validate_read(state_tracker_t *tracker,
                         }
                     }
                 }
-                // Files created after read: may or may not appear (race at boundary)
+                // If no happens-before relationship: concurrent, either outcome valid
                 break;
                 
             case CONSISTENCY_WEAK_POSIX:
-                // POSIX weak: Snapshot at read_start
-                // Files created BEFORE read: MUST appear (if not deleted before)
-                if (created_before_read && !deleted_before_read && !deleted_during_read) {
+                // POSIX weak: If create happens-before read, file MUST appear
+                if (create_happens_before_read && !delete_happens_before_read) {
                     if (!was_read) {
                         result.missing_entries++;
                         result.total_bugs_found++;
                     }
                 }
                 
-                // Files deleted BEFORE read: MUST NOT appear
-                if (deleted_before_read && was_read) {
+                // If delete happens-before read: MUST NOT appear
+                if (delete_happens_before_read && was_read) {
                     result.phantom_entries++;
                     result.total_bugs_found++;
                 }
                 
-                // Files created/deleted DURING read: Either is valid (no bug)
+                // No causality established: concurrent operations, either outcome valid
                 break;
                 
             case CONSISTENCY_EVENTUAL:
@@ -268,11 +320,6 @@ validation_result_t tracker_validate_read(state_tracker_t *tracker,
                 // Missing/phantom may be propagation delays - not counted
                 // (Duplicates already checked above)
                 break;
-        }
-        
-        // Files created AFTER read: should not appear (but tolerate as race at boundary)
-        if (created_after_read && was_read && model == CONSISTENCY_STRICT) {
-            // Could be clock skew or race at boundary - don't count as hard bug
         }
     }
     
@@ -348,6 +395,9 @@ void tracker_export_history(state_tracker_t *tracker, const char *output_file) {
 
 void tracker_cleanup(state_tracker_t *tracker) {
     if (tracker) {
+        if (tracker->vclock) {
+            vclock_cleanup(tracker->vclock);
+        }
         pthread_mutex_destroy(&tracker->lock);
         free(tracker);
     }

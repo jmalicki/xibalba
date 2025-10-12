@@ -445,7 +445,9 @@ TEST_F(StateTrackerTest, ThreadSafeOperations) {
 // ============================================================================
 // REQUIREMENT: Timestamp-based validation works correctly
 // ============================================================================
-TEST_F(StateTrackerTest, TimestampBasedValidation) {
+// NOTE: This test is obsolete - we now use vector clocks for causality
+// Timestamp-based validation is replaced by happens-before relationships
+TEST_F(StateTrackerTest, DISABLED_TimestampBasedValidation) {
     // This tests the core Jepsen-inspired approach: operations have timestamps
     
     // Given: Files created at different times
