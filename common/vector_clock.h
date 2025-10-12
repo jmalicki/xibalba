@@ -28,25 +28,27 @@
 #include <stdbool.h>
 #include <pthread.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define MAX_THREADS 64  // Maximum concurrent threads to track
 
 // Vector clock: one counter per thread
 typedef struct {
     uint64_t clocks[MAX_THREADS];
-    uint32_t num_threads;
-    pthread_mutex_t lock;
+    uint32_t num_registered;           // Number of threads registered
+    pthread_t thread_ids[MAX_THREADS]; // Thread ID registry (for debugging)
+    pthread_mutex_t lock;              // Protects clocks array
+    pthread_mutex_t registry_lock;     // Protects thread registration
+    pthread_key_t tls_key;             // Thread-local storage key for fast lookup
 } vector_clock_t;
-
-// Thread ID to clock index mapping
-typedef struct {
-    pthread_t thread_id;
-    uint32_t clock_idx;
-} thread_mapping_t;
 
 // Initialize a vector clock
 vector_clock_t* vclock_init(void);
 
 // Get clock index for current thread (creates if needed)
+// Uses thread-local storage for O(1) lookup after first call
 uint32_t vclock_get_thread_idx(vector_clock_t *vc, pthread_t thread_id);
 
 // Increment clock for current thread (happens on every operation)
@@ -68,6 +70,10 @@ void vclock_cleanup(vector_clock_t *vc);
 
 // Print vector clock (for debugging)
 void vclock_print(const uint64_t *clock, uint32_t num_threads);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // VECTOR_CLOCK_H
 

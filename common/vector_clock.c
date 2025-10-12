@@ -9,42 +9,76 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdint.h>  // For uintptr_t
 
 vector_clock_t* vclock_init(void) {
     vector_clock_t *vc = calloc(1, sizeof(vector_clock_t));
     if (!vc) return NULL;
     
     pthread_mutex_init(&vc->lock, NULL);
-    vc->num_threads = 0;
+    pthread_mutex_init(&vc->registry_lock, NULL);
+    
+    // Create TLS key for fast thread index lookup
+    if (pthread_key_create(&vc->tls_key, NULL) != 0) {
+        free(vc);
+        return NULL;
+    }
+    
+    vc->num_registered = 0;
     memset(vc->clocks, 0, sizeof(vc->clocks));
+    memset(vc->thread_ids, 0, sizeof(vc->thread_ids));
     
     return vc;
 }
 
 uint32_t vclock_get_thread_idx(vector_clock_t *vc, pthread_t thread_id) {
-    // Simple hash-based mapping: use thread_id modulo MAX_THREADS
-    // This works for controlled test scenarios with known thread counts
-    // For production with many threads, would need proper hash table
+    // Use pthread_self() as the actual thread ID, ignoring the parameter
+    // (parameter exists for API compatibility but TLS is keyed by calling thread)
+    pthread_t actual_thread = pthread_self();
+    (void)thread_id;  // Unused - kept for API compatibility
     
-    (void)vc;  // Not used in simple approach
-    uint32_t idx = ((uint64_t)thread_id / 1000) % MAX_THREADS;
+    // Fast path: Check thread-local storage
+    // After first registration, this is O(1) with no mutex!
+    void *idx_ptr = pthread_getspecific(vc->tls_key);
+    if (idx_ptr != NULL) {
+        return (uint32_t)(uintptr_t)idx_ptr;
+    }
+    
+    // Slow path: First time for this thread - register it
+    pthread_mutex_lock(&vc->registry_lock);
+    
+    // Double-check: another thread might have registered while we waited
+    idx_ptr = pthread_getspecific(vc->tls_key);
+    if (idx_ptr != NULL) {
+        pthread_mutex_unlock(&vc->registry_lock);
+        return (uint32_t)(uintptr_t)idx_ptr;
+    }
+    
+    // Check if we have space for another thread
+    if (vc->num_registered >= MAX_THREADS) {
+        pthread_mutex_unlock(&vc->registry_lock);
+        fprintf(stderr, "FATAL: Exceeded MAX_THREADS (%d)\n", MAX_THREADS);
+        abort();
+    }
+    
+    // Register this thread
+    uint32_t idx = vc->num_registered++;
+    vc->thread_ids[idx] = actual_thread;  // Store actual thread ID
+    
+    // Store in TLS for future O(1) lookups
+    pthread_setspecific(vc->tls_key, (void*)(uintptr_t)idx);
+    
+    pthread_mutex_unlock(&vc->registry_lock);
     return idx;
 }
 
 void vclock_tick(vector_clock_t *vc, pthread_t thread_id) {
+    // Get thread's clock index (fast TLS lookup after first call)
+    uint32_t idx = vclock_get_thread_idx(vc, thread_id);
+    
+    // Increment this thread's clock
     pthread_mutex_lock(&vc->lock);
-    
-    // Simple approach: use thread_id modulo MAX_THREADS as index
-    // This works for our use case (controlled # of threads)
-    uint32_t idx = ((uint64_t)thread_id / 1000) % MAX_THREADS;
-    
-    if (idx < MAX_THREADS) {
-        vc->clocks[idx]++;
-        if (idx >= vc->num_threads) {
-            vc->num_threads = idx + 1;
-        }
-    }
-    
+    vc->clocks[idx]++;
     pthread_mutex_unlock(&vc->lock);
 }
 
@@ -90,7 +124,9 @@ void vclock_merge(vector_clock_t *vc, const uint64_t *other_clock) {
 
 void vclock_cleanup(vector_clock_t *vc) {
     if (vc) {
+        pthread_key_delete(vc->tls_key);
         pthread_mutex_destroy(&vc->lock);
+        pthread_mutex_destroy(&vc->registry_lock);
         free(vc);
     }
 }

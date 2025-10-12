@@ -253,10 +253,10 @@ validation_result_t tracker_validate_read(state_tracker_t *tracker,
         
         // Use vector clocks to establish causality (happens-before relationships)
         bool create_happens_before_read = vclock_happens_before(
-            file->create_vc, read_vc, tracker->vclock->num_threads);
+            file->create_vc, read_vc, tracker->vclock->num_registered);
         
         bool delete_happens_before_read = file->has_delete_vc && vclock_happens_before(
-            file->delete_vc, read_vc, tracker->vclock->num_threads);
+            file->delete_vc, read_vc, tracker->vclock->num_registered);
         
         // Check if file was actually read
         bool was_read = false;

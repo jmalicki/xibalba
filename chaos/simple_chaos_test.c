@@ -203,9 +203,15 @@ static void *reader_thread(void *arg) {
 static void *bug_writer_thread(void *arg) {
     struct test_state *state = (struct test_state *)arg;
     
-    // Open bugs JSONL file
+    // Create output directory separate from test directory
+    // This prevents output files from appearing as phantom entries
+    char output_dir[512];
+    snprintf(output_dir, sizeof(output_dir), "%s.output", state->test_dir);
+    mkdir(output_dir, 0755);  // Create if doesn't exist (ignore if exists)
+    
+    // Open bugs JSONL file in output directory
     char bugs_file[512];
-    snprintf(bugs_file, sizeof(bugs_file), "%s/xibalba-bugs.jsonl", state->test_dir);
+    snprintf(bugs_file, sizeof(bugs_file), "%s/xibalba-bugs.jsonl", output_dir);
     FILE *bugs_fp = fopen(bugs_file, "w");
     if (!bugs_fp) {
         fprintf(stderr, "Warning: Could not open bugs file: %s\n", bugs_file);
@@ -463,9 +469,14 @@ int main(int argc, char *argv[]) {
         }
     }
     
+    // Create output directory separate from test directory
+    char output_dir[512];
+    snprintf(output_dir, sizeof(output_dir), "%s.output", test_dir);
+    mkdir(output_dir, 0755);  // Create if doesn't exist
+    
     // Open incremental results file (JSONL - one line per time period)
     char progress_file[512];
-    snprintf(progress_file, sizeof(progress_file), "%s/xibalba-progress.jsonl", test_dir);
+    snprintf(progress_file, sizeof(progress_file), "%s/xibalba-progress.jsonl", output_dir);
     FILE *progress_fp = fopen(progress_file, "w");
     if (!progress_fp) {
         fprintf(stderr, "Warning: Could not open progress file: %s\n", progress_file);
@@ -600,15 +611,15 @@ int main(int argc, char *argv[]) {
     
     printf("\n");
     
-    // Export results
+    // Export results to output directory (reuse output_dir from above)
     char history_file[512];
-    snprintf(history_file, sizeof(history_file), "%s/xibalba-history.json", test_dir);
-    snprintf(progress_file, sizeof(progress_file), "%s/xibalba-progress.jsonl", test_dir);
+    snprintf(history_file, sizeof(history_file), "%s/xibalba-history.json", output_dir);
+    snprintf(progress_file, sizeof(progress_file), "%s/xibalba-progress.jsonl", output_dir);
     
     tracker_export_history(tracker, history_file);
     
     char bugs_file[512];
-    snprintf(bugs_file, sizeof(bugs_file), "%s/xibalba-bugs.jsonl", test_dir);
+    snprintf(bugs_file, sizeof(bugs_file), "%s/xibalba-bugs.jsonl", output_dir);
     
     printf("Results exported:\n");
     printf("  Progress (JSONL): %s (one line per 5-second period)\n", progress_file);
