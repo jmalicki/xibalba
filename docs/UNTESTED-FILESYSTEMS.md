@@ -52,7 +52,7 @@
 
 **Links:**
 - Wikipedia: https://en.wikipedia.org/wiki/Bcachefs
-- Linux kernel: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/fs/bcachefs
+- Linux kernel: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/fs
 - Controversies: https://lwn.net/Articles/934623/
 
 ---
