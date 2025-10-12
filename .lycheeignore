@@ -1,6 +1,9 @@
 # Lychee link checker ignore patterns
 #
-# NOTE: We no longer ignore DOI/ACM links. Instead, we accept 403/429
-# status codes as valid (see .github/workflows/ci.yml) since these
-# indicate bot protection, not broken links.
+# DOI links return 403 (bot protection) but are valid for humans
+# We keep the PDF links alongside DOI for accessibility
+https://doi.org/*
+
+# ACM Digital Library also has bot protection
+https://dl.acm.org/*
 

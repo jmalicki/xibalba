@@ -49,7 +49,7 @@ if (happens_before(file->create_vc, read_vc)) {
 1. **Lamport, Leslie (1978)**  
    *"Time, Clocks, and the Ordering of Events in a Distributed System"*  
    Communications of the ACM, 21(7):558-565  
-   DOI: [10.1145/359545.359563](https://doi.org/10.1145/359545.359563)  
+   [PDF](https://lamport.azurewebsites.net/pubs/time-clocks.pdf) | [DOI](https://doi.org/10.1145/359545.359563)  
    - **Foundation**: Defines happens-before (→) relation
    - **Key insight**: Logical time instead of physical time
    - **Lamport timestamps**: Simple scalar clocks

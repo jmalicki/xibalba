@@ -24,8 +24,8 @@ jobs:
       uses: lycheeverse/lychee-action@v1
       with:
         # Check all markdown files
-        # Accept 403/429 as valid (bot protection, not broken links)
-        args: '--verbose --no-progress --accept 200,403,429 **/*.md'
+        # Use .lycheeignore to skip DOI/ACM links (bot protection)
+        args: '--verbose --no-progress **/*.md'
         # Fail on actual broken links (404, 500, etc.)
         fail: true
         # Format output
