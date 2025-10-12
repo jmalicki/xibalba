@@ -18,7 +18,7 @@ bazel_dep(name = "rules_oci", version = "1.7.4")
 
 # Hermetic Debian package management (needs bazel_gazelle)
 bazel_dep(name = "gazelle", version = "0.36.0")
-bazel_dep(name = "rules_distroless", version = "0.3.7")
+bazel_dep(name = "rules_distroless", version = "0.5.3")
 
 # Pull base images for containers
 oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
@@ -27,25 +27,31 @@ oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
 oci.pull(
     name = "ubuntu_base",
     image = "ubuntu",
-    tag = "24.04",
     platforms = ["linux/amd64"],
+    tag = "24.04",
 )
 
 # Distroless base (has libc already configured)
 oci.pull(
     name = "distroless_base",
     image = "gcr.io/distroless/base-debian12",
-    tag = "latest",
     platforms = ["linux/amd64"],
+    tag = "latest",
 )
-
-use_repo(oci, "ubuntu_base", "distroless_base")
+use_repo(oci, "distroless_base", "ubuntu_base")
 
 # Configure apt package sources for CI dev environment
 apt = use_extension("@rules_distroless//apt:extensions.bzl", "apt")
+
+# Test with noble example (exact copy from rules_distroless)
+apt.install(
+    name = "test_noble",
+    lock = "//test_noble:noble.lock.json",
+    manifest = "//test_noble:noble.yaml",
+)
 apt.install(
     name = "ubuntu_packages",
     lock = "//tools/ci/docker:packages.lock.json",
     manifest = "//tools/ci/docker:packages.yaml",
 )
-use_repo(apt, "ubuntu_packages")
+use_repo(apt, "test_noble", "ubuntu_packages")
