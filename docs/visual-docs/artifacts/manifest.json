@@ -1,9 +1,177 @@
 {
   "version": "1.0",
   "total_prompts": 65,
-  "generated": 16,
+  "generated": 40,
   "failed": 0,
   "images": [
+    {
+      "id": "why-this-matters-06",
+      "title": "The Truth is Hidden",
+      "prompt": "Hero Twins searching for the truth amidst a sea of supernatural bugs and challenges in Xibalba, dark ominous glow, intricate glyphs and hieroglyphics, chaotic atmosphere, focus on the twins' searching expressions",
+      "filename": "why-this-matters-06.png",
+      "status": "exists"
+    },
+    {
+      "id": "why-this-matters-07",
+      "title": "Xibalba's Treacherous Paths",
+      "prompt": "A winding underground passage in Xibalba, lined with supernatural challenges and cryptic glyphs, dark ominous glow, atmospheric lighting, focus on the path ahead",
+      "filename": "why-this-matters-07.png",
+      "status": "exists"
+    },
+    {
+      "id": "why-this-matters-08",
+      "title": "Jaguar Warriors of Xibalba",
+      "prompt": "A group of jaguar warriors guarding a trial in Xibalba, surrounded by Hero Twins and supernatural challenges, vibrant colors and glyphs, dramatic low-angle shot, powerful atmosphere",
+      "filename": "why-this-matters-08.png",
+      "status": "exists"
+    },
+    {
+      "id": "why-this-matters-09",
+      "title": "The Weight of the Trials",
+      "prompt": "A Hero Twin carrying the weight of the trials in Xibalba, surrounded by supernatural challenges and cryptic glyphs, dark ominous glow, introspective atmosphere, focus on the hero's expression",
+      "filename": "why-this-matters-09.png",
+      "status": "exists"
+    },
+    {
+      "id": "why-this-matters-10",
+      "title": "Racing Against Time",
+      "prompt": "Hero Twins racing against time to complete a trial in Xibalba, surrounded by supernatural challenges and jaguar warriors, vibrant colors and glyphs, dramatic fast-motion shot, fast-paced atmosphere",
+      "filename": "why-this-matters-10.png",
+      "status": "exists"
+    },
+    {
+      "id": "technical-details-01",
+      "title": "Hero Twin's Descent",
+      "prompt": "Hero Twin emerging from a dark cave, entering the grand Maya pyramid temple of Xibalba - vibrant colors and intricate glyphs adorn the walls, a Death God (Lords of Xibalba) casts a shadowy gaze from above, a locked door with a Maya hieroglyphic warning excludes other operating systems, Ancient Maya mythology art style with dramatic underworld scenes, composition: hero twin center, Death God top-left, locked door bottom-right, warm golden light, moody dark atmosphere",
+      "filename": "technical-details-01.png",
+      "status": "exists"
+    },
+    {
+      "id": "technical-details-02",
+      "title": "Death God's Challenge",
+      "prompt": "Death God (Lords of Xibalba) testing the resolve of a Hero Twin navigating the chaotic temple - eBPF fault injection mechanism depicted by the Death God's staff, a Jaguar warrior in the background watches the trial, a Sacred cenote reflects the vibrant colors of the temple, Ancient Maya mythology art style with intricate glyphs, composition: Hero Twin and Death God center, Sacred cenote background, warm red light, intense and dramatic atmosphere",
+      "filename": "technical-details-02.png",
+      "status": "exists"
+    },
+    {
+      "id": "technical-details-03",
+      "title": "Trial of Concurrent Operations",
+      "prompt": "A Hero Twin navigating the intricate carvings on the temple walls, depicting the chaos of concurrent filesystem operations - a Plumed serpent (Kukulkan) wraps around the carvings, a Hero twin's companion looks on, a Sacred ball game court in the background symbolizes the struggle, Ancient Maya mythology art style with vibrant colors, composition: Hero Twin and companion center, Plumed serpent and ball game court background, cool blue light, sense of urgency",
+      "filename": "technical-details-03.png",
+      "status": "exists"
+    },
+    {
+      "id": "technical-details-04",
+      "title": "Locked Door of Exclusion",
+      "prompt": "A locked door with a Maya hieroglyphic warning excludes other operating systems from entering the temple - a group of operating systems (Windows, macOS, etc.) watch from outside, a Death God casts a shadowy gaze, a Sacred cenote reflects the warm golden light, Ancient Maya mythology art style with intricate glyphs, composition: locked door center, operating systems and Death God background, warm golden light, sense of exclusion",
+      "filename": "technical-details-04.png",
+      "status": "exists"
+    },
+    {
+      "id": "technical-details-05",
+      "title": "Hero Twin's Resolve",
+      "prompt": "A Hero Twin stands firm against the Death God's challenge, the eBPF fault injection mechanism depicted by the Death God's staff, a Jaguar warrior in the background watches with respect, a Sacred ball game court in the background symbolizes the struggle, Ancient Maya mythology art style with vibrant colors, composition: Hero Twin center, Death God and Jaguar warrior background, warm red light, sense of determination",
+      "filename": "technical-details-05.png",
+      "status": "exists"
+    },
+    {
+      "id": "technical-details-06",
+      "title": "Chaos of Concurrent Operations",
+      "prompt": "A chaotic scene of concurrent filesystem operations - multiple Hero twins navigating the temple, a Plumed serpent (Kukulkan) wraps around the carvings, a Sacred cenote reflects the warm golden light, Ancient Maya mythology art style with vibrant colors, composition: multiple Hero twins center, Plumed serpent and Sacred cenote background, cool blue light, sense of chaos",
+      "filename": "technical-details-06.png",
+      "status": "exists"
+    },
+    {
+      "id": "technical-details-07",
+      "title": "eBPF Fault Injection",
+      "prompt": "A close-up of the Death God's staff, depicting the eBPF fault injection mechanism - a group of eBPF elements (tables, maps, etc.) surround the staff, a Hero twin looks on in the background, a Sacred cenote reflects the warm golden light, Ancient Maya mythology art style with intricate glyphs, composition: staff center, Hero twin and eBPF elements background, warm golden light, sense of complexity",
+      "filename": "technical-details-07.png",
+      "status": "exists"
+    },
+    {
+      "id": "technical-details-08",
+      "title": "Hero Twin's Companion",
+      "prompt": "A Hero Twin's companion looks on as the Hero Twin navigates the temple - a Jaguar warrior in the background watches with respect, a Sacred cenote reflects the warm golden light, Ancient Maya mythology art style with vibrant colors, composition: Hero Twin and companion center, Jaguar warrior and Sacred cenote background, warm red light, sense of loyalty",
+      "filename": "technical-details-08.png",
+      "status": "exists"
+    },
+    {
+      "id": "technical-details-09",
+      "title": "Temple Entrance",
+      "prompt": "A grand entrance to the Maya pyramid temple of Xibalba - a Hero twin emerges from the darkness, a Death God (Lords of Xibalba) casts a shadowy gaze, a locked door with a Maya hieroglyphic warning excludes other operating systems, Ancient Maya mythology art style with dramatic underworld scenes, composition: Hero twin center, Death God and locked door background, warm golden light, moody dark atmosphere",
+      "filename": "technical-details-09.png",
+      "status": "exists"
+    },
+    {
+      "id": "technical-details-10",
+      "title": "Hero Twin's Journey",
+      "prompt": "A Hero Twin journeys through the chaotic temple, navigating the intricate carvings and facing the Death God's challenges - a Plumed serpent (Kukulkan) wraps around the carvings, a Sacred cenote reflects the warm golden light, Ancient Maya mythology art style with vibrant colors, composition: Hero Twin center, Plumed serpent and Sacred cenote background, cool blue light, sense of journey",
+      "filename": "technical-details-10.png",
+      "status": "exists"
+    },
+    {
+      "id": "the-name-xibalba-01",
+      "title": "Xibalba Entrance at Dusk",
+      "prompt": "Ah Puch and Ixchel guarding Xibalba entrance - Ancient Maya jungle at dusk, massive cave system beneath, skeletons illuminated by flickering torches, intricate glyphs and codex art on cave walls, vibrant colors",
+      "filename": "the-name-xibalba-01.png",
+      "status": "exists"
+    },
+    {
+      "id": "the-name-xibalba-02",
+      "title": "Ixchel's Haunting Smile",
+      "prompt": "Ixchel's skeletal face with a haunting smile - Close-up, warm torchlight, intricate hieroglyphs in the background, dramatic shadows, Ancient Maya mythology art style",
+      "filename": "the-name-xibalba-02.png",
+      "status": "exists"
+    },
+    {
+      "id": "the-name-xibalba-03",
+      "title": "Cave System at Sunset",
+      "prompt": "Xibalba's cave system at sunset - Dappled light, ancient stone walls, Ah Puch and Ixchel in the distance, sacred cenotes and underground rivers, vibrant colors, Ancient Maya mythology art style",
+      "filename": "the-name-xibalba-03.png",
+      "status": "exists"
+    },
+    {
+      "id": "the-name-xibalba-04",
+      "title": "Hieroglyphic Warning",
+      "prompt": "Warning hieroglyphs on Xibalba's entrance - Intricate glyphs, Ancient Maya codex art, Ah Puch and Ixchel in the background, ominous atmosphere, Ancient Maya mythology art style",
+      "filename": "the-name-xibalba-04.png",
+      "status": "exists"
+    },
+    {
+      "id": "the-name-xibalba-05",
+      "title": "Death Gods in Shadow",
+      "prompt": "Ah Puch and Ixchel in shadow - Dark, ominous atmosphere, flickering torches casting eerie shadows, Ancient Maya mythology art style, vibrant colors",
+      "filename": "the-name-xibalba-05.png",
+      "status": "exists"
+    },
+    {
+      "id": "the-name-xibalba-06",
+      "title": "Jungle to Xibalba Bridge",
+      "prompt": "Bridge between jungle and Xibalba - Ancient Maya pyramids and temples in the background, massive cave system beneath, Ah Puch and Ixchel in the foreground, vibrant colors, Ancient Maya mythology art style",
+      "filename": "the-name-xibalba-06.png",
+      "status": "exists"
+    },
+    {
+      "id": "the-name-xibalba-07",
+      "title": "Underground River",
+      "prompt": "Sacred underground river in Xibalba - Serene atmosphere, ancient stone walls, Ah Puch and Ixchel in the background, vibrant colors, Ancient Maya mythology art style",
+      "filename": "the-name-xibalba-07.png",
+      "status": "exists"
+    },
+    {
+      "id": "the-name-xibalba-08",
+      "title": "Ah Puch's Gaze",
+      "prompt": "Ah Puch's skeletal face with a stern gaze - Close-up, warm torchlight, intricate hieroglyphs in the background, dramatic shadows, Ancient Maya mythology art style",
+      "filename": "the-name-xibalba-08.png",
+      "status": "exists"
+    },
+    {
+      "id": "the-name-xibalba-09",
+      "title": "Xibalba's Dark Entrance",
+      "prompt": "Xibalba's dark entrance at night - Flickering torches, Ah Puch and Ixchel in the distance, ominous atmosphere, Ancient Maya mythology art style, vibrant colors",
+      "filename": "the-name-xibalba-09.png",
+      "status": "exists"
+    },
     {
       "id": "the-name-xibalba-10",
       "title": "Ixchel's Cave",
