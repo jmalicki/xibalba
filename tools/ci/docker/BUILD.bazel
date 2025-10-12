@@ -56,9 +56,7 @@ genrule(
             find tmp/usr/share/ca-certificates -name '*.crt' -exec cat {} \\; > tmp/etc/ssl/certs/ca-certificates.crt 2>/dev/null || true
         fi
         
-        # Create /lib symlink to /usr/lib (linker scripts expect /lib path)
-        mkdir -p tmp/lib
-        cd tmp/lib && ln -sf ../usr/lib/x86_64-linux-gnu . && cd -
+        # NOTE: mergedusr=True in MODULE.bazel handles /lib -> /usr/lib normalization
         
         tar -C tmp -cf $@ --transform='s|^\\./||' .
         rm -rf tmp

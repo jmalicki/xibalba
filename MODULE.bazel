@@ -39,5 +39,6 @@ apt.install(
     name = "ubuntu_packages",
     lock = "//tools/ci/docker:packages.lock.json",
     manifest = "//tools/ci/docker:packages.yaml",
+    mergedusr = True,  # Normalize paths for usr-merge (fixes /lib vs /usr/lib conflicts)
 )
 use_repo(apt, "ubuntu_packages")
