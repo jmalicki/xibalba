@@ -276,6 +276,24 @@ validation_result_t tracker_validate_read(state_tracker_t *tracker,
         }
     }
     
+    // Check for phantom entries: files in actual_entries that don't exist in ground truth
+    // This detects completely unknown files (never created)
+    for (int i = 0; i < num_actual; i++) {
+        bool found_in_tracker = false;
+        for (uint64_t j = 0; j < tracker->file_count; j++) {
+            if (strcmp(actual_entries[i], tracker->files[j].filename) == 0) {
+                found_in_tracker = true;
+                break;
+            }
+        }
+        
+        // File was read but never created = phantom!
+        if (!found_in_tracker && model != CONSISTENCY_EVENTUAL) {
+            result.phantom_entries++;
+            result.total_bugs_found++;
+        }
+    }
+    
     pthread_mutex_unlock(&tracker->lock);
     return result;
 }
