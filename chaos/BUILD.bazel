@@ -19,7 +19,7 @@ genrule(
     srcs = ["pause_injector.bpf.c"],
     outs = ["pause_injector.bpf.o"],
     cmd = """
-        clang -g -O2 -target bpf \
+        $$CC -g -O2 -target bpf \
             -D__TARGET_ARCH_x86_64 \
             -I/usr/include/x86_64-linux-gnu \
             -c $(location pause_injector.bpf.c) \

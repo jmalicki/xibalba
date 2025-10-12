@@ -10,7 +10,6 @@ load("@rules_distroless//distroless:defs.bzl", "flatten")
 # ============================================================================
 
 exports_files([
-    "Dockerfile",
     "packages.yaml",
     "packages.lock.json",
 ])
@@ -57,6 +56,10 @@ genrule(
         fi
         
         # NOTE: mergedusr=True in MODULE.bazel handles /lib -> /usr/lib normalization
+        
+        # Create clang/clang++ symlinks (genrules use hardcoded 'clang', not 'clang-18')
+        ln -sf clang-18 tmp/usr/bin/clang
+        ln -sf clang++-18 tmp/usr/bin/clang++
         
         tar -C tmp -cf $@ --transform='s|^\\./||' .
         rm -rf tmp
