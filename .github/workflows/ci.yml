@@ -57,13 +57,10 @@ jobs:
     - uses: actions/checkout@v4
     
     - name: Run state_tracker unit tests
-      env:
-        CC: clang-18
-        CXX: clang++-18
       run: |
         bazel test //common:state_tracker_test \
-          --action_env=CC=clang-18 \
-          --action_env=CXX=clang++-18 \
+          --repo_env=CC=clang-18 \
+          --repo_env=CXX=clang++-18 \
           --test_output=errors \
           --test_summary=detailed \
           --noshow_progress \
@@ -93,35 +90,26 @@ jobs:
     - uses: actions/checkout@v4
     
     - name: Build all chaos testing targets
-      env:
-        CC: clang-18
-        CXX: clang++-18
       run: |
         bazel build //chaos:all \
-          --action_env=CC=clang-18 \
-          --action_env=CXX=clang++-18 \
+          --repo_env=CC=clang-18 \
+          --repo_env=CXX=clang++-18 \
           --noshow_progress \
           --show_result=0
         
     - name: Build VM infrastructure
-      env:
-        CC: clang-18
-        CXX: clang++-18
       run: |
         bazel build //vm:extract_kernel //vm:build_initramfs \
-          --action_env=CC=clang-18 \
-          --action_env=CXX=clang++-18 \
+          --repo_env=CC=clang-18 \
+          --repo_env=CXX=clang++-18 \
           --noshow_progress \
           --show_result=0
         
     - name: Build packaging
-      env:
-        CC: clang-18
-        CXX: clang++-18
       run: |
         bazel build //packaging:xibalba-deb \
-          --action_env=CC=clang-18 \
-          --action_env=CXX=clang++-18 \
+          --repo_env=CC=clang-18 \
+          --repo_env=CXX=clang++-18 \
           --noshow_progress \
           --show_result=0
 
@@ -149,13 +137,10 @@ jobs:
         apt-get update && apt-get install -y qemu-system-x86
     
     - name: Run QEMU filesystem tests
-      env:
-        CC: clang-18
-        CXX: clang++-18
       run: |
         bazel test //vm:qemu_filesystem_suite \
-          --action_env=CC=clang-18 \
-          --action_env=CXX=clang++-18 \
+          --repo_env=CC=clang-18 \
+          --repo_env=CXX=clang++-18 \
           --test_timeout=600 \
           --test_output=errors \
           --noshow_progress \

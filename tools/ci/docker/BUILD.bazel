@@ -72,6 +72,11 @@ oci_image(
         ":flat_no_prefix",  # Flattened packages with ./ prefix stripped
         ":bazelisk_layer",  # Bazelisk binary
     ],
+    env = {
+        "CC": "clang-18",
+        "CXX": "clang++-18",
+        "PATH": "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+    },
 )
 
 # Tarball for local testing
