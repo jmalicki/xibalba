@@ -82,34 +82,51 @@ cp -L /lib64/ld-linux-x86-64.so.2 initrd/lib64/
 
 # Copy kernel modules for btrfs and ZFS
 echo "Copying kernel modules..."
-KERNEL_VERSION=$(ls /lib/modules/ | head -1)
-mkdir -p initrd/lib/modules/$KERNEL_VERSION/kernel/fs
+echo "  DEBUG: Checking /lib/modules/..."
+ls -la /lib/modules/ || echo "  DEBUG: /lib/modules/ not found or empty"
+KERNEL_VERSION=$(ls /lib/modules/ 2>/dev/null | head -1 || echo "")
 
-# Copy btrfs modules (in mainline kernel)
-if [ -d /lib/modules/$KERNEL_VERSION/kernel/fs/btrfs ]; then
-    cp -r /lib/modules/$KERNEL_VERSION/kernel/fs/btrfs initrd/lib/modules/$KERNEL_VERSION/kernel/fs/
-    echo "  ✓ btrfs modules copied"
+if [ -n "$KERNEL_VERSION" ] && [ -d "/lib/modules/$KERNEL_VERSION" ]; then
+    mkdir -p initrd/lib/modules/$KERNEL_VERSION/kernel/fs
+    
+    # Copy btrfs modules (in mainline kernel)
+    if [ -d /lib/modules/$KERNEL_VERSION/kernel/fs/btrfs ]; then
+        cp -r /lib/modules/$KERNEL_VERSION/kernel/fs/btrfs initrd/lib/modules/$KERNEL_VERSION/kernel/fs/
+        echo "  ✓ btrfs modules copied"
+    else
+        echo "  ⚠️  btrfs modules not found (may be built-in)"
+    fi
+    
+    # Copy ZFS modules (external DKMS module - may not exist)
+    ZFS_COPIED=0
+    if [ -d /lib/modules/$KERNEL_VERSION/extra/zfs ]; then
+        mkdir -p initrd/lib/modules/$KERNEL_VERSION/extra
+        cp -r /lib/modules/$KERNEL_VERSION/extra/zfs initrd/lib/modules/$KERNEL_VERSION/extra/
+        echo "  ✓ ZFS modules copied (extra/zfs)"
+        ZFS_COPIED=1
+    elif [ -d /lib/modules/$KERNEL_VERSION/updates/dkms ]; then
+        mkdir -p initrd/lib/modules/$KERNEL_VERSION/updates
+        cp -r /lib/modules/$KERNEL_VERSION/updates/dkms initrd/lib/modules/$KERNEL_VERSION/updates/ 2>/dev/null && {
+            echo "  ✓ DKMS modules copied (may include ZFS)"
+            ZFS_COPIED=1
+        } || echo "  ⚠️  DKMS modules not found"
+    fi
+    
+    if [ $ZFS_COPIED -eq 0 ]; then
+        echo "  ⚠️  ZFS modules not found (ZFS will not be available in VM)"
+    fi
+    
+    # Copy modules.* dependency files for modprobe
+    cp /lib/modules/$KERNEL_VERSION/modules.dep initrd/lib/modules/$KERNEL_VERSION/ 2>/dev/null || echo "  ⚠️  modules.dep not found"
+    cp /lib/modules/$KERNEL_VERSION/modules.dep.bin initrd/lib/modules/$KERNEL_VERSION/ 2>/dev/null || true
+    cp /lib/modules/$KERNEL_VERSION/modules.alias initrd/lib/modules/$KERNEL_VERSION/ 2>/dev/null || true
+    cp /lib/modules/$KERNEL_VERSION/modules.alias.bin initrd/lib/modules/$KERNEL_VERSION/ 2>/dev/null || true
+    cp /lib/modules/$KERNEL_VERSION/modules.symbols initrd/lib/modules/$KERNEL_VERSION/ 2>/dev/null || true
+    cp /lib/modules/$KERNEL_VERSION/modules.symbols.bin initrd/lib/modules/$KERNEL_VERSION/ 2>/dev/null || true
+    echo "  ✓ Module support configured"
+else
+    echo "  ⚠️  No kernel modules directory found (filesystems may be built-in or unavailable)"
 fi
-
-# Copy ZFS modules (external DKMS module)
-if [ -d /lib/modules/$KERNEL_VERSION/extra/zfs ]; then
-    mkdir -p initrd/lib/modules/$KERNEL_VERSION/extra
-    cp -r /lib/modules/$KERNEL_VERSION/extra/zfs initrd/lib/modules/$KERNEL_VERSION/extra/
-    echo "  ✓ ZFS modules copied (extra/zfs)"
-elif [ -d /lib/modules/$KERNEL_VERSION/updates/dkms ]; then
-    mkdir -p initrd/lib/modules/$KERNEL_VERSION/updates
-    cp -r /lib/modules/$KERNEL_VERSION/updates/dkms initrd/lib/modules/$KERNEL_VERSION/updates/ || true
-    echo "  ✓ DKMS modules copied (may include ZFS)"
-fi
-
-# Copy modules.* dependency files for modprobe
-cp /lib/modules/$KERNEL_VERSION/modules.dep initrd/lib/modules/$KERNEL_VERSION/ 2>/dev/null || true
-cp /lib/modules/$KERNEL_VERSION/modules.dep.bin initrd/lib/modules/$KERNEL_VERSION/ 2>/dev/null || true
-cp /lib/modules/$KERNEL_VERSION/modules.alias initrd/lib/modules/$KERNEL_VERSION/ 2>/dev/null || true
-cp /lib/modules/$KERNEL_VERSION/modules.alias.bin initrd/lib/modules/$KERNEL_VERSION/ 2>/dev/null || true
-cp /lib/modules/$KERNEL_VERSION/modules.symbols initrd/lib/modules/$KERNEL_VERSION/ 2>/dev/null || true
-cp /lib/modules/$KERNEL_VERSION/modules.symbols.bin initrd/lib/modules/$KERNEL_VERSION/ 2>/dev/null || true
-echo "  ✓ Module dependency files copied"
 
 # Copy our custom init script
 echo "Installing custom init..."
