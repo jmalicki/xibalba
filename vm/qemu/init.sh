@@ -132,7 +132,20 @@ echo "✓ Filesystem formatted"
 if [ "$FILESYSTEM" != "zfs" ]; then
     echo "Mounting test filesystem..."
     mkdir -p /test
-    mount /dev/vda /test
+    if ! mount /dev/vda /test; then
+        CODE=$?
+        echo "ERROR: Failed to mount $FILESYSTEM (exit: $CODE)"
+        echo "This likely means the kernel doesn't support $FILESYSTEM"
+        echo "Skipping test execution..."
+        echo ""
+        echo "=== XIBALBA_TEST_COMPLETE ==="
+        echo "EXIT_CODE=255"
+        echo "FILESYSTEM=$FILESYSTEM"
+        echo "ERROR=mount_failed"
+        echo "=========================="
+        poweroff
+        exit 255
+    fi
 fi
 echo "✓ Test filesystem ready"
 
