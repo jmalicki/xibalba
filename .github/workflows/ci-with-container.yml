@@ -1,0 +1,240 @@
+name: CI (with GHCR container)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # ============================================================================
+  # Documentation Validation - Check markdown links
+  # ============================================================================
+  markdown-links:
+    name: Validate Markdown Links
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      issues: write
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Check markdown links
+      uses: lycheeverse/lychee-action@v1
+      with:
+        args: '--verbose --no-progress **/*.md'
+        fail: true
+        format: markdown
+        token: ${{ secrets.GITHUB_TOKEN }}
+      
+    - name: Create issue on link failure
+      if: failure()
+      uses: peter-evans/create-issue-from-file@v5
+      with:
+        title: 'Broken links detected in documentation'
+        content-filepath: ./lychee/out.md
+        labels: documentation, bug
+
+  # ============================================================================
+  # Unit Tests - Using cached GHCR container
+  # ============================================================================
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-24.04
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Generate cache key
+      id: cache-key
+      run: |
+        CACHE_KEY=$(cat MODULE.bazel.lock tools/ci/docker/packages.lock.json | sha256sum | cut -c1-16)
+        echo "key=${CACHE_KEY}" >> $GITHUB_OUTPUT
+        echo "📝 Cache key: ${CACHE_KEY}"
+    
+    - name: Pull CI container from GHCR
+      run: |
+        IMAGE="ghcr.io/jmalicki/xibalba-dev-env:cache-${{ steps.cache-key.outputs.key }}"
+        echo "🐳 Pulling container: ${IMAGE}"
+        
+        # Try exact cache key
+        if docker pull "${IMAGE}"; then
+          echo "✅ Cache HIT: Exact match"
+        # Fallback to latest
+        elif docker pull "ghcr.io/jmalicki/xibalba-dev-env:latest"; then
+          echo "⚠️  Cache MISS: Using :latest as fallback"
+          docker tag "ghcr.io/jmalicki/xibalba-dev-env:latest" "${IMAGE}"
+        else
+          echo "❌ ERROR: Could not pull container from GHCR"
+          exit 1
+        fi
+    
+    - name: Setup Bazelisk
+      uses: bazelbuild/setup-bazelisk@v3
+    
+    - name: Run state_tracker unit tests in container
+      run: |
+        IMAGE="ghcr.io/jmalicki/xibalba-dev-env:cache-${{ steps.cache-key.outputs.key }}"
+        docker run --rm \
+          -v ${{ github.workspace }}:/workspace \
+          -w /workspace \
+          -e HOME=/tmp \
+          "${IMAGE}" \
+          /usr/bin/bash -c "
+            bazel test //common:state_tracker_test \
+              --test_output=errors \
+              --test_summary=detailed \
+              --noshow_progress \
+              --ui_event_filters=-info,-debug \
+              --show_result=0
+          "
+      
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: unit-test-results
+        path: bazel-testlogs/
+
+  # ============================================================================
+  # Build Tests - Ensure all targets build
+  # ============================================================================
+  build-all:
+    name: Build All Targets
+    runs-on: ubuntu-24.04
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Generate cache key
+      id: cache-key
+      run: |
+        CACHE_KEY=$(cat MODULE.bazel.lock tools/ci/docker/packages.lock.json | sha256sum | cut -c1-16)
+        echo "key=${CACHE_KEY}" >> $GITHUB_OUTPUT
+        echo "📝 Cache key: ${CACHE_KEY}"
+    
+    - name: Pull CI container from GHCR
+      run: |
+        IMAGE="ghcr.io/jmalicki/xibalba-dev-env:cache-${{ steps.cache-key.outputs.key }}"
+        echo "🐳 Pulling container: ${IMAGE}"
+        
+        if docker pull "${IMAGE}"; then
+          echo "✅ Cache HIT"
+        elif docker pull "ghcr.io/jmalicki/xibalba-dev-env:latest"; then
+          echo "⚠️  Using :latest"
+          docker tag "ghcr.io/jmalicki/xibalba-dev-env:latest" "${IMAGE}"
+        else
+          echo "❌ ERROR: Could not pull container"
+          exit 1
+        fi
+    
+    - name: Setup Bazelisk
+      uses: bazelbuild/setup-bazelisk@v3
+    
+    - name: Build all chaos testing targets
+      run: |
+        IMAGE="ghcr.io/jmalicki/xibalba-dev-env:cache-${{ steps.cache-key.outputs.key }}"
+        docker run --rm \
+          -v ${{ github.workspace }}:/workspace \
+          -w /workspace \
+          -e HOME=/tmp \
+          "${IMAGE}" \
+          /usr/bin/bash -c "
+            bazel build //chaos:all \
+              --noshow_progress \
+              --show_result=0
+          "
+        
+    - name: Build VM infrastructure
+      run: |
+        IMAGE="ghcr.io/jmalicki/xibalba-dev-env:cache-${{ steps.cache-key.outputs.key }}"
+        docker run --rm \
+          -v ${{ github.workspace }}:/workspace \
+          -w /workspace \
+          -e HOME=/tmp \
+          "${IMAGE}" \
+          /usr/bin/bash -c "
+            bazel build //vm:extract_kernel //vm:build_initramfs \
+              --noshow_progress \
+              --show_result=0
+          "
+        
+    - name: Build packaging
+      run: |
+        IMAGE="ghcr.io/jmalicki/xibalba-dev-env:cache-${{ steps.cache-key.outputs.key }}"
+        docker run --rm \
+          -v ${{ github.workspace }}:/workspace \
+          -w /workspace \
+          -e HOME=/tmp \
+          "${IMAGE}" \
+          /usr/bin/bash -c "
+            bazel build //packaging:xibalba-deb \
+              --noshow_progress \
+              --show_result=0
+          "
+
+  # ============================================================================
+  # VM Tests - Full integration tests (slower, run on demand)
+  # ============================================================================
+  vm-tests:
+    name: VM Tests (ext4, xfs, btrfs)
+    runs-on: ubuntu-24.04
+    # Only run VM tests on main branch or when PR is labeled
+    if: github.ref == 'refs/heads/main' || contains(github.event.pull_request.labels.*.name, 'run-vm-tests')
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    # VM tests need QEMU which isn't in our build container
+    # Install it separately on the host
+    - name: Install QEMU and dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          clang-18 \
+          libbpf-dev \
+          libelf-dev \
+          linux-headers-generic \
+          qemu-system-x86
+    
+    - name: Enable KVM
+      run: |
+        echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger --name-match=kvm
+        
+    - name: Setup Bazelisk
+      uses: bazelbuild/setup-bazelisk@v3
+    
+    - name: Run QEMU filesystem tests
+      run: |
+        bazel test //vm:qemu_filesystem_suite \
+          --test_timeout=600 \
+          --test_output=errors \
+          --noshow_progress \
+          --ui_event_filters=-info,-debug
+    
+    - name: Extract and upload bug results
+      if: always()
+      run: |
+        mkdir -p ci-results
+        find bazel-testlogs/vm -name "test.log" -exec grep -A1000 "XIBALBA_PROGRESS_JSONL" {} \; | \
+          grep "^{" > ci-results/all-progress.jsonl || true
+        find bazel-testlogs/vm -name "test.log" -exec grep -A1000 "XIBALBA_BUGS_JSONL" {} \; | \
+          grep "^{" > ci-results/all-bugs.jsonl || true
+        
+    - name: Upload JSONL results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: vm-test-jsonl-results
+        path: ci-results/
+        
+    - name: Upload full test logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: vm-test-logs
+        path: bazel-testlogs/vm/
+
