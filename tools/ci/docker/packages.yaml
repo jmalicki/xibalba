@@ -7,7 +7,8 @@ sources:
     url: https://snapshot.ubuntu.com/ubuntu/20241001T000000Z
 
 archs:
-  - amd64
+  - "amd64"
+  - "arm64"
 
 packages:
   # System essentials (for running commands in container)

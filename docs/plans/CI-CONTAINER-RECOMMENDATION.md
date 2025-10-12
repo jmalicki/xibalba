@@ -2,18 +2,20 @@
 
 ## Current Status
 
-**After 2+ hours of debugging rules_distroless:**
+**After 4+ hours of debugging rules_distroless:**
 
 ✅ **Works:**
-- Dependencies configured
-- Lock file generated (128KB)
-- OCI image builds successfully  
-- Bazel caching works
+- Dependencies configured correctly (verified against working examples)
+- Lock file generated (1840 lines, valid JSON, 118KB with arm64)
+- Individual packages download correctly
+- `bazel run @ubuntu_packages//:lock` works
 
-❌ **Doesn't Work:**
-- Container won't run (binary execution issues)
-- Missing shared library dependencies (cascading issues)
-- Each binary needs specific .so files manually added
+❌ **Doesn't Work - BUG IN rules_distroless:**
+- BUILD.bazel not generated properly (only has `:lock` target)
+- Should have `:ubuntu_packages`, `:packages`, `:dpkg_status`, `:flat` targets
+- `noble` example works, ours doesn't - **despite identical configuration**
+- packages.bzl is empty (should contain package imports)
+- Can't use individual `//package/amd64:data` targets without manual dependency resolution
 
 ## The Problem with rules_distroless for CI
 
