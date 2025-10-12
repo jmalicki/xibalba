@@ -33,3 +33,16 @@ sh_binary(
     tags = ["local", "no-cache", "no-sandbox"],
 )
 
+# Extreme stress test for btrfs POSIX compliance
+# 32 CPUs, massive oversubscription, tests for duplicate entries
+sh_binary(
+    name = "btrfs_extreme_stress",
+    srcs = ["btrfs-extreme-stress.sh"],
+    data = [
+        "//vm:build_initramfs",
+        "//vm:extract_kernel",
+    ],
+    visibility = ["//visibility:public"],
+    tags = ["local", "no-cache", "no-sandbox"],
+)
+

@@ -10,6 +10,7 @@ DURATION=300
 READERS=10
 WRITERS=3
 MODEL="posix"
+CPUS=2
 
 # Parse named arguments
 while [[ $# -gt 0 ]]; do
@@ -34,6 +35,10 @@ while [[ $# -gt 0 ]]; do
             MODEL="$2"
             shift 2
             ;;
+        --cpus)
+            CPUS="$2"
+            shift 2
+            ;;
         -h|--help)
             echo "Usage: $0 [OPTIONS]"
             echo ""
@@ -43,10 +48,12 @@ while [[ $# -gt 0 ]]; do
             echo "  --readers N       Number of reader threads [default: 10]"
             echo "  --writers N       Number of writer threads [default: 3]"
             echo "  --model MODEL     Consistency model (posix, weak, strict, eventual) [default: posix]"
+            echo "  --cpus N          Number of CPUs for VM [default: 2]"
             echo ""
             echo "Examples:"
             echo "  $0 --filesystem ext4 --model posix --duration 30 --readers 5 --writers 2"
             echo "  $0 --filesystem zfs --model weak --duration 60"
+            echo "  $0 --filesystem ext4 --cpus 8 --readers 32 --writers 16"
             exit 0
             ;;
         *)
@@ -99,7 +106,10 @@ fi
 
 echo "=== Xibalba Fast QEMU Test ==="
 echo "Filesystem: $FILESYSTEM"
+echo "Model: $MODEL"
 echo "Duration: $DURATION seconds"
+echo "Workload: $READERS readers, $WRITERS writers"
+echo "CPUs: $CPUS"
 echo "Kernel: $KERNEL"
 echo "Initramfs: $INITRAMFS (includes xibalba binaries)"
 echo ""
@@ -130,7 +140,7 @@ timeout --foreground --kill-after=10 $TIMEOUT \
     -enable-kvm \
     -cpu host \
     -m 2048 \
-    -smp 2 \
+    -smp "$CPUS" \
     -kernel "$KERNEL" \
     -initrd "$INITRAMFS" \
     -append "console=ttyS0 rdinit=/init xibalba.fs=$FILESYSTEM xibalba.duration=$DURATION xibalba.readers=$READERS xibalba.writers=$WRITERS xibalba.model=$MODEL" \
