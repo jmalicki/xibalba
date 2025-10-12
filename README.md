@@ -233,10 +233,20 @@ bazel run //chaos:simple_chaos_test -- --duration 60 /tmp/xibalba_test
 
 **No setup needed!** VM infrastructure uses Docker for hermetic builds.
 
-**Quick test** (single filesystem, 10 seconds):
+**Quick test** (single filesystem):
 ```bash
-bazel run //vm:qemu_test_runner -- ext4 10 5 2
-# Args: filesystem duration readers writers
+# With explicit parameters (recommended)
+bazel run //vm:qemu_test_runner -- \
+    --filesystem ext4 \
+    --duration 30 \
+    --readers 5 \
+    --writers 2
+
+# With defaults (ext4, 300sec, 10 readers, 3 writers)
+bazel run //vm:qemu_test_runner
+
+# Just override what you need
+bazel run //vm:qemu_test_runner -- --duration 60
 ```
 
 **Full test suite** (ext4, xfs, btrfs in parallel):
@@ -259,6 +269,7 @@ bazel test //vm:qemu_test_btrfs  # btrfs only
 📖 **See**: 
 - [`docs/design/FAST-VM-TESTING.md`](docs/design/FAST-VM-TESTING.md) - Architecture
 - [`docs/VM-PERMISSIONS.md`](docs/VM-PERMISSIONS.md) - KVM setup
+- [`docs/TESTING-GUIDE.md`](docs/TESTING-GUIDE.md) - Complete testing guide
 
 
 ### Building Individual Components

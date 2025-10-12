@@ -17,7 +17,12 @@ def qemu_filesystem_test(name, filesystem, duration = 60, readers = 10, writers 
     native.sh_test(
         name = name,
         srcs = ["qemu/test-wrapper.sh"],
-        args = [filesystem, str(duration), str(readers), str(writers)],
+        args = [
+            "--filesystem", filesystem,
+            "--duration", str(duration),
+            "--readers", str(readers),
+            "--writers", str(writers),
+        ],
         data = [
             ":qemu_test_runner",
             "qemu/run-qemu-test.sh",

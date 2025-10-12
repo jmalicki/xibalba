@@ -419,10 +419,10 @@ int main(int argc, char *argv[]) {
         .test_dir = test_dir,
         .tracker = tracker,
         .model = model,
-        .stop = ATOMIC_VAR_INIT(false),
-        .operations = ATOMIC_VAR_INIT(0),
-        .bugs_found = ATOMIC_VAR_INIT(0),
-        .reads_completed = ATOMIC_VAR_INIT(0),
+        .stop = false,  // C11 atomics initialize to zero by default
+        .operations = 0,
+        .bugs_found = 0,
+        .reads_completed = 0,
         .bug_queue = bug_queue,
     };
     

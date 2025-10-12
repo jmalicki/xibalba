@@ -85,9 +85,12 @@ bazel run //chaos:simple_chaos_test -- --duration 60 /tmp/xibalba_test
 
 ```bash
 # Single filesystem test (ext4, 10 seconds)
-bazel run //vm:qemu_test_runner -- ext4 10 5 2
+bazel run //vm:qemu_test_runner -- --filesystem ext4 --duration 10 --readers 5 --writers 2
 
-# Run full test suite (ext4, xfs, btrfs)
+# Quick test with defaults (ext4, 300sec, 10 readers, 3 writers)
+bazel run //vm:qemu_test_runner
+
+# Run full test suite (ext4, xfs, btrfs in parallel)
 bazel test //vm:qemu_filesystem_suite
 
 # Individual filesystem tests:
@@ -96,13 +99,20 @@ bazel test //vm:qemu_test_xfs
 bazel test //vm:qemu_test_btrfs
 ```
 
-**VM test parameters**:
+**VM test parameters** (all optional with sensible defaults):
 ```bash
-qemu_test_runner <filesystem> <duration_sec> <readers> <writers>
+bazel run //vm:qemu_test_runner -- [OPTIONS]
 
-# Examples:
-qemu_test_runner ext4 30 10 3   # 30sec, 10 readers, 3 writers
-qemu_test_runner xfs 60 20 5    # 60sec, 20 readers, 5 writers
+Options:
+  --filesystem FS   Filesystem to test (ext4, xfs, btrfs) [default: ext4]
+  --duration SEC    Test duration in seconds [default: 300]
+  --readers N       Number of reader threads [default: 10]
+  --writers N       Number of writer threads [default: 3]
+
+Examples:
+  bazel run //vm:qemu_test_runner -- --filesystem ext4 --duration 30
+  bazel run //vm:qemu_test_runner -- --filesystem xfs --readers 20 --writers 5
+  bazel run //vm:qemu_test_runner -- --duration 60  # Uses default ext4
 ```
 
 ## Analyzing Results
