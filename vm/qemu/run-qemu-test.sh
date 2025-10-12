@@ -9,6 +9,8 @@ FILESYSTEM="ext4"
 DURATION=300
 READERS=10
 WRITERS=3
+MODEL="posix"
+CPUS=2
 
 # Parse named arguments
 while [[ $# -gt 0 ]]; do
@@ -29,18 +31,29 @@ while [[ $# -gt 0 ]]; do
             WRITERS="$2"
             shift 2
             ;;
+        --model)
+            MODEL="$2"
+            shift 2
+            ;;
+        --cpus)
+            CPUS="$2"
+            shift 2
+            ;;
         -h|--help)
             echo "Usage: $0 [OPTIONS]"
             echo ""
             echo "Options:"
-            echo "  --filesystem FS   Filesystem to test (ext4, xfs, btrfs) [default: ext4]"
+            echo "  --filesystem FS   Filesystem to test (ext4, xfs, btrfs, zfs) [default: ext4]"
             echo "  --duration SEC    Test duration in seconds [default: 300]"
             echo "  --readers N       Number of reader threads [default: 10]"
             echo "  --writers N       Number of writer threads [default: 3]"
+            echo "  --model MODEL     Consistency model (posix, weak, strict, eventual) [default: posix]"
+            echo "  --cpus N          Number of CPUs for VM [default: 2]"
             echo ""
             echo "Examples:"
-            echo "  $0 --filesystem ext4 --duration 30 --readers 5 --writers 2"
-            echo "  $0 --filesystem xfs --duration 60"
+            echo "  $0 --filesystem ext4 --model posix --duration 30 --readers 5 --writers 2"
+            echo "  $0 --filesystem zfs --model weak --duration 60"
+            echo "  $0 --filesystem ext4 --cpus 8 --readers 32 --writers 16"
             exit 0
             ;;
         *)
@@ -93,7 +106,10 @@ fi
 
 echo "=== Xibalba Fast QEMU Test ==="
 echo "Filesystem: $FILESYSTEM"
+echo "Model: $MODEL"
 echo "Duration: $DURATION seconds"
+echo "Workload: $READERS readers, $WRITERS writers"
+echo "CPUs: $CPUS"
 echo "Kernel: $KERNEL"
 echo "Initramfs: $INITRAMFS (includes xibalba binaries)"
 echo ""
@@ -108,18 +124,40 @@ echo "✓ Xibalba binaries embedded in initramfs (no network/9p required)"
 # Launch QEMU with direct kernel boot
 echo ""
 echo "Booting VM..."
-qemu-system-x86_64 \
+
+# Calculate timeout: test duration + overhead (more for ZFS which is slow to create pools)
+if [ "$FILESYSTEM" = "zfs" ]; then
+    TIMEOUT=$((DURATION + 120))
+    echo "VM timeout: ${TIMEOUT}s (test duration + 120s overhead for ZFS)"
+else
+    TIMEOUT=$((DURATION + 60))
+    echo "VM timeout: ${TIMEOUT}s (test duration + 60s overhead)"
+fi
+
+# Run QEMU with timeout
+timeout --foreground --kill-after=10 $TIMEOUT \
+    qemu-system-x86_64 \
     -enable-kvm \
     -cpu host \
     -m 2048 \
-    -smp 2 \
+    -smp "$CPUS" \
     -kernel "$KERNEL" \
     -initrd "$INITRAMFS" \
-    -append "console=ttyS0 rdinit=/init xibalba.fs=$FILESYSTEM xibalba.duration=$DURATION xibalba.readers=$READERS xibalba.writers=$WRITERS" \
+    -append "console=ttyS0 rdinit=/init xibalba.fs=$FILESYSTEM xibalba.duration=$DURATION xibalba.readers=$READERS xibalba.writers=$WRITERS xibalba.model=$MODEL" \
     -drive file="$TEST_DISK",if=virtio,format=qcow2 \
     -nographic
 
 VM_EXIT=$?
+
+if [ $VM_EXIT -eq 124 ]; then
+    echo ""
+    echo "ERROR: VM timed out after ${TIMEOUT}s"
+    exit 1
+elif [ $VM_EXIT -eq 137 ]; then
+    echo ""
+    echo "ERROR: VM killed (timeout SIGKILL)"
+    exit 1
+fi
 
 # Cleanup
 rm -f "$TEST_DISK"

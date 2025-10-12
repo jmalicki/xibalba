@@ -47,7 +47,14 @@ if grep -q "XIBALBA_TEST_COMPLETE" "$OUTPUT"; then
     # Show test results
     grep -A20 "=== Results ===" "$OUTPUT" || true
     
-    if [ "$TEST_EXIT" -eq 0 ]; then
+    echo ""
+    echo "[DEBUG] TEST_EXIT='$TEST_EXIT' (length: ${#TEST_EXIT})"
+    
+    # Strip any whitespace
+    TEST_EXIT=$(echo "$TEST_EXIT" | tr -d '[:space:]')
+    echo "[DEBUG] After strip: TEST_EXIT='$TEST_EXIT'"
+    
+    if [ "$TEST_EXIT" = "0" ]; then
         echo ""
         echo "✅ TEST PASSED: No bugs detected"
         cat "$OUTPUT" > "${TEST_LOG:-/dev/null}"  # Save full log if TEST_LOG is set
@@ -55,7 +62,7 @@ if grep -q "XIBALBA_TEST_COMPLETE" "$OUTPUT"; then
         exit 0
     else
         echo ""
-        echo "❌ TEST FAILED: Bugs detected or test error"
+        echo "❌ TEST FAILED: Bugs detected or test error (exit code: $TEST_EXIT)"
         echo ""
         echo "Full output:"
         cat "$OUTPUT"

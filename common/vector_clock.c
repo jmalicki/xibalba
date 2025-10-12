@@ -11,22 +11,39 @@
 #include <stdio.h>
 #include <stdint.h>  // For uintptr_t
 
-vector_clock_t* vclock_init(void) {
+vector_clock_t* vclock_init(uint32_t max_threads) {
+    // Default to 1024 if not specified
+    if (max_threads == 0) {
+        max_threads = 1024;
+    }
+    
     vector_clock_t *vc = calloc(1, sizeof(vector_clock_t));
     if (!vc) return NULL;
+    
+    // Allocate dynamic arrays
+    vc->max_threads = max_threads;
+    vc->clocks = calloc(max_threads, sizeof(uint64_t));
+    vc->thread_ids = calloc(max_threads, sizeof(pthread_t));
+    
+    if (!vc->clocks || !vc->thread_ids) {
+        free(vc->clocks);
+        free(vc->thread_ids);
+        free(vc);
+        return NULL;
+    }
     
     pthread_mutex_init(&vc->lock, NULL);
     pthread_mutex_init(&vc->registry_lock, NULL);
     
     // Create TLS key for fast thread index lookup
     if (pthread_key_create(&vc->tls_key, NULL) != 0) {
+        free(vc->clocks);
+        free(vc->thread_ids);
         free(vc);
         return NULL;
     }
     
     vc->num_registered = 0;
-    memset(vc->clocks, 0, sizeof(vc->clocks));
-    memset(vc->thread_ids, 0, sizeof(vc->thread_ids));
     
     return vc;
 }
@@ -55,9 +72,9 @@ uint32_t vclock_get_thread_idx(vector_clock_t *vc, pthread_t thread_id) {
     }
     
     // Check if we have space for another thread
-    if (vc->num_registered >= MAX_THREADS) {
+    if (vc->num_registered >= vc->max_threads) {
         pthread_mutex_unlock(&vc->registry_lock);
-        fprintf(stderr, "FATAL: Exceeded MAX_THREADS (%d)\n", MAX_THREADS);
+        fprintf(stderr, "FATAL: Exceeded max_threads (%u)\n", vc->max_threads);
         abort();
     }
     
@@ -84,7 +101,7 @@ void vclock_tick(vector_clock_t *vc, pthread_t thread_id) {
 
 void vclock_snapshot(vector_clock_t *vc, uint64_t *snapshot) {
     pthread_mutex_lock(&vc->lock);
-    memcpy(snapshot, vc->clocks, sizeof(uint64_t) * MAX_THREADS);
+    memcpy(snapshot, vc->clocks, sizeof(uint64_t) * vc->max_threads);
     pthread_mutex_unlock(&vc->lock);
 }
 
@@ -113,7 +130,7 @@ void vclock_merge(vector_clock_t *vc, const uint64_t *other_clock) {
     pthread_mutex_lock(&vc->lock);
     
     // Merge: take max of each component
-    for (uint32_t i = 0; i < MAX_THREADS; i++) {
+    for (uint32_t i = 0; i < vc->max_threads; i++) {
         if (other_clock[i] > vc->clocks[i]) {
             vc->clocks[i] = other_clock[i];
         }
@@ -127,6 +144,8 @@ void vclock_cleanup(vector_clock_t *vc) {
         pthread_key_delete(vc->tls_key);
         pthread_mutex_destroy(&vc->lock);
         pthread_mutex_destroy(&vc->registry_lock);
+        free(vc->clocks);
+        free(vc->thread_ids);
         free(vc);
     }
 }

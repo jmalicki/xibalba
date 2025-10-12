@@ -32,6 +32,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <stdatomic.h>
 
 static uint64_t get_timestamp_ns(void) {
     struct timespec ts;
@@ -45,8 +46,8 @@ state_tracker_t* tracker_init(void) {
         return NULL;
     }
     
-    // Initialize vector clock for causality tracking
-    tracker->vclock = vclock_init();
+    // Initialize vector clock for causality tracking (0 = use default max_threads)
+    tracker->vclock = vclock_init(0);
     if (!tracker->vclock) {
         free(tracker);
         return NULL;
@@ -208,9 +209,15 @@ validation_result_t tracker_validate_read(state_tracker_t *tracker,
                                            int num_actual,
                                            uint64_t read_start_ns,
                                            uint64_t read_end_ns,
-                                           consistency_model_t model) {
+                                           consistency_model_t model,
+                                           FILE *scan_export_file) {
     validation_result_t result = {0};
     result.total_operations = 1;
+    
+    // Suppress unused parameter warnings (used for export, not validation yet)
+    (void)read_start_ns;
+    (void)read_end_ns;
+    (void)scan_export_file;  // TODO: Implement scan export
     
     pthread_mutex_lock(&tracker->lock);
     
@@ -351,6 +358,51 @@ validation_result_t tracker_validate_read(state_tracker_t *tracker,
             result.phantom_entries++;
             result.total_bugs_found++;
         }
+    }
+    
+    // Export scan data for post-hoc analysis (while we still hold lock)
+    if (scan_export_file) {
+        static _Atomic uint64_t scan_counter = 0;
+        uint64_t scan_id = atomic_fetch_add(&scan_counter, 1);
+        
+        // Export as single-line JSON
+        fprintf(scan_export_file, "{\"scan\":%lu,", scan_id);
+        
+        // Export actual entries
+        fprintf(scan_export_file, "\"actual\":[");
+        for (int i = 0; i < num_actual; i++) {
+            fprintf(scan_export_file, "\"%s\"", actual_entries[i]);
+            if (i < num_actual - 1) fprintf(scan_export_file, ",");
+        }
+        fprintf(scan_export_file, "],");
+        
+        // Export expected entries (based on causality - what SHOULD be visible)
+        fprintf(scan_export_file, "\"expected\":[");
+        bool first_expected = true;
+        for (uint64_t i = 0; i < tracker->file_count; i++) {
+            file_state_t *file = &tracker->files[i];
+            if (!file->has_create_vc) continue;
+            
+            bool create_hb = vclock_happens_before(file->create_vc, read_vc, tracker->vclock->num_registered);
+            bool delete_hb = file->has_delete_vc && vclock_happens_before(file->delete_vc, read_vc, tracker->vclock->num_registered);
+            
+            // Should be visible if created before read and not deleted before read
+            if (create_hb && !delete_hb) {
+                if (!first_expected) fprintf(scan_export_file, ",");
+                fprintf(scan_export_file, "\"%s\"", file->filename);
+                first_expected = false;
+            }
+        }
+        fprintf(scan_export_file, "],");
+        
+        // Export validation results for ALL models (enables post-hoc comparison!)
+        fprintf(scan_export_file, "\"results\":{");
+        fprintf(scan_export_file, "\"duplicates\":%lu,", result.duplicate_entries);
+        fprintf(scan_export_file, "\"missing\":%lu,", result.missing_entries);
+        fprintf(scan_export_file, "\"phantoms\":%lu", result.phantom_entries);
+        fprintf(scan_export_file, "}}\n");
+        
+        fflush(scan_export_file);  // Ensure written immediately
     }
     
     pthread_mutex_unlock(&tracker->lock);

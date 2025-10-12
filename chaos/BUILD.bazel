@@ -42,6 +42,38 @@ cc_binary(
     # After building, run: sudo ./grant_caps.sh
 )
 
+# ============================================================================
+# Enhanced eBPF v2 - Multi-syscall fault injection
+# ============================================================================
+
+# Enhanced eBPF injector v2 - multi-syscall delays
+genrule(
+    name = "pause_injector_v2_bpf",
+    srcs = ["pause_injector_v2.bpf.c"],
+    outs = ["pause_injector_v2.bpf.o"],
+    cmd = """
+        clang -g -O2 -target bpf \
+            -D__TARGET_ARCH_x86_64 \
+            -I/usr/include/x86_64-linux-gnu \
+            -c $(location pause_injector_v2.bpf.c) \
+            -o $@
+    """,
+    visibility = ["//visibility:public"],
+)
+
+# Enhanced pause controller v2 - configures multi-syscall delays
+cc_binary(
+    name = "pause_controller_v2",
+    srcs = ["pause_controller_v2.c"],
+    copts = ["-std=gnu11"],
+    data = [":pause_injector_v2_bpf"],
+    linkopts = [
+        "-lbpf",
+        "-lelf",
+        "-lz",
+    ],
+)
+
 # Consistency model benchmark - measures bug detection rates
 cc_binary(
     name = "benchmark_consistency",

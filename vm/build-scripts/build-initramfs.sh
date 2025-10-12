@@ -5,7 +5,7 @@
 set -euo pipefail
 
 if [ $# -lt 5 ]; then
-    echo "Usage: $0 INIT_SCRIPT PAUSE_CONTROLLER SIMPLE_CHAOS_TEST GAUNTLET_SCRIPT OUTPUT_FILE"
+    echo "Usage: $0 INIT_SCRIPT PAUSE_CONTROLLER SIMPLE_CHAOS_TEST GAUNTLET_SCRIPT OUTPUT_FILE [KERNEL_MODULES_TAR]"
     exit 1
 fi
 
@@ -14,18 +14,30 @@ PAUSE_CONTROLLER="$2"
 SIMPLE_CHAOS_TEST="$3"
 GAUNTLET_SCRIPT="$4"
 OUTPUT_FILE="$5"
+KERNEL_MODULES_TAR="${6:-}"
 
-echo "Building minimal initramfs with embedded xibalba binaries..."
+echo "Building minimal initramfs with embedded xibalba binaries and kernel modules..."
 
 cd /tmp
-mkdir -p initrd/{bin,sbin,usr/bin,usr/sbin,dev,proc,sys,test,opt/xibalba}
+mkdir -p initrd/{bin,sbin,usr/bin,usr/sbin,dev,proc,sys,run,test,opt/xibalba}
 
-# Install busybox, bash, and jq
-echo "Installing busybox, bash, and jq..."
-apt-get install -y -qq busybox-static bash jq
+# Install busybox, bash, jq, and udev (for ZFS)
+echo "Installing busybox, bash, jq, and udev..."
+apt-get install -y -qq busybox-static bash jq udev kmod
 cp /bin/busybox initrd/bin/busybox
 cp /bin/bash initrd/bin/bash
 cp /usr/bin/jq initrd/usr/bin/jq
+
+# Install udev for dynamic device node creation (needed by ZFS)
+echo "Installing udev components..."
+cp /lib/systemd/systemd-udevd initrd/sbin/udevd
+cp /bin/udevadm initrd/sbin/udevadm
+
+# Copy udev rules (minimal set for block devices)
+mkdir -p initrd/lib/udev/rules.d
+cp /lib/udev/rules.d/50-udev-default.rules initrd/lib/udev/rules.d/ 2>/dev/null || true
+cp /lib/udev/rules.d/60-block.rules initrd/lib/udev/rules.d/ 2>/dev/null || true
+cp /lib/udev/rules.d/80-drivers.rules initrd/lib/udev/rules.d/ 2>/dev/null || true
 
 # Create busybox symlinks for essential commands
 cd initrd/bin
@@ -34,14 +46,22 @@ for cmd in sh ash mount umount mkdir cat grep echo cut modprobe lsmod date sleep
 done
 cd ../..
 
-# Install filesystem tools (mkfs.ext4, mkfs.xfs, mkfs.btrfs)
+# Install filesystem tools (mkfs.ext4, mkfs.xfs, mkfs.btrfs, zfs)
 echo "Installing filesystem tools..."
-apt-get install -y -qq e2fsprogs xfsprogs btrfs-progs
+apt-get install -y -qq e2fsprogs xfsprogs btrfs-progs zfsutils-linux kmod
 
 # Copy mkfs tools to initrd
+echo "Copying filesystem utilities..."
 cp /sbin/mkfs.ext4 /sbin/mke2fs initrd/sbin/ || true
 cp /sbin/mkfs.xfs initrd/sbin/ || true
 cp /sbin/mkfs.btrfs initrd/sbin/ || true
+
+# Copy ZFS tools
+cp /sbin/zfs /sbin/zpool initrd/sbin/ || true
+
+# Copy modprobe (needed for ZFS kernel modules)
+cp /sbin/modprobe /sbin/insmod /sbin/rmmod initrd/sbin/ || true
+cp /sbin/depmod initrd/sbin/ || true
 
 # Copy xibalba binaries into initramfs FIRST
 echo "Installing xibalba binaries..."
@@ -55,8 +75,8 @@ chmod +x initrd/usr/bin/*
 echo "Copying required libraries..."
 mkdir -p initrd/lib/x86_64-linux-gnu initrd/lib64
 
-# Copy libraries for bash, jq, xibalba binaries, and all mkfs tools
-for binary in initrd/bin/bash initrd/usr/bin/jq initrd/usr/bin/pause_controller initrd/usr/bin/simple_chaos_test initrd/sbin/mkfs.*; do
+# Copy libraries for bash, jq, xibalba binaries, mkfs tools, zfs tools, modprobe, and udev
+for binary in initrd/bin/bash initrd/usr/bin/jq initrd/usr/bin/pause_controller initrd/usr/bin/simple_chaos_test initrd/sbin/mkfs.* initrd/sbin/zfs initrd/sbin/zpool initrd/sbin/modprobe initrd/sbin/udevd initrd/sbin/udevadm; do
     if [ -f "$binary" ]; then
         echo "  Copying libs for $(basename $binary)..."
         # Get list of libraries first, then copy (avoid subshell issues)
@@ -71,6 +91,50 @@ done
 
 # Add ld-linux linker
 cp -L /lib64/ld-linux-x86-64.so.2 initrd/lib64/
+
+# Extract kernel modules from provided tarball
+if [ -n "$KERNEL_MODULES_TAR" ] && [ -f "$KERNEL_MODULES_TAR" ]; then
+    echo "Extracting kernel modules from $KERNEL_MODULES_TAR..."
+    mkdir -p initrd/lib/modules
+    tar -xzf "$KERNEL_MODULES_TAR" -C initrd/lib/modules
+    
+    KERNEL_VERSION=$(ls initrd/lib/modules/ | head -1)
+    if [ -n "$KERNEL_VERSION" ]; then
+        echo "  ✓ Kernel modules extracted (version: $KERNEL_VERSION)"
+        
+        # Decompress zstd-compressed modules (modprobe needs .ko not .ko.zst)
+        echo "  Decompressing zstd modules..."
+        apt-get install -y -qq zstd
+        COMPRESSED_COUNT=$(find initrd/lib/modules/$KERNEL_VERSION -name "*.ko.zst" | wc -l)
+        if [ $COMPRESSED_COUNT -gt 0 ]; then
+            echo "    Decompressing $COMPRESSED_COUNT modules..."
+            find initrd/lib/modules/$KERNEL_VERSION -name "*.ko.zst" -exec sh -c '
+                zstd -d -q "$1" -o "${1%.zst}" && rm "$1"
+            ' _ {} \;
+            echo "    ✓ Modules decompressed"
+        else
+            echo "    No compressed modules found"
+        fi
+        
+        # Run depmod to generate module dependencies
+        echo "  Running depmod..."
+        depmod -b initrd $KERNEL_VERSION
+        echo "    ✓ Module dependencies generated"
+        
+        # List available filesystem modules
+        echo "  Available filesystem modules:"
+        find initrd/lib/modules/$KERNEL_VERSION -path "*/fs/*.ko" -type f 2>/dev/null | \
+            sed 's|.*/||' | sed 's|\.ko||' | sort | head -10 | sed 's/^/    - /'
+        
+        # Count total modules
+        MODULE_COUNT=$(find initrd/lib/modules/$KERNEL_VERSION -name "*.ko" | wc -l)
+        echo "  Total modules: $MODULE_COUNT"
+    else
+        echo "  ⚠️  Kernel modules extracted but version unknown"
+    fi
+else
+    echo "  ⚠️  No kernel modules provided (filesystems may be built-in or unavailable)"
+fi
 
 # Copy our custom init script
 echo "Installing custom init..."
