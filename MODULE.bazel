@@ -20,16 +20,26 @@ bazel_dep(name = "rules_oci", version = "1.7.4")
 bazel_dep(name = "gazelle", version = "0.36.0")
 bazel_dep(name = "rules_distroless", version = "0.3.7")
 
-# Pull Ubuntu base image for build tools container
+# Pull base images for containers
 oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
+
+# Ubuntu base for reference
 oci.pull(
     name = "ubuntu_base",
     image = "ubuntu",
     tag = "24.04",
-    platforms = ["linux/amd64"],  # We're targeting x86-64
-    # TODO: Pin digest once we verify this works
+    platforms = ["linux/amd64"],
 )
-use_repo(oci, "ubuntu_base")
+
+# Distroless base (has libc already configured)
+oci.pull(
+    name = "distroless_base",
+    image = "gcr.io/distroless/base-debian12",
+    tag = "latest",
+    platforms = ["linux/amd64"],
+)
+
+use_repo(oci, "ubuntu_base", "distroless_base")
 
 # Configure apt package sources for CI dev environment
 apt = use_extension("@rules_distroless//apt:extensions.bzl", "apt")

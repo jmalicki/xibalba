@@ -21,37 +21,30 @@ exports_files([
 # OCI Images with apt packages
 # ============================================================================
 
-# Build environment with all CI dependencies
+# CI build environment (ONLY for compiling Xibalba, not testing)
+# Filesystem tools are in QEMU VMs, not in this container
 oci_image(
     name = "xibalba_dev_env",
-    base = "@ubuntu_base",
+    base = "@ubuntu_base",  # Ubuntu 24.04 has libc already
     tars = [
-        # System essentials (must come first)
+        # System essentials
         "@ubuntu_packages//bash/amd64:data",
         "@ubuntu_packages//coreutils/amd64:data",
         "@ubuntu_packages//findutils/amd64:data",
-        "@ubuntu_packages//grep/amd64:data",
-        "@ubuntu_packages//sed/amd64:data",
-        "@ubuntu_packages//gawk/amd64:data",
         
-        # Build tools
+        # Build tools (to compile Xibalba)
         "@ubuntu_packages//clang-18/amd64:data",
+        "@ubuntu_packages//libclang-cpp18/amd64:data",
+        "@ubuntu_packages//libllvm18/amd64:data",
+        "@ubuntu_packages//libedit2/amd64:data",
         "@ubuntu_packages//libbpf-dev/amd64:data",
         "@ubuntu_packages//libelf-dev/amd64:data",
         "@ubuntu_packages//linux-headers-generic/amd64:data",
         
-        # Filesystem tools
-        "@ubuntu_packages//e2fsprogs/amd64:data",
-        "@ubuntu_packages//xfsprogs/amd64:data",
-        "@ubuntu_packages//btrfs-progs/amd64:data",
-        "@ubuntu_packages//zfsutils-linux/amd64:data",
-        "@ubuntu_packages//f2fs-tools/amd64:data",
-        "@ubuntu_packages//nilfs-tools/amd64:data",
-        "@ubuntu_packages//nfs-common/amd64:data",
-        "@ubuntu_packages//qemu-system-x86/amd64:data",
-        
-        # Utilities
+        # Utilities (for CI scripts)
         "@ubuntu_packages//jq/amd64:data",
+        "@ubuntu_packages//libjq1/amd64:data",
+        "@ubuntu_packages//libonig5/amd64:data",
         "@ubuntu_packages//curl/amd64:data",
         "@ubuntu_packages//ca-certificates/amd64:data",
     ],

@@ -10,32 +10,28 @@ archs:
   - amd64
 
 packages:
-  # System essentials
+  # System essentials (for running commands in container)
   - bash
   - coreutils
   - findutils
-  - grep
-  - sed
-  - gawk
   
-  # Build dependencies (what CI needs to compile)
+  # Build dependencies (what CI needs to COMPILE Xibalba)
   - clang-18
+  - libclang-cpp18
+  - libllvm18
+  - libedit2
   - libbpf-dev
   - libelf-dev
   - linux-headers-generic
   
-  # Filesystem tools (for testing)
-  - e2fsprogs
-  - xfsprogs
-  - btrfs-progs
-  - zfsutils-linux
-  - f2fs-tools
-  - nilfs-tools
-  - nfs-common
-  - qemu-system-x86
-  
-  # Utilities
+  # Utilities (for CI scripts)
   - jq
+  - libjq1
+  - libonig5
   - curl
   - ca-certificates
+
+# NOTE: Filesystem tools (mkfs.*, etc.) are NOT needed here!
+# They are installed in QEMU VMs via initramfs (see vm/build-scripts/build-initramfs.sh)
+# This container is ONLY for building Xibalba, not testing it.
 
