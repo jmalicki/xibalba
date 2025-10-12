@@ -249,9 +249,9 @@ bazel test //vm:consistency_model_comparison
 
 1. **POSIX.1-2024** (IEEE Std 1003.1-2024): Directory operations specification
 2. **Lamport, 1978**: "Time, Clocks, and the Ordering of Events in a Distributed System"
-3. **ext4 Documentation**: [`Documentation/filesystems/ext4/`](https://kernel.org/doc/html/latest/filesystems/ext4/)
-4. **XFS Documentation**: [`Documentation/filesystems/xfs/`](https://kernel.org/doc/html/latest/filesystems/xfs/)
-5. **btrfs Documentation**: [`Documentation/filesystems/btrfs/`](https://kernel.org/doc/html/latest/filesystems/btrfs/)
+3. **ext4 Documentation**: [kernel.org/doc](https://docs.kernel.org/filesystems/ext4/index.html)
+4. **XFS Documentation**: [kernel.org/doc](https://docs.kernel.org/filesystems/xfs/index.html)
+5. **btrfs Documentation**: [btrfs.readthedocs.io](https://btrfs.readthedocs.io/)
 
 ---
 

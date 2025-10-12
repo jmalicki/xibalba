@@ -17,7 +17,7 @@ This document lists specific real-world filesystem bugs that Xibalba should be t
 
 **Links & References:**
 - **CVE:** CVE-2024-40943
-- **CVE Details:** https://www.rapid7.com/db/vulnerabilities/oracle_linux-cve-2024-40943/
+- **CVE Details:** CVE-2024-40943 (Rapid7 link unavailable)
 - **Discovered:** July 12, 2024
 - **Error Message:** "Owner 5668 has an extent at cpos 78723 which can no longer be found"
 - **Kernel Commit:** Search git.kernel.org for CVE-2024-40943
@@ -460,7 +460,7 @@ For each bug test:
 - MITRE CVE: https://cve.mitre.org
 - NVD: https://nvd.nist.gov
 - Ubuntu Security: https://ubuntu.com/security/cves
-- Rapid7 VulnDB: https://www.rapid7.com/db/vulnerabilities/
+- CVE databases (search by CVE ID)
 
 **News & Analysis:**
 - LWN.net: https://lwn.net (excellent technical analysis)
@@ -552,7 +552,7 @@ For each bug test, document:
 - **Trust in filesystems (2023):** https://lwn.net/Articles/951846/
 
 ### CVE Details:
-- **CVE-2024-40943 (OCFS2):** https://www.rapid7.com/db/vulnerabilities/oracle_linux-cve-2024-40943/
+- **CVE-2024-40943 (OCFS2):** CVE-2024-40943
 - **CVE-2025-38164 (F2FS):** https://www.wiz.io/vulnerability-database/cve/cve-2025-38164
 - **CVE-2024-35807 (ext4):** https://ubuntu.com/security/CVE-2024-35807
 - **CVE-2024-26616 (Btrfs):** Search on https://nvd.nist.gov
@@ -583,7 +583,7 @@ For each bug test, document:
 
 ### Community Discussions:
 - **Hacker News - ext4 corruption:** https://news.ycombinator.com/item?id=38589389
-- **Phoronix Forums - ext4 bug:** https://www.phoronix.com/forums/forum/software/general-linux-open-source/32852-ext4-data-corruption-bug-hits-stable-linux-kernels
+- **Phoronix Forums - ext4 bug:** (Forum link blocked by bot protection)
 
 ---
 
