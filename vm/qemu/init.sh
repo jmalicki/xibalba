@@ -57,6 +57,13 @@ case "$FILESYSTEM" in
             echo "ERROR: mkfs.xfs not found"
             exit 1
         fi
+        # Load XFS kernel module
+        echo "Loading XFS kernel module..."
+        if ! modprobe xfs 2>/dev/null; then
+            echo "⚠️  XFS module not available (may be built-in)"
+        else
+            echo "✓ XFS module loaded"
+        fi
         echo "Running mkfs.xfs with 30s timeout..."
         timeout 30 mkfs.xfs -f /dev/vda || {
             CODE=$?
@@ -69,6 +76,13 @@ case "$FILESYSTEM" in
         if ! command -v mkfs.btrfs >/dev/null; then
             echo "ERROR: mkfs.btrfs not found"
             exit 1
+        fi
+        # Load btrfs kernel module
+        echo "Loading btrfs kernel module..."
+        if ! modprobe btrfs 2>/dev/null; then
+            echo "⚠️  btrfs module not available (may be built-in)"
+        else
+            echo "✓ btrfs module loaded"
         fi
         echo "Running mkfs.btrfs with 30s timeout..."
         timeout 30 mkfs.btrfs -f /dev/vda || {

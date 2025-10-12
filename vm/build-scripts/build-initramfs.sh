@@ -5,7 +5,7 @@
 set -euo pipefail
 
 if [ $# -lt 5 ]; then
-    echo "Usage: $0 INIT_SCRIPT PAUSE_CONTROLLER SIMPLE_CHAOS_TEST GAUNTLET_SCRIPT OUTPUT_FILE"
+    echo "Usage: $0 INIT_SCRIPT PAUSE_CONTROLLER SIMPLE_CHAOS_TEST GAUNTLET_SCRIPT OUTPUT_FILE [KERNEL_MODULES_TAR]"
     exit 1
 fi
 
@@ -14,8 +14,9 @@ PAUSE_CONTROLLER="$2"
 SIMPLE_CHAOS_TEST="$3"
 GAUNTLET_SCRIPT="$4"
 OUTPUT_FILE="$5"
+KERNEL_MODULES_TAR="${6:-}"
 
-echo "Building minimal initramfs with embedded xibalba binaries..."
+echo "Building minimal initramfs with embedded xibalba binaries and kernel modules..."
 
 cd /tmp
 mkdir -p initrd/{bin,sbin,usr/bin,usr/sbin,dev,proc,sys,test,opt/xibalba}
@@ -80,52 +81,29 @@ done
 # Add ld-linux linker
 cp -L /lib64/ld-linux-x86-64.so.2 initrd/lib64/
 
-# Copy kernel modules for btrfs and ZFS
-echo "Copying kernel modules..."
-echo "  DEBUG: Checking /lib/modules/..."
-ls -la /lib/modules/ || echo "  DEBUG: /lib/modules/ not found or empty"
-KERNEL_VERSION=$(ls /lib/modules/ 2>/dev/null | head -1 || echo "")
-
-if [ -n "$KERNEL_VERSION" ] && [ -d "/lib/modules/$KERNEL_VERSION" ]; then
-    mkdir -p initrd/lib/modules/$KERNEL_VERSION/kernel/fs
+# Extract kernel modules from provided tarball
+if [ -n "$KERNEL_MODULES_TAR" ] && [ -f "$KERNEL_MODULES_TAR" ]; then
+    echo "Extracting kernel modules from $KERNEL_MODULES_TAR..."
+    mkdir -p initrd/lib/modules
+    tar -xzf "$KERNEL_MODULES_TAR" -C initrd/lib/modules
     
-    # Copy btrfs modules (in mainline kernel)
-    if [ -d /lib/modules/$KERNEL_VERSION/kernel/fs/btrfs ]; then
-        cp -r /lib/modules/$KERNEL_VERSION/kernel/fs/btrfs initrd/lib/modules/$KERNEL_VERSION/kernel/fs/
-        echo "  ✓ btrfs modules copied"
+    KERNEL_VERSION=$(ls initrd/lib/modules/ | head -1)
+    if [ -n "$KERNEL_VERSION" ]; then
+        echo "  ✓ Kernel modules extracted (version: $KERNEL_VERSION)"
+        
+        # List available filesystem modules
+        echo "  Available filesystem modules:"
+        find initrd/lib/modules/$KERNEL_VERSION -path "*/fs/*.ko*" -type f 2>/dev/null | \
+            sed 's|.*/||' | sed 's|\.ko.*||' | sort | head -10 | sed 's/^/    - /'
+        
+        # Count total modules
+        MODULE_COUNT=$(find initrd/lib/modules/$KERNEL_VERSION -name "*.ko*" | wc -l)
+        echo "  Total modules: $MODULE_COUNT"
     else
-        echo "  ⚠️  btrfs modules not found (may be built-in)"
+        echo "  ⚠️  Kernel modules extracted but version unknown"
     fi
-    
-    # Copy ZFS modules (external DKMS module - may not exist)
-    ZFS_COPIED=0
-    if [ -d /lib/modules/$KERNEL_VERSION/extra/zfs ]; then
-        mkdir -p initrd/lib/modules/$KERNEL_VERSION/extra
-        cp -r /lib/modules/$KERNEL_VERSION/extra/zfs initrd/lib/modules/$KERNEL_VERSION/extra/
-        echo "  ✓ ZFS modules copied (extra/zfs)"
-        ZFS_COPIED=1
-    elif [ -d /lib/modules/$KERNEL_VERSION/updates/dkms ]; then
-        mkdir -p initrd/lib/modules/$KERNEL_VERSION/updates
-        cp -r /lib/modules/$KERNEL_VERSION/updates/dkms initrd/lib/modules/$KERNEL_VERSION/updates/ 2>/dev/null && {
-            echo "  ✓ DKMS modules copied (may include ZFS)"
-            ZFS_COPIED=1
-        } || echo "  ⚠️  DKMS modules not found"
-    fi
-    
-    if [ $ZFS_COPIED -eq 0 ]; then
-        echo "  ⚠️  ZFS modules not found (ZFS will not be available in VM)"
-    fi
-    
-    # Copy modules.* dependency files for modprobe
-    cp /lib/modules/$KERNEL_VERSION/modules.dep initrd/lib/modules/$KERNEL_VERSION/ 2>/dev/null || echo "  ⚠️  modules.dep not found"
-    cp /lib/modules/$KERNEL_VERSION/modules.dep.bin initrd/lib/modules/$KERNEL_VERSION/ 2>/dev/null || true
-    cp /lib/modules/$KERNEL_VERSION/modules.alias initrd/lib/modules/$KERNEL_VERSION/ 2>/dev/null || true
-    cp /lib/modules/$KERNEL_VERSION/modules.alias.bin initrd/lib/modules/$KERNEL_VERSION/ 2>/dev/null || true
-    cp /lib/modules/$KERNEL_VERSION/modules.symbols initrd/lib/modules/$KERNEL_VERSION/ 2>/dev/null || true
-    cp /lib/modules/$KERNEL_VERSION/modules.symbols.bin initrd/lib/modules/$KERNEL_VERSION/ 2>/dev/null || true
-    echo "  ✓ Module support configured"
 else
-    echo "  ⚠️  No kernel modules directory found (filesystems may be built-in or unavailable)"
+    echo "  ⚠️  No kernel modules provided (filesystems may be built-in or unavailable)"
 fi
 
 # Copy our custom init script

@@ -27,11 +27,11 @@ oci_image(
 
 # === Fast QEMU VM Testing Infrastructure ===
 
-# Extract kernel from Ubuntu package (runs in container - hermetic!)
+# Extract kernel and modules from Ubuntu packages (runs in container - hermetic!)
 genrule(
-    name = "extract_kernel",
+    name = "extract_kernel_and_modules",
     srcs = ["build-scripts/extract-kernel.sh"],
-    outs = ["vmlinuz"],
+    outs = ["vmlinuz", "kernel-modules.tar.gz"],
     cmd = """
         SCRIPT=$$(realpath $(location build-scripts/extract-kernel.sh))
         OUTPUT=$$(realpath $(@D))
@@ -41,12 +41,21 @@ genrule(
             -e HOST_UID=$$(id -u) \
             -e HOST_GID=$$(id -g) \
             ubuntu:24.04 \
-            bash -c 'apt-get update -qq && apt-get install -y -qq wget binutils xz-utils zstd && bash /extract.sh /output/vmlinuz && chown $$HOST_UID:$$HOST_GID /output/vmlinuz'
+            bash -c 'apt-get update -qq && apt-get install -y -qq wget binutils xz-utils zstd && \
+                     bash /extract.sh /output/vmlinuz /tmp/modules && \
+                     cd /tmp/modules && tar czf /output/kernel-modules.tar.gz . && \
+                     chown $$HOST_UID:$$HOST_GID /output/vmlinuz /output/kernel-modules.tar.gz'
     """,
     tags = ["docker", "requires-network", "local", "no-sandbox"],
 )
 
-# Build minimal initramfs with filesystem tools and xibalba binaries
+# Legacy alias for compatibility
+filegroup(
+    name = "extract_kernel",
+    srcs = [":vmlinuz"],
+)
+
+# Build minimal initramfs with filesystem tools, xibalba binaries, and kernel modules
 genrule(
     name = "build_initramfs",
     srcs = [
@@ -55,6 +64,7 @@ genrule(
         "//chaos:pause_controller",
         "//chaos:simple_chaos_test",
         ":xibalba-gauntlet.sh",
+        ":kernel-modules.tar.gz",
     ],
     outs = ["initramfs.img"],
     cmd = """
@@ -63,6 +73,7 @@ genrule(
         PAUSE_CTRL=$$(realpath $(location //chaos:pause_controller))
         CHAOS_TEST=$$(realpath $(location //chaos:simple_chaos_test))
         GAUNTLET=$$(realpath $(location :xibalba-gauntlet.sh))
+        MODULES=$$(realpath $(location :kernel-modules.tar.gz))
         OUTPUT=$$(realpath $(@D))
         docker run --rm \
             -v $$SCRIPT:/build.sh:ro \
@@ -70,11 +81,12 @@ genrule(
             -v $$PAUSE_CTRL:/input/pause_controller:ro \
             -v $$CHAOS_TEST:/input/simple_chaos_test:ro \
             -v $$GAUNTLET:/input/xibalba-gauntlet:ro \
+            -v $$MODULES:/input/kernel-modules.tar.gz:ro \
             -v $$OUTPUT:/output \
             -e HOST_UID=$$(id -u) \
             -e HOST_GID=$$(id -g) \
             ubuntu:24.04 \
-            bash -c 'apt-get update -qq && apt-get install -y -qq cpio gzip && bash /build.sh /input/init.sh /input/pause_controller /input/simple_chaos_test /input/xibalba-gauntlet /output/initramfs.img && chown $$HOST_UID:$$HOST_GID /output/initramfs.img'
+            bash -c 'apt-get update -qq && apt-get install -y -qq cpio gzip tar && bash /build.sh /input/init.sh /input/pause_controller /input/simple_chaos_test /input/xibalba-gauntlet /output/initramfs.img /input/kernel-modules.tar.gz && chown $$HOST_UID:$$HOST_GID /output/initramfs.img'
     """,
     tags = ["docker", "requires-network", "local", "no-sandbox"],
 )
