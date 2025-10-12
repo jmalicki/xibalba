@@ -25,6 +25,8 @@ packages:
   - libbpf-dev
   - libelf-dev
   - linux-headers-generic
+  - libc6-dev  # Standard C library development files (provides libm.so.6, libmvec.so.1)
+  - libstdc++-13-dev  # C++ standard library development files
   
   # Bazel dependencies
   - python3

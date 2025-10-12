@@ -1366,7 +1366,48 @@
 		},
 		{
 			"arch": "amd64",
-			"dependencies": [],
+			"dependencies": [
+				{
+					"key": "rpcsvc-proto_1.4.2-0ubuntu7_amd64",
+					"name": "rpcsvc-proto",
+					"version": "1.4.2-0ubuntu7"
+				},
+				{
+					"key": "libc6_2.39-0ubuntu8_amd64",
+					"name": "libc6",
+					"version": "2.39-0ubuntu8"
+				},
+				{
+					"key": "libgcc-s1_14-20240412-0ubuntu1_amd64",
+					"name": "libgcc-s1",
+					"version": "14-20240412-0ubuntu1"
+				},
+				{
+					"key": "gcc-14-base_14-20240412-0ubuntu1_amd64",
+					"name": "gcc-14-base",
+					"version": "14-20240412-0ubuntu1"
+				},
+				{
+					"key": "libcrypt-dev_1-4.4.36-4build1_amd64",
+					"name": "libcrypt-dev",
+					"version": "1:4.4.36-4build1"
+				},
+				{
+					"key": "libcrypt1_1-4.4.36-4build1_amd64",
+					"name": "libcrypt1",
+					"version": "1:4.4.36-4build1"
+				},
+				{
+					"key": "linux-libc-dev_6.8.0-31.31_amd64",
+					"name": "linux-libc-dev",
+					"version": "6.8.0-31.31"
+				},
+				{
+					"key": "libc-dev-bin_2.39-0ubuntu8_amd64",
+					"name": "libc-dev-bin",
+					"version": "2.39-0ubuntu8"
+				}
+			],
 			"key": "libc6-dev_2.39-0ubuntu8_amd64",
 			"name": "libc6-dev",
 			"sha256": "1f03b79223d9cf1a6ed3a648f6942619dcb97b2884dba8fd12e262b6771e247a",
@@ -1765,7 +1806,113 @@
 		},
 		{
 			"arch": "amd64",
-			"dependencies": [],
+			"dependencies": [
+				{
+					"key": "libc6-dev_2.39-0ubuntu8_amd64",
+					"name": "libc6-dev",
+					"version": "2.39-0ubuntu8"
+				},
+				{
+					"key": "rpcsvc-proto_1.4.2-0ubuntu7_amd64",
+					"name": "rpcsvc-proto",
+					"version": "1.4.2-0ubuntu7"
+				},
+				{
+					"key": "libc6_2.39-0ubuntu8_amd64",
+					"name": "libc6",
+					"version": "2.39-0ubuntu8"
+				},
+				{
+					"key": "libgcc-s1_14-20240412-0ubuntu1_amd64",
+					"name": "libgcc-s1",
+					"version": "14-20240412-0ubuntu1"
+				},
+				{
+					"key": "gcc-14-base_14-20240412-0ubuntu1_amd64",
+					"name": "gcc-14-base",
+					"version": "14-20240412-0ubuntu1"
+				},
+				{
+					"key": "libcrypt-dev_1-4.4.36-4build1_amd64",
+					"name": "libcrypt-dev",
+					"version": "1:4.4.36-4build1"
+				},
+				{
+					"key": "libcrypt1_1-4.4.36-4build1_amd64",
+					"name": "libcrypt1",
+					"version": "1:4.4.36-4build1"
+				},
+				{
+					"key": "linux-libc-dev_6.8.0-31.31_amd64",
+					"name": "linux-libc-dev",
+					"version": "6.8.0-31.31"
+				},
+				{
+					"key": "libc-dev-bin_2.39-0ubuntu8_amd64",
+					"name": "libc-dev-bin",
+					"version": "2.39-0ubuntu8"
+				},
+				{
+					"key": "libstdc-p--p-6_14-20240412-0ubuntu1_amd64",
+					"name": "libstdc++6",
+					"version": "14-20240412-0ubuntu1"
+				},
+				{
+					"key": "libgcc-13-dev_13.2.0-23ubuntu4_amd64",
+					"name": "libgcc-13-dev",
+					"version": "13.2.0-23ubuntu4"
+				},
+				{
+					"key": "libquadmath0_14-20240412-0ubuntu1_amd64",
+					"name": "libquadmath0",
+					"version": "14-20240412-0ubuntu1"
+				},
+				{
+					"key": "libhwasan0_14-20240412-0ubuntu1_amd64",
+					"name": "libhwasan0",
+					"version": "14-20240412-0ubuntu1"
+				},
+				{
+					"key": "libubsan1_14-20240412-0ubuntu1_amd64",
+					"name": "libubsan1",
+					"version": "14-20240412-0ubuntu1"
+				},
+				{
+					"key": "libtsan2_14-20240412-0ubuntu1_amd64",
+					"name": "libtsan2",
+					"version": "14-20240412-0ubuntu1"
+				},
+				{
+					"key": "liblsan0_14-20240412-0ubuntu1_amd64",
+					"name": "liblsan0",
+					"version": "14-20240412-0ubuntu1"
+				},
+				{
+					"key": "libasan8_14-20240412-0ubuntu1_amd64",
+					"name": "libasan8",
+					"version": "14-20240412-0ubuntu1"
+				},
+				{
+					"key": "libatomic1_14-20240412-0ubuntu1_amd64",
+					"name": "libatomic1",
+					"version": "14-20240412-0ubuntu1"
+				},
+				{
+					"key": "libitm1_14-20240412-0ubuntu1_amd64",
+					"name": "libitm1",
+					"version": "14-20240412-0ubuntu1"
+				},
+				{
+					"key": "libgomp1_14-20240412-0ubuntu1_amd64",
+					"name": "libgomp1",
+					"version": "14-20240412-0ubuntu1"
+				},
+				{
+					"key": "gcc-13-base_13.2.0-23ubuntu4_amd64",
+					"name": "gcc-13-base",
+					"version": "13.2.0-23ubuntu4"
+				}
+			],
 			"key": "libstdc-p--p--13-dev_13.2.0-23ubuntu4_amd64",
 			"name": "libstdc++-13-dev",
 			"sha256": "0e34b7a6ad0d9db6c718301a0c30a077590decbb31099d0fd6ac957222d77a94",
@@ -4830,7 +4977,48 @@
 		},
 		{
 			"arch": "arm64",
-			"dependencies": [],
+			"dependencies": [
+				{
+					"key": "rpcsvc-proto_1.4.2-0ubuntu7_arm64",
+					"name": "rpcsvc-proto",
+					"version": "1.4.2-0ubuntu7"
+				},
+				{
+					"key": "libc6_2.39-0ubuntu8_arm64",
+					"name": "libc6",
+					"version": "2.39-0ubuntu8"
+				},
+				{
+					"key": "libgcc-s1_14-20240412-0ubuntu1_arm64",
+					"name": "libgcc-s1",
+					"version": "14-20240412-0ubuntu1"
+				},
+				{
+					"key": "gcc-14-base_14-20240412-0ubuntu1_arm64",
+					"name": "gcc-14-base",
+					"version": "14-20240412-0ubuntu1"
+				},
+				{
+					"key": "libcrypt-dev_1-4.4.36-4build1_arm64",
+					"name": "libcrypt-dev",
+					"version": "1:4.4.36-4build1"
+				},
+				{
+					"key": "libcrypt1_1-4.4.36-4build1_arm64",
+					"name": "libcrypt1",
+					"version": "1:4.4.36-4build1"
+				},
+				{
+					"key": "linux-libc-dev_6.8.0-31.31_arm64",
+					"name": "linux-libc-dev",
+					"version": "6.8.0-31.31"
+				},
+				{
+					"key": "libc-dev-bin_2.39-0ubuntu8_arm64",
+					"name": "libc-dev-bin",
+					"version": "2.39-0ubuntu8"
+				}
+			],
 			"key": "libc6-dev_2.39-0ubuntu8_arm64",
 			"name": "libc6-dev",
 			"sha256": "cf8d2af040044ea5f9205a7a7a3eceabe9bc182fd780a1dac8e849f8eccee1f1",
@@ -5218,7 +5406,108 @@
 		},
 		{
 			"arch": "arm64",
-			"dependencies": [],
+			"dependencies": [
+				{
+					"key": "libc6-dev_2.39-0ubuntu8_arm64",
+					"name": "libc6-dev",
+					"version": "2.39-0ubuntu8"
+				},
+				{
+					"key": "rpcsvc-proto_1.4.2-0ubuntu7_arm64",
+					"name": "rpcsvc-proto",
+					"version": "1.4.2-0ubuntu7"
+				},
+				{
+					"key": "libc6_2.39-0ubuntu8_arm64",
+					"name": "libc6",
+					"version": "2.39-0ubuntu8"
+				},
+				{
+					"key": "libgcc-s1_14-20240412-0ubuntu1_arm64",
+					"name": "libgcc-s1",
+					"version": "14-20240412-0ubuntu1"
+				},
+				{
+					"key": "gcc-14-base_14-20240412-0ubuntu1_arm64",
+					"name": "gcc-14-base",
+					"version": "14-20240412-0ubuntu1"
+				},
+				{
+					"key": "libcrypt-dev_1-4.4.36-4build1_arm64",
+					"name": "libcrypt-dev",
+					"version": "1:4.4.36-4build1"
+				},
+				{
+					"key": "libcrypt1_1-4.4.36-4build1_arm64",
+					"name": "libcrypt1",
+					"version": "1:4.4.36-4build1"
+				},
+				{
+					"key": "linux-libc-dev_6.8.0-31.31_arm64",
+					"name": "linux-libc-dev",
+					"version": "6.8.0-31.31"
+				},
+				{
+					"key": "libc-dev-bin_2.39-0ubuntu8_arm64",
+					"name": "libc-dev-bin",
+					"version": "2.39-0ubuntu8"
+				},
+				{
+					"key": "libstdc-p--p-6_14-20240412-0ubuntu1_arm64",
+					"name": "libstdc++6",
+					"version": "14-20240412-0ubuntu1"
+				},
+				{
+					"key": "libgcc-13-dev_13.2.0-23ubuntu4_arm64",
+					"name": "libgcc-13-dev",
+					"version": "13.2.0-23ubuntu4"
+				},
+				{
+					"key": "libhwasan0_14-20240412-0ubuntu1_arm64",
+					"name": "libhwasan0",
+					"version": "14-20240412-0ubuntu1"
+				},
+				{
+					"key": "libubsan1_14-20240412-0ubuntu1_arm64",
+					"name": "libubsan1",
+					"version": "14-20240412-0ubuntu1"
+				},
+				{
+					"key": "libtsan2_14-20240412-0ubuntu1_arm64",
+					"name": "libtsan2",
+					"version": "14-20240412-0ubuntu1"
+				},
+				{
+					"key": "liblsan0_14-20240412-0ubuntu1_arm64",
+					"name": "liblsan0",
+					"version": "14-20240412-0ubuntu1"
+				},
+				{
+					"key": "libasan8_14-20240412-0ubuntu1_arm64",
+					"name": "libasan8",
+					"version": "14-20240412-0ubuntu1"
+				},
+				{
+					"key": "libatomic1_14-20240412-0ubuntu1_arm64",
+					"name": "libatomic1",
+					"version": "14-20240412-0ubuntu1"
+				},
+				{
+					"key": "libitm1_14-20240412-0ubuntu1_arm64",
+					"name": "libitm1",
+					"version": "14-20240412-0ubuntu1"
+				},
+				{
+					"key": "libgomp1_14-20240412-0ubuntu1_arm64",
+					"name": "libgomp1",
+					"version": "14-20240412-0ubuntu1"
+				},
+				{
+					"key": "gcc-13-base_13.2.0-23ubuntu4_arm64",
+					"name": "gcc-13-base",
+					"version": "13.2.0-23ubuntu4"
+				}
+			],
 			"key": "libstdc-p--p--13-dev_13.2.0-23ubuntu4_arm64",
 			"name": "libstdc++-13-dev",
 			"sha256": "30707afa137c328dd99c76e752068f144b124b655f4ddc649d42931e48b1acd4",

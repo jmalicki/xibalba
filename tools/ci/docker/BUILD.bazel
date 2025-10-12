@@ -19,14 +19,15 @@ exports_files([
 # Download and install Bazelisk
 # ============================================================================
 
-# Download Bazelisk and create a tar layer
+# Download Bazel (not Bazelisk) and create a tar layer
 genrule(
     name = "bazelisk_layer",
     outs = ["bazelisk.tar.gz"],
     cmd = """
         mkdir -p tmp/usr/local/bin
+        # Download the actual Bazel binary (not Bazelisk)
         wget -q -O tmp/usr/local/bin/bazel \
-          https://github.com/bazelbuild/bazelisk/releases/download/v1.19.0/bazelisk-linux-amd64
+          https://releases.bazel.build/8.4.2/release/bazel-8.4.2-linux-x86_64
         chmod +x tmp/usr/local/bin/bazel
         tar -C tmp -czf $@ ./usr/local/bin/bazel
         rm -rf tmp
@@ -54,6 +55,10 @@ genrule(
         if [ -d tmp/usr/share/ca-certificates ]; then
             find tmp/usr/share/ca-certificates -name '*.crt' -exec cat {} \\; > tmp/etc/ssl/certs/ca-certificates.crt 2>/dev/null || true
         fi
+        
+        # Create /lib symlink to /usr/lib (linker scripts expect /lib path)
+        mkdir -p tmp/lib
+        cd tmp/lib && ln -sf ../usr/lib/x86_64-linux-gnu . && cd -
         
         tar -C tmp -cf $@ --transform='s|^\\./||' .
         rm -rf tmp
