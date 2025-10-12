@@ -45,12 +45,26 @@ wget -q "$KERNEL_MODULES_URL" -O kernel-modules.deb
 
 echo "Extracting kernel modules..."
 ar x kernel-modules.deb
+# List what we extracted for debugging
+ls -la *.tar.* 2>/dev/null || echo "No tar files found after ar x"
+
+# Try different compression formats
 if [ -f data.tar.zst ]; then
+    echo "  Found data.tar.zst (zstd)"
     tar --zstd -xf data.tar.zst
 elif [ -f data.tar.xz ]; then
+    echo "  Found data.tar.xz (xz)"
     tar -xf data.tar.xz
+elif [ -f data.tar.gz ]; then
+    echo "  Found data.tar.gz (gzip)"
+    tar -xzf data.tar.gz
+elif [ -f data.tar ]; then
+    echo "  Found data.tar (uncompressed)"
+    tar -xf data.tar
 else
     echo "ERROR: Unknown data archive format for modules"
+    echo "Available files:"
+    ls -la
     exit 1
 fi
 

@@ -91,13 +91,32 @@ if [ -n "$KERNEL_MODULES_TAR" ] && [ -f "$KERNEL_MODULES_TAR" ]; then
     if [ -n "$KERNEL_VERSION" ]; then
         echo "  ✓ Kernel modules extracted (version: $KERNEL_VERSION)"
         
+        # Decompress zstd-compressed modules (modprobe needs .ko not .ko.zst)
+        echo "  Decompressing zstd modules..."
+        apt-get install -y -qq zstd
+        COMPRESSED_COUNT=$(find initrd/lib/modules/$KERNEL_VERSION -name "*.ko.zst" | wc -l)
+        if [ $COMPRESSED_COUNT -gt 0 ]; then
+            echo "    Decompressing $COMPRESSED_COUNT modules..."
+            find initrd/lib/modules/$KERNEL_VERSION -name "*.ko.zst" -exec sh -c '
+                zstd -d -q "$1" -o "${1%.zst}" && rm "$1"
+            ' _ {} \;
+            echo "    ✓ Modules decompressed"
+        else
+            echo "    No compressed modules found"
+        fi
+        
+        # Run depmod to generate module dependencies
+        echo "  Running depmod..."
+        depmod -b initrd $KERNEL_VERSION
+        echo "    ✓ Module dependencies generated"
+        
         # List available filesystem modules
         echo "  Available filesystem modules:"
-        find initrd/lib/modules/$KERNEL_VERSION -path "*/fs/*.ko*" -type f 2>/dev/null | \
-            sed 's|.*/||' | sed 's|\.ko.*||' | sort | head -10 | sed 's/^/    - /'
+        find initrd/lib/modules/$KERNEL_VERSION -path "*/fs/*.ko" -type f 2>/dev/null | \
+            sed 's|.*/||' | sed 's|\.ko||' | sort | head -10 | sed 's/^/    - /'
         
         # Count total modules
-        MODULE_COUNT=$(find initrd/lib/modules/$KERNEL_VERSION -name "*.ko*" | wc -l)
+        MODULE_COUNT=$(find initrd/lib/modules/$KERNEL_VERSION -name "*.ko" | wc -l)
         echo "  Total modules: $MODULE_COUNT"
     else
         echo "  ⚠️  Kernel modules extracted but version unknown"
