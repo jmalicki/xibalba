@@ -42,6 +42,10 @@ packages:
   - curl
   - ca-certificates
   - openssl
+  
+  # Docker (for VM kernel extraction)
+  - docker.io
+  - containerd
 
 # NOTE: Filesystem tools (mkfs.*, etc.) are NOT needed here!
 # They are installed in QEMU VMs via initramfs (see vm/build-scripts/build-initramfs.sh)

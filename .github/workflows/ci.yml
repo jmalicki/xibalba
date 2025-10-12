@@ -84,7 +84,7 @@ jobs:
     # Run entire job inside the container (has Bazel, clang, all build deps)
     container:
       image: ghcr.io/jmalicki/xibalba-dev-env:latest
-      options: --user root
+      options: --user root --privileged -v /var/run/docker.sock:/var/run/docker.sock
     
     steps:
     - uses: actions/checkout@v4
