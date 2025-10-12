@@ -16,6 +16,9 @@ bazel_dep(name = "googletest", version = "1.14.0")
 # Bazel utility functions (needed by vm/BUILD.bazel for native_binary)
 bazel_dep(name = "bazel_skylib", version = "1.5.0")
 
+# Packaging rules (for .deb creation)
+bazel_dep(name = "rules_pkg", version = "0.9.1")
+
 # Rules for building OCI (Docker) images - used for hermetic build environment
 bazel_dep(name = "rules_oci", version = "1.7.4")
 
