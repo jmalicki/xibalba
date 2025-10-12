@@ -62,9 +62,11 @@ genrule(
         ln -sf clang++-18 tmp/usr/bin/clang++
         
         # Create non-root user (rules_python refuses to run as root)
-        mkdir -p tmp/home/runner
+        mkdir -p tmp/home/runner tmp/home/runner/.cache
         echo "runner:x:1001:1001:Runner:/home/runner:/bin/bash" >> tmp/etc/passwd
         echo "runner:x:1001:" >> tmp/etc/group
+        # Set proper ownership (files in tar need correct uid/gid)
+        # Note: Can't use chown in genrule, but tar will preserve the directory structure
         
         tar -C tmp -cf $@ --transform='s|^\\./||' .
         rm -rf tmp
