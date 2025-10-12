@@ -1,0 +1,455 @@
+{
+  "version": "1.0",
+  "created_at": "2025-10-11T19:57:44.089056",
+  "created_by": "workflow/prompt_generation.py",
+  "concepts_version": "repos/xibalba/docs/visual-docs/artifacts/concepts.json",
+  "theme": "Maya Underworld - Xibalba",
+  "total_prompts": 44,
+  "variations_per_concept": 5,
+  "generation_params": {
+    "steps": 50,
+    "guidance": 2.0
+  },
+  "prompts": [
+    {
+      "id": "xibalba-chaos-testing-framework-for-linux-kernel-f-01",
+      "concept_id": "xibalba-chaos-testing-framework-for-linux-kernel-f",
+      "concept_heading": "Xibalba: Chaos Testing Framework for Linux Kernel Filesystems",
+      "title": "Trial of Filesystem Integrity",
+      "prompt": "A hero twin stands atop a crumbling Maya pyramid, surrounded by Death gods in a swirling vortex of vibrant colors and intricate glyphs, as they gaze upon a filesystem represented by the six houses of torment in the underworld of Xibalba, ancient jungle foliage swaying in the background, with a dramatic sky filled with pyrotechnics and a crescent moon, style reference: Classic Maya codex art, composition: hero in foreground, filesystem in background, colors: deep oranges, turquoise, gold, lighting: soft, mysterious, mood: ominous",
+      "focus": "Ancient Maya gods and hero twin",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "xibalba-chaos-testing-framework-for-linux-kernel-f-02",
+      "concept_id": "xibalba-chaos-testing-framework-for-linux-kernel-f",
+      "concept_heading": "Xibalba: Chaos Testing Framework for Linux Kernel Filesystems",
+      "title": "Battle for Kernel Stability",
+      "prompt": "A Jaguar warrior, representing the Linux kernel, battles against the Death god, Camazotz, in a dark, eerie cave system within the underworld of Xibalba, surrounded by ancient Maya hieroglyphics and flickering torches, as the sound of the Sacred ball game echoes in the background, style reference: Ancient Maya mythology art style with vibrant colors and intricate glyphs, composition: hero in foreground, Death god in background, colors: deep blues, purples, gold, lighting: dim, foreboding, mood: intense",
+      "focus": "Jaguar warrior and Death god",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "xibalba-chaos-testing-framework-for-linux-kernel-f-03",
+      "concept_id": "xibalba-chaos-testing-framework-for-linux-kernel-f",
+      "concept_heading": "Xibalba: Chaos Testing Framework for Linux Kernel Filesystems",
+      "title": "Navigating the Filesystem Maze",
+      "prompt": "A hero twin, symbolizing the Linux filesystem, navigates through the six houses of torment in Xibalba, with the Plumed serpent, Kukulkan, guiding them through the treacherous paths and ancient Maya temples, as a background of a lush jungle and a vibrant sunset, style reference: Classic Maya art style, composition: hero in foreground, serpent in background, colors: earthy tones, turquoise, gold, lighting: warm, inviting, mood: hopeful",
+      "focus": "Hero twin and Plumed serpent",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "xibalba-chaos-testing-framework-for-linux-kernel-f-04",
+      "concept_id": "xibalba-chaos-testing-framework-for-linux-kernel-f",
+      "concept_heading": "Xibalba: Chaos Testing Framework for Linux Kernel Filesystems",
+      "title": "Testing the Underworld Boundaries",
+      "prompt": "A group of Death gods, the Lords of Xibalba, oversee a chaotic testing framework, with a hero twin in the center, as the filesystem represented by the six houses of torment undergoes rigorous testing, amidst a backdrop of a dramatic, stormy sky and ancient Maya ruins, style reference: Ancient Maya mythology art style with vibrant colors and intricate glyphs, composition: Death gods in foreground, hero twin in background, colors: deep reds, purples, gold, lighting: bright, chaotic, mood: dynamic",
+      "focus": "Death gods and hero twin",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "xibalba-chaos-testing-framework-for-linux-kernel-f-05",
+      "concept_id": "xibalba-chaos-testing-framework-for-linux-kernel-f",
+      "concept_heading": "Xibalba: Chaos Testing Framework for Linux Kernel Filesystems",
+      "title": "Xibalba's Tormenting Trials",
+      "prompt": "A hero twin, embodying the Linux filesystem, faces various tests and trials within the six houses of torment in Xibalba, with the Death gods, the Lords of Xibalba, observing from above, surrounded by ancient Maya temples and a deep, mystical jungle, style reference: Classic Maya codex art, composition: hero in foreground, Death gods in background, colors: earthy tones, turquoise, gold, lighting: soft, mystical, mood: contemplative",
+      "focus": "Hero twin and Death gods",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "what-is-xibalba-01",
+      "concept_id": "what-is-xibalba",
+      "concept_heading": "What is Xibalba?",
+      "title": "Hero Twins Confront Death",
+      "prompt": "Hero twins Hunahpu and Xbalanque navigating through the treacherous House of Darkness - a labyrinthine Maya temple with jaguar warriors and skeletal Death gods lurking in the shadows, vibrant colors, intricate glyphs, dramatic underworld scenes, and a central pyramid in the background, composition: close-up, low-angle shot focusing on the twins' determined expressions, colors: dim blue and purple hues with fiery orange accents, mood: ominous",
+      "focus": "Dense underworld scene, highlighting the twins' bravery",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "what-is-xibalba-02",
+      "concept_id": "what-is-xibalba",
+      "concept_heading": "What is Xibalba?",
+      "title": "Death Gods' Challenge",
+      "prompt": "Death gods Ah Muzen Cab and Yum Kaax, the Lords of Xibalba, presenting their trials to the brave hero twins, a grand Maya pyramid with intricate hieroglyphic writing and codex art adorning its walls, a Sacred cenote in the foreground, composition: wide-angle shot showing the pyramid's grandeur, colors: rich blues and reds, mood: intense",
+      "focus": "The Death gods' imposing presence, trials, and the pyramid's grandeur",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "what-is-xibalba-03",
+      "concept_id": "what-is-xibalba",
+      "concept_heading": "What is Xibalba?",
+      "title": "Jaguar Warriors' Ambush",
+      "prompt": "Jaguar warriors, supernatural beings, and the Lord of Death Ah Puch lurking in the shadows of a cave system, the hero twins Hunahpu and Xbalanque running for their lives, vibrant colors, intricate glyphs, dramatic underworld scenes, composition: fast-paced, dynamic shot focusing on the action, colors: dark blues and reds, mood: thrilling",
+      "focus": "The jungle ambush, hero twins' agility, and the supernatural danger",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "what-is-xibalba-04",
+      "concept_id": "what-is-xibalba",
+      "concept_heading": "What is Xibalba?",
+      "title": "The Six Houses of Torment",
+      "prompt": "A sprawling, intricate map of the Six Houses of Torment, a Maya temple with a central Sacred ball game court, hieroglyphic writing, and codex art, composition: overhead shot showing the temple's design, colors: muted earth tones, mood: surreal",
+      "focus": "The complex layout of the torment houses, the temple's grand design, and the ball game court",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "what-is-xibalba-05",
+      "concept_id": "what-is-xibalba",
+      "concept_heading": "What is Xibalba?",
+      "title": "Plumed Serpent's Guidance",
+      "prompt": "The Plumed Serpent, Kukulkan, guiding the hero twins through the treacherous underworld, a winding underground river, a Maya temple in the background, vibrant colors, intricate glyphs, dramatic underworld scenes, composition: serene, low-angle shot focusing on the serpent's majestic presence, colors: soft blues and greens, mood: mystical",
+      "focus": "The Plumed Serpent's guidance, hero twins' hope, and the serene underworld landscape",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "why-this-matters-01",
+      "concept_id": "why-this-matters",
+      "concept_heading": "Why This Matters",
+      "title": "Racing Against the Death Gods",
+      "prompt": "Hero twins Hunahpu and Xbalanque sprint through the Sacred Ball Court of Xibalba, pursued by Ah Puch and K'awiil, amidst vibrant jungle foliage and intricate hieroglyphics. Ancient Maya mythology art style, dramatic underworld scene, with a focus on the twins' determination.",
+      "focus": "Speed, determination, and the twins' pursuit",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "why-this-matters-02",
+      "concept_id": "why-this-matters",
+      "concept_heading": "Why This Matters",
+      "title": "Battle for the Filesystem",
+      "prompt": "Lords of Xibalba, Ah Puch and K'awiil, face off against the Hero Twins in a battle for control of the Six Houses of Torment, represented by a sprawling, maze-like filesystem with glowing blue pathways and ancient pyramids in the background. Ancient Maya mythology art style, vibrant colors, and dramatic lighting.",
+      "focus": "Conflict, power struggle, and the filesystem as a battleground",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "why-this-matters-03",
+      "concept_id": "why-this-matters",
+      "concept_heading": "Why This Matters",
+      "title": "Navigating the Underworld",
+      "prompt": "The Hero Twins, Hunahpu and Xbalanque, stand at the edge of a vast, underground river, with the Plumed Serpent, Kukulkan, emerging from the depths, as they prepare to navigate the treacherous waters of Xibalba. Ancient Maya mythology art style, mysterious atmosphere, and a focus on the twins' bravery.",
+      "focus": "Bravery, exploration, and the unknown",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "why-this-matters-04",
+      "concept_id": "why-this-matters",
+      "concept_heading": "Why This Matters",
+      "title": "Conquering the House of Knives",
+      "prompt": "The Hero Twins, Hunahpu and Xbalanque, stand victorious in the House of Knives, their weapons and shields adorned with intricate glyphs, as they confront the Death Gods in a dramatic showdown. Ancient Maya mythology art style, vibrant colors, and a focus on triumph and victory.",
+      "focus": "Triumph, victory, and the twins' strength",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "why-this-matters-05",
+      "concept_id": "why-this-matters",
+      "concept_heading": "Why This Matters",
+      "title": "Descent into the Underworld",
+      "prompt": "The Hero Twins, Hunahpu and Xbalanque, descend into the underworld, surrounded by a swirling vortex of colors and lights, as they prepare to face the Trials of Xibalba. Ancient Maya mythology art style, mystical atmosphere, and a focus on the twins' journey.",
+      "focus": "Journey, transformation, and the unknown",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "technical-details-01",
+      "concept_id": "technical-details",
+      "concept_heading": "Technical Details",
+      "title": "Death Gods Inspect Code",
+      "prompt": "Death gods (Lords of Xibalba) examining lines of code on an ancient Maya temple tablet - Hero twins navigating trials in Xibalba, Maya pyramids and temples in the background, vibrant colors, intricate glyphs, and dramatic underworld scenes, low-angle shot to emphasize power, warm golden lighting, ominous mood",
+      "focus": "Death gods as authorities on chaos testing",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "technical-details-02",
+      "concept_id": "technical-details",
+      "concept_heading": "Technical Details",
+      "title": "Trial of the Unittest",
+      "prompt": "A Hero twin navigating a challenging trial in Xibalba, Death gods watching from the shadows, Maya pyramids and temples in the background, Sacred cenotes and underground rivers flowing through the scene, Ancient Maya mythology art style, bold colors, high-energy mood, focus on the Hero twin's determination",
+      "focus": "The importance of testing and perseverance",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "technical-details-03",
+      "concept_id": "technical-details",
+      "concept_heading": "Technical Details",
+      "title": "The Six Houses of Error",
+      "prompt": "A hero navigating the six houses of torment (House of Darkness, House of Knives, etc.) in Xibalba, each house represented by a unique Maya temple, Death gods waiting to welcome the hero to their domain, Jaguar warriors and supernatural beings lurking in the shadows, Ancient Maya mythology art style, muted colors, foreboding mood, focus on the hero's journey",
+      "focus": "The various challenges and pitfalls of chaos testing",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "technical-details-04",
+      "concept_id": "technical-details",
+      "concept_heading": "Technical Details",
+      "title": "The Codex of Chaos",
+      "prompt": "A hero discovering an ancient codex containing the secrets of Xibalba's chaos testing framework, Maya pyramids and temples in the background, Death gods and Hero twins navigating trials visible in the codex's intricate glyphs, Ancient Maya mythology art style, bright colors, sense of discovery, focus on the codex's power",
+      "focus": "The ancient knowledge and wisdom of Xibalba",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "technical-details-05",
+      "concept_id": "technical-details",
+      "concept_heading": "Technical Details",
+      "title": "Battle with the Lords of Failure",
+      "prompt": "A hero facing off against the Death gods (Lords of Xibalba) in an epic battle, Maya pyramids and temples in the background, Sacred ball game court visible in the distance, Ancient Maya mythology art style, bold colors, high-energy mood, focus on the hero's bravery and determination",
+      "focus": "The ultimate challenge of chaos testing: defeating failure and proving resilience",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "the-name-xibalba-01",
+      "concept_id": "the-name-xibalba",
+      "concept_heading": "The Name: Xibalba",
+      "title": "The Guardians of Xibalba",
+      "prompt": "A dramatic scene of the Death gods standing before the entrance to a grand Maya pyramid, with Hero twins in the background, navigating the trials of the underworld - Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, composition: Death gods in foreground, pyramid in background, focal point on the twins' anxious expressions, colors: deep blues and purples, warm golden lighting, mood: foreboding",
+      "focus": "Death gods and their significance in the underworld",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "the-name-xibalba-02",
+      "concept_id": "the-name-xibalba",
+      "concept_heading": "The Name: Xibalba",
+      "title": "The Hero Twins in the House of Darkness",
+      "prompt": "A mystical scene of the Hero twins navigating the House of Darkness, with glowing Maya glyphs illuminating the underground passage, and the Plumed Serpent (Kukulkan) watching over them - Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, composition: twins in the center, passage and serpent in background, focal point on the twins' determination, colors: dark blues and purples, soft green glow, mood: suspenseful",
+      "focus": "Hero twins' journey through the underworld",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "the-name-xibalba-03",
+      "concept_id": "the-name-xibalba",
+      "concept_heading": "The Name: Xibalba",
+      "title": "The Jaguar Warriors of Xibalba",
+      "prompt": "A dynamic scene of Jaguar warriors in battle with the Lords of Xibalba, with the six houses of torment visible in the background - Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, composition: warriors in the foreground, houses of torment in background, focal point on the battle, colors: fiery oranges and reds, golden lighting, mood: intense",
+      "focus": "Jaguar warriors and their role in the underworld",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "the-name-xibalba-04",
+      "concept_id": "the-name-xibalba",
+      "concept_heading": "The Name: Xibalba",
+      "title": "The Sacred Cenote of Xibalba",
+      "prompt": "A serene scene of the Sacred cenote, with the Plumed Serpent rising from the water, and the Hero twins standing on the banks, looking out at the underworld - Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, composition: cenote and serpent in the center, twins in the background, focal point on the serpent, colors: soft blues and greens, warm sunlight, mood: peaceful",
+      "focus": "The significance of the Sacred cenote in the underworld",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "the-name-xibalba-05",
+      "concept_id": "the-name-xibalba",
+      "concept_heading": "The Name: Xibalba",
+      "title": "The Trials of Xibalba",
+      "prompt": "A dramatic scene of the Hero twins participating in the Sacred ball game, with the Lords of Xibalba watching from the sidelines, and the six houses of torment visible in the background - Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, composition: twins in the center, ball game and lords in background, focal point on the twins' determination, colors: deep reds and oranges, warm golden lighting, mood: intense",
+      "focus": "The significance of the ball game in the underworld",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "the-myth-the-hero-twins-descent-01",
+      "concept_id": "the-myth-the-hero-twins-descent",
+      "concept_heading": "The Myth: The Hero Twins' Descent",
+      "title": "Hero Twins Descend",
+      "prompt": "Hunahpu and Xbalanque, youthful Hero Twins, stepping into Xibalba - Dark stone pyramid temple, jaguar warriors in the background, Death gods watching from above, vibrant blues and reds, dramatic scene, Hero twins in the foreground, intense focus",
+      "focus": "Youthful heroism, temple entrance",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "the-myth-the-hero-twins-descent-02",
+      "concept_id": "the-myth-the-hero-twins-descent",
+      "concept_heading": "The Myth: The Hero Twins' Descent",
+      "title": "Trial of Knives",
+      "prompt": "Xbalanque, one of the Hero Twins, navigating the House of Knives - jaguar warriors, knives flying, Hunahpu cheering, sacred cenote in the background, Ancient Maya mythology art style, warm orange and yellow hues, dynamic composition, focus on Xbalanque",
+      "focus": "Action and suspense, House of Knives",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "the-myth-the-hero-twins-descent-03",
+      "concept_id": "the-myth-the-hero-twins-descent",
+      "concept_heading": "The Myth: The Hero Twins' Descent",
+      "title": "Death Gods Confront",
+      "prompt": "Death gods, Ah Puch and Vucub Caquix, facing Hunahpu and Xbalanque - grand pyramid, plumed serpent Kukulkan above, Hieroglyphic writing on the walls, dramatic lighting, Death gods in the foreground, Hero Twins in the background, bold colors, intense mood",
+      "focus": "Death gods and hero twins confrontation",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "the-myth-the-hero-twins-descent-04",
+      "concept_id": "the-myth-the-hero-twins-descent",
+      "concept_heading": "The Myth: The Hero Twins' Descent",
+      "title": "Ball Game of Life and Death",
+      "prompt": "Hunahpu and Xbalanque playing the sacred ball game against the Death gods - pyramid court, jaguar warriors as spectators, Death gods in the background, vibrant colors, dynamic composition, focus on the ball game, Ancient Maya mythology art style",
+      "focus": "Sacred ball game and hero twins",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "the-myth-the-hero-twins-descent-05",
+      "concept_id": "the-myth-the-hero-twins-descent",
+      "concept_heading": "The Myth: The Hero Twins' Descent",
+      "title": "River of Souls",
+      "prompt": "Hero Twins navigating the River of Souls - underground river, sacred cenote, Hero twins in a canoe, Death gods watching from the riverbank, warm colors, peaceful scene, focus on the canoe, Ancient Maya mythology art style",
+      "focus": "Peaceful and mystical, River of Souls",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "the-metaphor-your-codes-descent-into-chaos-01",
+      "concept_id": "the-metaphor-your-codes-descent-into-chaos",
+      "concept_heading": "The Metaphor: Your Code's Descent into Chaos",
+      "title": "The Metaphor: Your Code's Descent into Chaos",
+      "prompt": "Visualize The Metaphor: Your Code's Descent into Chaos using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials",
+      "focus": "main concept",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "the-six-houses-chaos-test-categories-01",
+      "concept_id": "the-six-houses-chaos-test-categories",
+      "concept_heading": "The Six Houses: Chaos Test Categories",
+      "title": "The Six Houses: Chaos Test Categories",
+      "prompt": "Visualize The Six Houses: Chaos Test Categories using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials",
+      "focus": "main concept",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "key-features-01",
+      "concept_id": "key-features",
+      "concept_heading": "Key Features",
+      "title": "Key Features",
+      "prompt": "Visualize Key Features using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials",
+      "focus": "main concept",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "-jepsen-style-chaos-engineering-01",
+      "concept_id": "-jepsen-style-chaos-engineering",
+      "concept_heading": "\ud83c\udf2a\ufe0f **Jepsen-Style Chaos Engineering**",
+      "title": "\ud83c\udf2a\ufe0f **Jepsen-Style Chaos Engineering**",
+      "prompt": "Visualize \ud83c\udf2a\ufe0f **Jepsen-Style Chaos Engineering** using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials",
+      "focus": "main concept",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "-ebpf-delay-injection-01",
+      "concept_id": "-ebpf-delay-injection",
+      "concept_heading": "\u26a1 **eBPF Delay Injection**",
+      "title": "\u26a1 **eBPF Delay Injection**",
+      "prompt": "Visualize \u26a1 **eBPF Delay Injection** using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials",
+      "focus": "main concept",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "-incremental-jsonl-output-timeout-safe-01",
+      "concept_id": "-incremental-jsonl-output-timeout-safe",
+      "concept_heading": "\ud83d\udcca **Incremental JSONL Output (Timeout-Safe!)**",
+      "title": "\ud83d\udcca **Incremental JSONL Output (Timeout-Safe!)**",
+      "prompt": "Visualize \ud83d\udcca **Incremental JSONL Output (Timeout-Safe!)** using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials",
+      "focus": "main concept",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "-precise-bug-detection-01",
+      "concept_id": "-precise-bug-detection",
+      "concept_heading": "\ud83d\udd0d **Precise Bug Detection**",
+      "title": "\ud83d\udd0d **Precise Bug Detection**",
+      "prompt": "Visualize \ud83d\udd0d **Precise Bug Detection** using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials",
+      "focus": "main concept",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "-hermetic-qemu-vms-01",
+      "concept_id": "-hermetic-qemu-vms",
+      "concept_heading": "\ud83d\udda5\ufe0f **Hermetic QEMU VMs**",
+      "title": "\ud83d\udda5\ufe0f **Hermetic QEMU VMs**",
+      "prompt": "Visualize \ud83d\udda5\ufe0f **Hermetic QEMU VMs** using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials",
+      "focus": "main concept",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "-c20-unit-tests-1515-passing-01",
+      "concept_id": "-c20-unit-tests-1515-passing",
+      "concept_heading": "\ud83e\uddea **C++20 Unit Tests (15/15 passing)**",
+      "title": "\ud83e\uddea **C++20 Unit Tests (15/15 passing)**",
+      "prompt": "Visualize \ud83e\uddea **C++20 Unit Tests (15/15 passing)** using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials",
+      "focus": "main concept",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "-getting-started-01",
+      "concept_id": "-getting-started",
+      "concept_heading": "\ud83d\ude80 Getting Started",
+      "title": "\ud83d\ude80 Getting Started",
+      "prompt": "Visualize \ud83d\ude80 Getting Started using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials",
+      "focus": "main concept",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "documentation-01",
+      "concept_id": "documentation",
+      "concept_heading": "Documentation",
+      "title": "Documentation",
+      "prompt": "Visualize Documentation using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials",
+      "focus": "main concept",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "prerequisites-01",
+      "concept_id": "prerequisites",
+      "concept_heading": "Prerequisites",
+      "title": "Prerequisites",
+      "prompt": "Visualize Prerequisites using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials",
+      "focus": "main concept",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "quick-start-01",
+      "concept_id": "quick-start",
+      "concept_heading": "Quick Start",
+      "title": "Quick Start",
+      "prompt": "Visualize Quick Start using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials",
+      "focus": "main concept",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    },
+    {
+      "id": "clone-repository-01",
+      "concept_id": "clone-repository",
+      "concept_heading": "Clone repository",
+      "title": "Clone repository",
+      "prompt": "Visualize Clone repository using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials",
+      "focus": "main concept",
+      "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+      "theme": "Maya Underworld - Xibalba"
+    }
+  ]
+}

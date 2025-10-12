@@ -1,0 +1,270 @@
+{
+  "version": "1.0",
+  "created_at": "2025-10-11T19:56:52.227727",
+  "created_by": "workflow/concept_generation.py",
+  "theme_version": "repos/xibalba/docs/visual-docs/artifacts/theme.json",
+  "source_document": "repos/xibalba/README.md",
+  "theme": "Maya Underworld - Xibalba",
+  "concepts": [
+    {
+      "id": "xibalba-chaos-testing-framework-for-linux-kernel-f",
+      "heading": "Xibalba: Chaos Testing Framework for Linux Kernel Filesystems",
+      "level": 1,
+      "technical_reality": "[![Xibalba CI](https://github.com/jmalicki/xibalba/actions/workflows/ci.yml/badge.svg)](https://gith...",
+      "visual_concept": "Visualize Xibalba: Chaos Testing Framework for Linux Kernel Filesystems using Maya Underworld - Xibalba imagery",
+      "key_elements": [
+        "Maya pyramids and temples",
+        "Death gods (Lords of Xibalba)",
+        "Hero twins navigating trials"
+      ],
+      "source_section": "Xibalba: Chaos Testing Framework for Linux Kernel Filesystems"
+    },
+    {
+      "id": "what-is-xibalba",
+      "heading": "What is Xibalba?",
+      "level": 2,
+      "technical_reality": "**Xibalba** is a chaos testing framework that finds subtle bugs in **Linux kernel** filesystem code\u2014...",
+      "visual_concept": "Visualize What is Xibalba? using Maya Underworld - Xibalba imagery",
+      "key_elements": [
+        "Maya pyramids and temples",
+        "Death gods (Lords of Xibalba)",
+        "Hero twins navigating trials"
+      ],
+      "source_section": "What is Xibalba?"
+    },
+    {
+      "id": "why-this-matters",
+      "heading": "Why This Matters",
+      "level": 3,
+      "technical_reality": "**The Problem**: Imagine 100 programs all trying to list files in the same directory simultaneously....",
+      "visual_concept": "Visualize Why This Matters using Maya Underworld - Xibalba imagery",
+      "key_elements": [
+        "Maya pyramids and temples",
+        "Death gods (Lords of Xibalba)",
+        "Hero twins navigating trials"
+      ],
+      "source_section": "Why This Matters"
+    },
+    {
+      "id": "technical-details",
+      "heading": "Technical Details",
+      "level": 3,
+      "technical_reality": "**Xibalba** is a [Jepsen](https://jepsen.io/)-inspired chaos testing framework specifically designed...",
+      "visual_concept": "Visualize Technical Details using Maya Underworld - Xibalba imagery",
+      "key_elements": [
+        "Maya pyramids and temples",
+        "Death gods (Lords of Xibalba)",
+        "Hero twins navigating trials"
+      ],
+      "source_section": "Technical Details"
+    },
+    {
+      "id": "the-name-xibalba",
+      "heading": "The Name: Xibalba",
+      "level": 2,
+      "technical_reality": "**[Xibalba](https://en.wikipedia.org/wiki/Xibalba)** (shee-bahl-BAH) \u2014 literally **\"Place of Fear\"**...",
+      "visual_concept": "Visualize The Name: Xibalba using Maya Underworld - Xibalba imagery",
+      "key_elements": [
+        "Maya pyramids and temples",
+        "Death gods (Lords of Xibalba)",
+        "Hero twins navigating trials"
+      ],
+      "source_section": "The Name: Xibalba"
+    },
+    {
+      "id": "the-myth-the-hero-twins-descent",
+      "heading": "The Myth: The Hero Twins' Descent",
+      "level": 3,
+      "technical_reality": "The most famous story of Xibalba tells of the Hero Twins\u2014**Hunahpu** and **Xbalanque**\u2014who were summ...",
+      "visual_concept": "Visualize The Myth: The Hero Twins' Descent using Maya Underworld - Xibalba imagery",
+      "key_elements": [
+        "Maya pyramids and temples",
+        "Death gods (Lords of Xibalba)",
+        "Hero twins navigating trials"
+      ],
+      "source_section": "The Myth: The Hero Twins' Descent"
+    },
+    {
+      "id": "the-metaphor-your-codes-descent-into-chaos",
+      "heading": "The Metaphor: Your Code's Descent into Chaos",
+      "level": 3,
+      "technical_reality": "Like the Hero Twins descending into Xibalba, **your code must face orchestrated chaos designed to ex...",
+      "visual_concept": "Visualize The Metaphor: Your Code's Descent into Chaos using Maya Underworld - Xibalba imagery",
+      "key_elements": [
+        "Maya pyramids and temples",
+        "Death gods (Lords of Xibalba)",
+        "Hero twins navigating trials"
+      ],
+      "source_section": "The Metaphor: Your Code's Descent into Chaos"
+    },
+    {
+      "id": "the-six-houses-chaos-test-categories",
+      "heading": "The Six Houses: Chaos Test Categories",
+      "level": 3,
+      "technical_reality": "| House | Trial | Test Category | What It Finds |\n|-------|-------|---------------|---------------|\n...",
+      "visual_concept": "Visualize The Six Houses: Chaos Test Categories using Maya Underworld - Xibalba imagery",
+      "key_elements": [
+        "Maya pyramids and temples",
+        "Death gods (Lords of Xibalba)",
+        "Hero twins navigating trials"
+      ],
+      "source_section": "The Six Houses: Chaos Test Categories"
+    },
+    {
+      "id": "key-features",
+      "heading": "Key Features",
+      "level": 2,
+      "technical_reality": "...",
+      "visual_concept": "Visualize Key Features using Maya Underworld - Xibalba imagery",
+      "key_elements": [
+        "Maya pyramids and temples",
+        "Death gods (Lords of Xibalba)",
+        "Hero twins navigating trials"
+      ],
+      "source_section": "Key Features"
+    },
+    {
+      "id": "-jepsen-style-chaos-engineering",
+      "heading": "\ud83c\udf2a\ufe0f **Jepsen-Style Chaos Engineering**",
+      "level": 3,
+      "technical_reality": "- Concurrent readers + writers (configurable: `--readers N --writers M`)\n- Configurable test duratio...",
+      "visual_concept": "Visualize \ud83c\udf2a\ufe0f **Jepsen-Style Chaos Engineering** using Maya Underworld - Xibalba imagery",
+      "key_elements": [
+        "Maya pyramids and temples",
+        "Death gods (Lords of Xibalba)",
+        "Hero twins navigating trials"
+      ],
+      "source_section": "\ud83c\udf2a\ufe0f **Jepsen-Style Chaos Engineering**"
+    },
+    {
+      "id": "-ebpf-delay-injection",
+      "heading": "\u26a1 **eBPF Delay Injection**",
+      "level": 3,
+      "technical_reality": "- Kernel-level getdents64 interception\n- Configurable delays: `pause_controller <prob%> <iterations>...",
+      "visual_concept": "Visualize \u26a1 **eBPF Delay Injection** using Maya Underworld - Xibalba imagery",
+      "key_elements": [
+        "Maya pyramids and temples",
+        "Death gods (Lords of Xibalba)",
+        "Hero twins navigating trials"
+      ],
+      "source_section": "\u26a1 **eBPF Delay Injection**"
+    },
+    {
+      "id": "-incremental-jsonl-output-timeout-safe",
+      "heading": "\ud83d\udcca **Incremental JSONL Output (Timeout-Safe!)**",
+      "level": 3,
+      "technical_reality": "- **`xibalba-progress.jsonl`**: One JSON line per 5 seconds\n- **`xibalba-bugs.jsonl`**: One JSON lin...",
+      "visual_concept": "Visualize \ud83d\udcca **Incremental JSONL Output (Timeout-Safe!)** using Maya Underworld - Xibalba imagery",
+      "key_elements": [
+        "Maya pyramids and temples",
+        "Death gods (Lords of Xibalba)",
+        "Hero twins navigating trials"
+      ],
+      "source_section": "\ud83d\udcca **Incremental JSONL Output (Timeout-Safe!)**"
+    },
+    {
+      "id": "-precise-bug-detection",
+      "heading": "\ud83d\udd0d **Precise Bug Detection**",
+      "level": 3,
+      "technical_reality": "- **Missing entries**: File should exist but doesn't (cache miss bugs)\n- **Phantom entries**: File e...",
+      "visual_concept": "Visualize \ud83d\udd0d **Precise Bug Detection** using Maya Underworld - Xibalba imagery",
+      "key_elements": [
+        "Maya pyramids and temples",
+        "Death gods (Lords of Xibalba)",
+        "Hero twins navigating trials"
+      ],
+      "source_section": "\ud83d\udd0d **Precise Bug Detection**"
+    },
+    {
+      "id": "-hermetic-qemu-vms",
+      "heading": "\ud83d\udda5\ufe0f **Hermetic QEMU VMs**",
+      "level": 3,
+      "technical_reality": "- Fast boot (<2 seconds with custom initramfs)\n- Docker-based hermetic builds (no host dependencies!...",
+      "visual_concept": "Visualize \ud83d\udda5\ufe0f **Hermetic QEMU VMs** using Maya Underworld - Xibalba imagery",
+      "key_elements": [
+        "Maya pyramids and temples",
+        "Death gods (Lords of Xibalba)",
+        "Hero twins navigating trials"
+      ],
+      "source_section": "\ud83d\udda5\ufe0f **Hermetic QEMU VMs**"
+    },
+    {
+      "id": "-c20-unit-tests-1515-passing",
+      "heading": "\ud83e\uddea **C++20 Unit Tests (15/15 passing)**",
+      "level": 3,
+      "technical_reality": "- GoogleTest framework\n- Tests core validation logic\n- Runs in CI on every PR\n- Proves bug detection...",
+      "visual_concept": "Visualize \ud83e\uddea **C++20 Unit Tests (15/15 passing)** using Maya Underworld - Xibalba imagery",
+      "key_elements": [
+        "Maya pyramids and temples",
+        "Death gods (Lords of Xibalba)",
+        "Hero twins navigating trials"
+      ],
+      "source_section": "\ud83e\uddea **C++20 Unit Tests (15/15 passing)**"
+    },
+    {
+      "id": "-getting-started",
+      "heading": "\ud83d\ude80 Getting Started",
+      "level": 2,
+      "technical_reality": "**Current Status**: \u2705 Core implementation complete, eBPF fault injection working\n\n**\u26a0\ufe0f IMPORTANT**: ...",
+      "visual_concept": "Visualize \ud83d\ude80 Getting Started using Maya Underworld - Xibalba imagery",
+      "key_elements": [
+        "Maya pyramids and temples",
+        "Death gods (Lords of Xibalba)",
+        "Hero twins navigating trials"
+      ],
+      "source_section": "\ud83d\ude80 Getting Started"
+    },
+    {
+      "id": "documentation",
+      "heading": "Documentation",
+      "level": 3,
+      "technical_reality": "**Core Docs**:\n- **\ud83d\udda5\ufe0f [VM Setup Guide](docs/VM-SETUP.md)** - QEMU/KVM hermetic VM testing\n- **\ud83d\udd27 [Fas...",
+      "visual_concept": "Visualize Documentation using Maya Underworld - Xibalba imagery",
+      "key_elements": [
+        "Maya pyramids and temples",
+        "Death gods (Lords of Xibalba)",
+        "Hero twins navigating trials"
+      ],
+      "source_section": "Documentation"
+    },
+    {
+      "id": "prerequisites",
+      "heading": "Prerequisites",
+      "level": 3,
+      "technical_reality": "**Host Machine**:\n- Linux host with KVM support\n- 8GB+ RAM (16GB+ recommended for parallel VM testin...",
+      "visual_concept": "Visualize Prerequisites using Maya Underworld - Xibalba imagery",
+      "key_elements": [
+        "Maya pyramids and temples",
+        "Death gods (Lords of Xibalba)",
+        "Hero twins navigating trials"
+      ],
+      "source_section": "Prerequisites"
+    },
+    {
+      "id": "quick-start",
+      "heading": "Quick Start",
+      "level": 3,
+      "technical_reality": "```bash...",
+      "visual_concept": "Visualize Quick Start using Maya Underworld - Xibalba imagery",
+      "key_elements": [
+        "Maya pyramids and temples",
+        "Death gods (Lords of Xibalba)",
+        "Hero twins navigating trials"
+      ],
+      "source_section": "Quick Start"
+    },
+    {
+      "id": "clone-repository",
+      "heading": "Clone repository",
+      "level": 1,
+      "technical_reality": "git clone https://github.com/jmalicki/xibalba.git\ncd xibalba...",
+      "visual_concept": "Visualize Clone repository using Maya Underworld - Xibalba imagery",
+      "key_elements": [
+        "Maya pyramids and temples",
+        "Death gods (Lords of Xibalba)",
+        "Hero twins navigating trials"
+      ],
+      "source_section": "Clone repository"
+    }
+  ]
+}
