@@ -51,26 +51,49 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Install dependencies
+    - name: Generate cache key
+      id: cache-key
       run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          clang-20 \
-          libbpf-dev \
-          libelf-dev \
-          linux-headers-generic
+        CACHE_KEY=$(cat MODULE.bazel.lock tools/ci/docker/packages.lock.json | sha256sum | cut -c1-16)
+        echo "key=${CACHE_KEY}" >> $GITHUB_OUTPUT
+        echo "📝 Cache key: ${CACHE_KEY}"
+    
+    - name: Pull CI container from GHCR
+      run: |
+        IMAGE="ghcr.io/jmalicki/xibalba-dev-env:cache-${{ steps.cache-key.outputs.key }}"
+        echo "🐳 Pulling container: ${IMAGE}"
+        
+        # Try exact cache key first
+        if docker pull "${IMAGE}"; then
+          echo "✅ Cache HIT: ${IMAGE}"
+        # Fallback to latest
+        elif docker pull "ghcr.io/jmalicki/xibalba-dev-env:latest"; then
+          echo "⚠️  Cache MISS: Using :latest as fallback"
+          docker tag "ghcr.io/jmalicki/xibalba-dev-env:latest" "${IMAGE}"
+        else
+          echo "❌ ERROR: Could not pull container from GHCR"
+          exit 1
+        fi
     
     - name: Setup Bazelisk
       uses: bazelbuild/setup-bazelisk@v3
     
     - name: Run state_tracker unit tests
       run: |
-        bazel test //common:state_tracker_test \
-          --test_output=errors \
-          --test_summary=detailed \
-          --noshow_progress \
-          --ui_event_filters=-info,-debug \
-          --show_result=0
+        IMAGE="ghcr.io/jmalicki/xibalba-dev-env:cache-${{ steps.cache-key.outputs.key }}"
+        docker run --rm \
+          -v ${{ github.workspace }}:/workspace \
+          -w /workspace \
+          -e HOME=/tmp \
+          "${IMAGE}" \
+          /usr/bin/bash -c "
+            bazel test //common:state_tracker_test \
+              --test_output=errors \
+              --test_summary=detailed \
+              --noshow_progress \
+              --ui_event_filters=-info,-debug \
+              --show_result=0
+          "
       
     - name: Upload test results
       if: always()
@@ -89,35 +112,72 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Install dependencies
+    - name: Generate cache key
+      id: cache-key
       run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          clang-20 \
-          libbpf-dev \
-          libelf-dev \
-          linux-headers-generic
+        CACHE_KEY=$(cat MODULE.bazel.lock tools/ci/docker/packages.lock.json | sha256sum | cut -c1-16)
+        echo "key=${CACHE_KEY}" >> $GITHUB_OUTPUT
+        echo "📝 Cache key: ${CACHE_KEY}"
+    
+    - name: Pull CI container from GHCR
+      run: |
+        IMAGE="ghcr.io/jmalicki/xibalba-dev-env:cache-${{ steps.cache-key.outputs.key }}"
+        echo "🐳 Pulling container: ${IMAGE}"
+        
+        if docker pull "${IMAGE}"; then
+          echo "✅ Cache HIT: ${IMAGE}"
+        elif docker pull "ghcr.io/jmalicki/xibalba-dev-env:latest"; then
+          echo "⚠️  Cache MISS: Using :latest as fallback"
+          docker tag "ghcr.io/jmalicki/xibalba-dev-env:latest" "${IMAGE}"
+        else
+          echo "❌ ERROR: Could not pull container from GHCR"
+          exit 1
+        fi
     
     - name: Setup Bazelisk
       uses: bazelbuild/setup-bazelisk@v3
     
     - name: Build all chaos testing targets
       run: |
-        bazel build //chaos:all \
-          --noshow_progress \
-          --show_result=0
+        IMAGE="ghcr.io/jmalicki/xibalba-dev-env:cache-${{ steps.cache-key.outputs.key }}"
+        docker run --rm \
+          -v ${{ github.workspace }}:/workspace \
+          -w /workspace \
+          -e HOME=/tmp \
+          "${IMAGE}" \
+          /usr/bin/bash -c "
+            bazel build //chaos:all \
+              --noshow_progress \
+              --show_result=0
+          "
         
     - name: Build VM infrastructure
       run: |
-        bazel build //vm:extract_kernel //vm:build_initramfs \
-          --noshow_progress \
-          --show_result=0
+        IMAGE="ghcr.io/jmalicki/xibalba-dev-env:cache-${{ steps.cache-key.outputs.key }}"
+        docker run --rm \
+          -v ${{ github.workspace }}:/workspace \
+          -w /workspace \
+          -e HOME=/tmp \
+          "${IMAGE}" \
+          /usr/bin/bash -c "
+            bazel build //vm:extract_kernel //vm:build_initramfs \
+              --noshow_progress \
+              --show_result=0
+          "
         
     - name: Build packaging
       run: |
-        bazel build //packaging:xibalba-deb \
-          --noshow_progress \
-          --show_result=0
+        IMAGE="ghcr.io/jmalicki/xibalba-dev-env:cache-${{ steps.cache-key.outputs.key }}"
+        docker run --rm \
+          -v ${{ github.workspace }}:/workspace \
+          -w /workspace \
+          -e HOME=/tmp \
+          "${IMAGE}" \
+          /usr/bin/bash -c "
+            bazel build //packaging:xibalba-deb \
+              --noshow_progress \
+              --show_result=0
+          "
 
   # ============================================================================
   # VM Tests - Full integration tests (slower, run on demand)
@@ -131,15 +191,30 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Install dependencies
+    - name: Generate cache key
+      id: cache-key
+      run: |
+        CACHE_KEY=$(cat MODULE.bazel.lock tools/ci/docker/packages.lock.json | sha256sum | cut -c1-16)
+        echo "key=${CACHE_KEY}" >> $GITHUB_OUTPUT
+    
+    - name: Pull CI container from GHCR
+      run: |
+        IMAGE="ghcr.io/jmalicki/xibalba-dev-env:cache-${{ steps.cache-key.outputs.key }}"
+        if docker pull "${IMAGE}"; then
+          echo "✅ Cache HIT"
+        elif docker pull "ghcr.io/jmalicki/xibalba-dev-env:latest"; then
+          echo "⚠️  Using :latest"
+          docker tag "ghcr.io/jmalicki/xibalba-dev-env:latest" "${IMAGE}"
+        else
+          echo "❌ Could not pull container"
+          exit 1
+        fi
+    
+    # VM tests need QEMU which requires host access
+    - name: Install QEMU
       run: |
         sudo apt-get update
-        sudo apt-get install -y \
-          clang-20 \
-          libbpf-dev \
-          libelf-dev \
-          linux-headers-generic \
-          qemu-system-x86
+        sudo apt-get install -y qemu-system-x86
     
     - name: Enable KVM
       run: |
@@ -152,12 +227,20 @@ jobs:
     
     - name: Run QEMU filesystem tests
       run: |
-        # Run tests with 30-second duration (not full 5-minute for CI)
-        bazel test //vm:qemu_filesystem_suite \
-          --test_timeout=600 \
-          --test_output=errors \
-          --noshow_progress \
-          --ui_event_filters=-info,-debug
+        # Build and run tests using container for build tools, host for QEMU
+        IMAGE="ghcr.io/jmalicki/xibalba-dev-env:cache-${{ steps.cache-key.outputs.key }}"
+        docker run --rm \
+          -v ${{ github.workspace }}:/workspace \
+          -w /workspace \
+          -e HOME=/tmp \
+          "${IMAGE}" \
+          /usr/bin/bash -c "
+            bazel test //vm:qemu_filesystem_suite \
+              --test_timeout=600 \
+              --test_output=errors \
+              --noshow_progress \
+              --ui_event_filters=-info,-debug
+          "
     
     - name: Extract and upload bug results
       if: always()
