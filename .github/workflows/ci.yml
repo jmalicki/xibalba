@@ -84,14 +84,9 @@ jobs:
     # Run entire job inside the container (has Bazel, clang, all build deps)
     container:
       image: ghcr.io/jmalicki/xibalba-dev-env:latest
-      options: --user root --privileged -v /var/run/docker.sock:/var/run/docker.sock
+      options: --user root
     
     steps:
-    # Fix Docker socket permissions BEFORE container starts (must run on host)
-    # GitHub Actions containers can't change host socket permissions
-    - name: Fix Docker socket permissions  
-      run: sudo chmod 666 /var/run/docker.sock
-    
     - uses: actions/checkout@v4
     
     - name: Build all chaos testing targets
@@ -102,19 +97,28 @@ jobs:
           --noshow_progress \
           --show_result=0
         
-    - name: Build VM infrastructure
-      run: |
-        bazel build //vm:extract_kernel //vm:build_initramfs \
-          --repo_env=CC=clang-18 \
-          --repo_env=CXX=clang++-18 \
-          --noshow_progress \
-          --show_result=0
-        
     - name: Build packaging
       run: |
         bazel build //packaging:xibalba-deb \
           --repo_env=CC=clang-18 \
           --repo_env=CXX=clang++-18 \
+          --noshow_progress \
+          --show_result=0
+  
+  # VM builds need Docker - run on host instead of in container
+  build-vm:
+    name: Build VM Infrastructure
+    runs-on: ubuntu-24.04
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Bazelisk
+      uses: bazelbuild/setup-bazelisk@v3
+    
+    - name: Build VM infrastructure  
+      run: |
+        bazel build //vm:extract_kernel //vm:build_initramfs \
           --noshow_progress \
           --show_result=0
 
