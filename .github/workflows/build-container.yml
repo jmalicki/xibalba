@@ -35,14 +35,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Generate cache key
+      - name: Setup Bazelisk
+        uses: bazelbuild/setup-bazelisk@v3
+
+      - name: Generate cache key from Bazel action hash
         id: cache-key
         run: |
-          CACHE_KEY=$(cat MODULE.bazel.lock tools/ci/docker/packages.lock.json | sha256sum | cut -c1-16)
+          # Use Bazel's action hash - truly hermetic cache key
+          CACHE_KEY=$(./tools/ci/docker/get_image_hash.sh)
           IMAGE_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:cache-${CACHE_KEY}"
           echo "key=${CACHE_KEY}" >> $GITHUB_OUTPUT
           echo "tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
-          echo "📝 Cache key: ${CACHE_KEY}"
+          echo "📝 Bazel action hash: ${CACHE_KEY}"
           echo "🏷️  Image tag: ${IMAGE_TAG}"
 
       - name: Check if image exists
