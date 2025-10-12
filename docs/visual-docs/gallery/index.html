@@ -12,58 +12,38 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: #e0e0e0;
-            line-height: 1.6;
+            font-family: 'Georgia', serif;
+            background: #fafafa;
+            color: #2c3e50;
+            line-height: 1.8;
         }
 
         .header {
             text-align: center;
-            padding: 60px 20px;
-            background: linear-gradient(135deg, #e94560 0%, #533483 100%);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            padding: 80px 20px 60px;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
         h1 {
-            font-size: 3.5em;
-            margin-bottom: 15px;
-            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+            font-size: 3em;
+            margin-bottom: 10px;
+            font-weight: 300;
+            letter-spacing: -0.5px;
         }
 
         .subtitle {
-            font-size: 1.3em;
-            opacity: 0.95;
-            margin-bottom: 30px;
-        }
-
-        .vote-instructions {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255,255,255,0.2);
-            border-radius: 15px;
-            padding: 25px;
-            max-width: 800px;
-            margin: 0 auto;
-            text-align: left;
-        }
-
-        .vote-instructions h3 {
-            margin-bottom: 15px;
-            color: #ffd700;
-        }
-
-        .vote-instructions ol {
-            margin-left: 25px;
-            line-height: 2;
+            font-size: 1.1em;
+            opacity: 0.9;
+            font-weight: 300;
         }
 
         .stats {
             display: flex;
             justify-content: center;
-            gap: 50px;
-            margin-top: 30px;
-            flex-wrap: wrap;
+            gap: 60px;
+            margin-top: 40px;
         }
 
         .stat {
@@ -71,42 +51,280 @@
         }
 
         .stat-number {
-            font-size: 3em;
-            font-weight: bold;
-            color: #ffd700;
+            font-size: 2.5em;
+            font-weight: 300;
+            color: #ecf0f1;
         }
 
         .stat-label {
-            font-size: 1.1em;
+            font-size: 0.9em;
             opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        /* ... rest of styles ... */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        .concept {
+            margin-bottom: 100px;
+            page-break-inside: avoid;
+        }
+
+        /* ELEVATED DOCUMENTATION TEXT */
+        .doc-text {
+            background: white;
+            padding: 50px 60px;
+            margin-bottom: 40px;
+            border-left: 6px solid #3498db;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+            border-radius: 2px;
+        }
+
+        .doc-text h2 {
+            font-size: 2.5em;
+            margin-bottom: 25px;
+            color: #2c3e50;
+            font-weight: 400;
+            line-height: 1.3;
+        }
+
+        .doc-text .doc-content {
+            font-size: 1.15em;
+            line-height: 1.9;
+            color: #34495e;
+            font-family: 'Georgia', serif;
+        }
+
+        /* VISUAL INTERPRETATION - SECONDARY */
+        .visual-interpretation {
+            background: #f8f9fa;
+            padding: 30px 40px;
+            margin-bottom: 30px;
+            border-left: 4px solid #95a5a6;
+            border-radius: 2px;
+        }
+
+        .visual-interpretation h3 {
+            font-size: 1.2em;
+            color: #7f8c8d;
+            margin-bottom: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .visual-interpretation-text {
+            font-size: 1.05em;
+            color: #5a6c7d;
+            font-style: italic;
+            line-height: 1.7;
+        }
+
+        /* GENERATED IMAGES - PROMINENT */
+        .images-section {
+            margin-bottom: 30px;
+        }
+
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .image-card {
+            background: white;
+            border-radius: 4px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .image-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+
+        .image-card img {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .image-info {
+            padding: 15px;
+            background: #fff;
+        }
+
+        .image-title {
+            font-size: 0.95em;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .image-filename {
+            font-size: 0.8em;
+            color: #95a5a6;
+            font-family: 'Monaco', 'Courier New', monospace;
+        }
+
+        /* TECHNICAL DETAILS - COLLAPSIBLE */
+        .technical-details {
+            margin-bottom: 20px;
+        }
+
+        .details-toggle {
+            background: #ecf0f1;
+            padding: 15px 25px;
+            cursor: pointer;
+            border-radius: 2px;
+            font-size: 0.95em;
+            color: #7f8c8d;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        .details-toggle:hover {
+            background: #e0e4e7;
+        }
+
+        .details-toggle::before {
+            content: "▶ ";
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+
+        .details-toggle.open::before {
+            transform: rotate(90deg);
+        }
+
+        .details-content {
+            display: none;
+            padding: 20px 25px;
+            background: #f8f9fa;
+            border-left: 3px solid #bdc3c7;
+            margin-top: 5px;
+        }
+
+        .details-content.open {
+            display: block;
+        }
+
+        .prompt-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 2px;
+            border-left: 3px solid #dfe6e9;
+        }
+
+        .prompt-title {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .prompt-text {
+            font-size: 0.85em;
+            color: #636e72;
+            line-height: 1.6;
+            font-family: 'Monaco', 'Courier New', monospace;
+        }
+
+        /* LIGHTBOX */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .lightbox.active {
+            display: flex;
+        }
+
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            box-shadow: 0 0 60px rgba(255, 255, 255, 0.1);
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 30px;
+            right: 40px;
+            font-size: 3em;
+            color: white;
+            cursor: pointer;
+            z-index: 10000;
+        }
+
+        .lightbox-info {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px 30px;
+            border-radius: 4px;
+            text-align: center;
+            color: white;
+        }
+
+        .lightbox-title {
+            font-size: 1.2em;
+            margin-bottom: 8px;
+        }
+
+        .lightbox-filename {
+            font-size: 0.9em;
+            opacity: 0.7;
+            font-family: 'Monaco', monospace;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .doc-text {
+                padding: 30px 25px;
+            }
+
+            .doc-text h2 {
+                font-size: 1.8em;
+            }
+
+            .images-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>Xibalba: The Maya Underworld of Chaos Testing</h1>
-        <div class="subtitle">AI-Generated Visual Documentation</div>
-
-        <div class="vote-instructions">
-            <h3>🗳️ How to Vote for Your Favorites</h3>
-            <ol>
-                <li>Browse the concepts and generated artwork below</li>
-                <li>Click <strong>"🗳️ Vote in Discussion"</strong> for each concept</li>
-                <li>Comment with your favorite image filename(s)</li>
-                <li>React with 👍 to support others' choices</li>
-            </ol>
-        </div>
+        <div class="subtitle">Visual Documentation Gallery</div>
 
         <div class="stats">
             <div class="stat">
                 <div class="stat-number">20</div>
-                <div class="stat-label">Concepts</div>
-            </div>
-            <div class="stat">
-                <div class="stat-number">44</div>
-                <div class="stat-label">Prompts</div>
+                <div class="stat-label">Sections</div>
             </div>
             <div class="stat">
                 <div class="stat-number">44</div>
@@ -118,66 +336,20 @@
     <div class="container">
     
         <div class="concept" id="xibalba-chaos-testing-framework-for-linux-kernel-f">
-            <div class="concept-header">
-                <h2 class="concept-title">Xibalba: Chaos Testing Framework for Linux Kernel Filesystems</h2>
-                <a href="https://github.com/jmalicki/xibalba/discussions" target="_blank" class="vote-button">
-                    🗳️ Vote in Discussion
-                </a>
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>Xibalba: Chaos Testing Framework for Linux Kernel Filesystems</h2>
+                <div class="doc-content">[![Xibalba CI](https://github.com/jmalicki/xibalba/actions/workflows/ci.yml/badge.svg)](https://gith...</div>
             </div>
 
-            <div class="concept-meta">
-                <div class="meta-item">
-                    <div class="meta-label">🔧 Technical Reality</div>
-                    <div class="meta-value">[![Xibalba CI](https://github.com/jmalicki/xibalba/actions/workflows/ci.yml/badge.svg)](https://gith...</div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-label">🎨 Visual Concept</div>
-                    <div class="meta-value">Visualize Xibalba: Chaos Testing Framework for Linux Kernel Filesystems using Maya Underworld - Xibalba imagery</div>
-                </div>
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize Xibalba: Chaos Testing Framework for Linux Kernel Filesystems using Maya Underworld - Xibalba imagery</div>
             </div>
 
-            <div class="prompts-section">
-                <h3>📝 Prompts Used</h3>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">Trial of Filesystem Integrity</div>
-                    <div class="prompt-text">
-                        A hero twin stands atop a crumbling Maya pyramid, surrounded by Death gods in a swirling vortex of vibrant colors and intricate glyphs, as they gaze upon a filesystem represented by the six houses of torment in the underworld of Xibalba, ancient jungle foliage swaying in the background, with a drama...
-                    </div>
-                </div>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">Battle for Kernel Stability</div>
-                    <div class="prompt-text">
-                        A Jaguar warrior, representing the Linux kernel, battles against the Death god, Camazotz, in a dark, eerie cave system within the underworld of Xibalba, surrounded by ancient Maya hieroglyphics and flickering torches, as the sound of the Sacred ball game echoes in the background, style reference: An...
-                    </div>
-                </div>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">Navigating the Filesystem Maze</div>
-                    <div class="prompt-text">
-                        A hero twin, symbolizing the Linux filesystem, navigates through the six houses of torment in Xibalba, with the Plumed serpent, Kukulkan, guiding them through the treacherous paths and ancient Maya temples, as a background of a lush jungle and a vibrant sunset, style reference: Classic Maya art styl...
-                    </div>
-                </div>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">Testing the Underworld Boundaries</div>
-                    <div class="prompt-text">
-                        A group of Death gods, the Lords of Xibalba, oversee a chaotic testing framework, with a hero twin in the center, as the filesystem represented by the six houses of torment undergoes rigorous testing, amidst a backdrop of a dramatic, stormy sky and ancient Maya ruins, style reference: Ancient Maya m...
-                    </div>
-                </div>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">Xibalba&#39;s Tormenting Trials</div>
-                    <div class="prompt-text">
-                        A hero twin, embodying the Linux filesystem, faces various tests and trials within the six houses of torment in Xibalba, with the Death gods, the Lords of Xibalba, observing from above, surrounded by ancient Maya temples and a deep, mystical jungle, style reference: Classic Maya codex art, compositi...
-                    </div>
-                </div>
-                
-            </div>
-
+            <!-- GENERATED IMAGES -->
             <div class="images-section">
-                <h3>🖼️ Generated Images</h3>
                 <div class="images-grid">
                 
                     <div class="image-card"
@@ -227,69 +399,59 @@
                 
                 </div>
             </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('xibalba-chaos-testing-framework-for-linux-kernel-f')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details-xibalba-chaos-testing-framework-for-linux-kernel-f">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Trial of Filesystem Integrity</div>
+                        <div class="prompt-text">A hero twin stands atop a crumbling Maya pyramid, surrounded by Death gods in a swirling vortex of vibrant colors and intricate glyphs, as they gaze upon a filesystem represented by the six houses of torment in the underworld of Xibalba, ancient jungle foliage swaying in the background, with a dramatic sky filled with pyrotechnics and a crescent moon, style reference: Classic Maya codex art, composition: hero in foreground, filesystem in background, colors: deep oranges, turquoise, gold, lighting: soft, mysterious, mood: ominous</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Battle for Kernel Stability</div>
+                        <div class="prompt-text">A Jaguar warrior, representing the Linux kernel, battles against the Death god, Camazotz, in a dark, eerie cave system within the underworld of Xibalba, surrounded by ancient Maya hieroglyphics and flickering torches, as the sound of the Sacred ball game echoes in the background, style reference: Ancient Maya mythology art style with vibrant colors and intricate glyphs, composition: hero in foreground, Death god in background, colors: deep blues, purples, gold, lighting: dim, foreboding, mood: intense</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Navigating the Filesystem Maze</div>
+                        <div class="prompt-text">A hero twin, symbolizing the Linux filesystem, navigates through the six houses of torment in Xibalba, with the Plumed serpent, Kukulkan, guiding them through the treacherous paths and ancient Maya temples, as a background of a lush jungle and a vibrant sunset, style reference: Classic Maya art style, composition: hero in foreground, serpent in background, colors: earthy tones, turquoise, gold, lighting: warm, inviting, mood: hopeful</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Testing the Underworld Boundaries</div>
+                        <div class="prompt-text">A group of Death gods, the Lords of Xibalba, oversee a chaotic testing framework, with a hero twin in the center, as the filesystem represented by the six houses of torment undergoes rigorous testing, amidst a backdrop of a dramatic, stormy sky and ancient Maya ruins, style reference: Ancient Maya mythology art style with vibrant colors and intricate glyphs, composition: Death gods in foreground, hero twin in background, colors: deep reds, purples, gold, lighting: bright, chaotic, mood: dynamic</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Xibalba&#39;s Tormenting Trials</div>
+                        <div class="prompt-text">A hero twin, embodying the Linux filesystem, faces various tests and trials within the six houses of torment in Xibalba, with the Death gods, the Lords of Xibalba, observing from above, surrounded by ancient Maya temples and a deep, mystical jungle, style reference: Classic Maya codex art, composition: hero in foreground, Death gods in background, colors: earthy tones, turquoise, gold, lighting: soft, mystical, mood: contemplative</div>
+                    </div>
+                    
+                </div>
+            </div>
         </div>
     
         <div class="concept" id="what-is-xibalba">
-            <div class="concept-header">
-                <h2 class="concept-title">What is Xibalba?</h2>
-                <a href="https://github.com/jmalicki/xibalba/discussions" target="_blank" class="vote-button">
-                    🗳️ Vote in Discussion
-                </a>
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>What is Xibalba?</h2>
+                <div class="doc-content">**Xibalba** is a chaos testing framework that finds subtle bugs in **Linux kernel** filesystem code—...</div>
             </div>
 
-            <div class="concept-meta">
-                <div class="meta-item">
-                    <div class="meta-label">🔧 Technical Reality</div>
-                    <div class="meta-value">**Xibalba** is a chaos testing framework that finds subtle bugs in **Linux kernel** filesystem code—...</div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-label">🎨 Visual Concept</div>
-                    <div class="meta-value">Visualize What is Xibalba? using Maya Underworld - Xibalba imagery</div>
-                </div>
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize What is Xibalba? using Maya Underworld - Xibalba imagery</div>
             </div>
 
-            <div class="prompts-section">
-                <h3>📝 Prompts Used</h3>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">Hero Twins Confront Death</div>
-                    <div class="prompt-text">
-                        Hero twins Hunahpu and Xbalanque navigating through the treacherous House of Darkness - a labyrinthine Maya temple with jaguar warriors and skeletal Death gods lurking in the shadows, vibrant colors, intricate glyphs, dramatic underworld scenes, and a central pyramid in the background, composition: ...
-                    </div>
-                </div>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">Death Gods&#39; Challenge</div>
-                    <div class="prompt-text">
-                        Death gods Ah Muzen Cab and Yum Kaax, the Lords of Xibalba, presenting their trials to the brave hero twins, a grand Maya pyramid with intricate hieroglyphic writing and codex art adorning its walls, a Sacred cenote in the foreground, composition: wide-angle shot showing the pyramid&#39;s grandeur, colo...
-                    </div>
-                </div>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">Jaguar Warriors&#39; Ambush</div>
-                    <div class="prompt-text">
-                        Jaguar warriors, supernatural beings, and the Lord of Death Ah Puch lurking in the shadows of a cave system, the hero twins Hunahpu and Xbalanque running for their lives, vibrant colors, intricate glyphs, dramatic underworld scenes, composition: fast-paced, dynamic shot focusing on the action, color...
-                    </div>
-                </div>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">The Six Houses of Torment</div>
-                    <div class="prompt-text">
-                        A sprawling, intricate map of the Six Houses of Torment, a Maya temple with a central Sacred ball game court, hieroglyphic writing, and codex art, composition: overhead shot showing the temple&#39;s design, colors: muted earth tones, mood: surreal
-                    </div>
-                </div>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">Plumed Serpent&#39;s Guidance</div>
-                    <div class="prompt-text">
-                        The Plumed Serpent, Kukulkan, guiding the hero twins through the treacherous underworld, a winding underground river, a Maya temple in the background, vibrant colors, intricate glyphs, dramatic underworld scenes, composition: serene, low-angle shot focusing on the serpent&#39;s majestic presence, colors...
-                    </div>
-                </div>
-                
-            </div>
-
+            <!-- GENERATED IMAGES -->
             <div class="images-section">
-                <h3>🖼️ Generated Images</h3>
                 <div class="images-grid">
                 
                     <div class="image-card"
@@ -339,69 +501,59 @@
                 
                 </div>
             </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('what-is-xibalba')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details-what-is-xibalba">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Hero Twins Confront Death</div>
+                        <div class="prompt-text">Hero twins Hunahpu and Xbalanque navigating through the treacherous House of Darkness - a labyrinthine Maya temple with jaguar warriors and skeletal Death gods lurking in the shadows, vibrant colors, intricate glyphs, dramatic underworld scenes, and a central pyramid in the background, composition: close-up, low-angle shot focusing on the twins&#39; determined expressions, colors: dim blue and purple hues with fiery orange accents, mood: ominous</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Death Gods&#39; Challenge</div>
+                        <div class="prompt-text">Death gods Ah Muzen Cab and Yum Kaax, the Lords of Xibalba, presenting their trials to the brave hero twins, a grand Maya pyramid with intricate hieroglyphic writing and codex art adorning its walls, a Sacred cenote in the foreground, composition: wide-angle shot showing the pyramid&#39;s grandeur, colors: rich blues and reds, mood: intense</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Jaguar Warriors&#39; Ambush</div>
+                        <div class="prompt-text">Jaguar warriors, supernatural beings, and the Lord of Death Ah Puch lurking in the shadows of a cave system, the hero twins Hunahpu and Xbalanque running for their lives, vibrant colors, intricate glyphs, dramatic underworld scenes, composition: fast-paced, dynamic shot focusing on the action, colors: dark blues and reds, mood: thrilling</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">The Six Houses of Torment</div>
+                        <div class="prompt-text">A sprawling, intricate map of the Six Houses of Torment, a Maya temple with a central Sacred ball game court, hieroglyphic writing, and codex art, composition: overhead shot showing the temple&#39;s design, colors: muted earth tones, mood: surreal</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Plumed Serpent&#39;s Guidance</div>
+                        <div class="prompt-text">The Plumed Serpent, Kukulkan, guiding the hero twins through the treacherous underworld, a winding underground river, a Maya temple in the background, vibrant colors, intricate glyphs, dramatic underworld scenes, composition: serene, low-angle shot focusing on the serpent&#39;s majestic presence, colors: soft blues and greens, mood: mystical</div>
+                    </div>
+                    
+                </div>
+            </div>
         </div>
     
         <div class="concept" id="why-this-matters">
-            <div class="concept-header">
-                <h2 class="concept-title">Why This Matters</h2>
-                <a href="https://github.com/jmalicki/xibalba/discussions" target="_blank" class="vote-button">
-                    🗳️ Vote in Discussion
-                </a>
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>Why This Matters</h2>
+                <div class="doc-content">**The Problem**: Imagine 100 programs all trying to list files in the same directory simultaneously....</div>
             </div>
 
-            <div class="concept-meta">
-                <div class="meta-item">
-                    <div class="meta-label">🔧 Technical Reality</div>
-                    <div class="meta-value">**The Problem**: Imagine 100 programs all trying to list files in the same directory simultaneously....</div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-label">🎨 Visual Concept</div>
-                    <div class="meta-value">Visualize Why This Matters using Maya Underworld - Xibalba imagery</div>
-                </div>
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize Why This Matters using Maya Underworld - Xibalba imagery</div>
             </div>
 
-            <div class="prompts-section">
-                <h3>📝 Prompts Used</h3>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">Racing Against the Death Gods</div>
-                    <div class="prompt-text">
-                        Hero twins Hunahpu and Xbalanque sprint through the Sacred Ball Court of Xibalba, pursued by Ah Puch and K&#39;awiil, amidst vibrant jungle foliage and intricate hieroglyphics. Ancient Maya mythology art style, dramatic underworld scene, with a focus on the twins&#39; determination.
-                    </div>
-                </div>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">Battle for the Filesystem</div>
-                    <div class="prompt-text">
-                        Lords of Xibalba, Ah Puch and K&#39;awiil, face off against the Hero Twins in a battle for control of the Six Houses of Torment, represented by a sprawling, maze-like filesystem with glowing blue pathways and ancient pyramids in the background. Ancient Maya mythology art style, vibrant colors, and drama...
-                    </div>
-                </div>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">Navigating the Underworld</div>
-                    <div class="prompt-text">
-                        The Hero Twins, Hunahpu and Xbalanque, stand at the edge of a vast, underground river, with the Plumed Serpent, Kukulkan, emerging from the depths, as they prepare to navigate the treacherous waters of Xibalba. Ancient Maya mythology art style, mysterious atmosphere, and a focus on the twins&#39; braver...
-                    </div>
-                </div>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">Conquering the House of Knives</div>
-                    <div class="prompt-text">
-                        The Hero Twins, Hunahpu and Xbalanque, stand victorious in the House of Knives, their weapons and shields adorned with intricate glyphs, as they confront the Death Gods in a dramatic showdown. Ancient Maya mythology art style, vibrant colors, and a focus on triumph and victory.
-                    </div>
-                </div>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">Descent into the Underworld</div>
-                    <div class="prompt-text">
-                        The Hero Twins, Hunahpu and Xbalanque, descend into the underworld, surrounded by a swirling vortex of colors and lights, as they prepare to face the Trials of Xibalba. Ancient Maya mythology art style, mystical atmosphere, and a focus on the twins&#39; journey.
-                    </div>
-                </div>
-                
-            </div>
-
+            <!-- GENERATED IMAGES -->
             <div class="images-section">
-                <h3>🖼️ Generated Images</h3>
                 <div class="images-grid">
                 
                     <div class="image-card"
@@ -451,69 +603,59 @@
                 
                 </div>
             </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('why-this-matters')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details-why-this-matters">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Racing Against the Death Gods</div>
+                        <div class="prompt-text">Hero twins Hunahpu and Xbalanque sprint through the Sacred Ball Court of Xibalba, pursued by Ah Puch and K&#39;awiil, amidst vibrant jungle foliage and intricate hieroglyphics. Ancient Maya mythology art style, dramatic underworld scene, with a focus on the twins&#39; determination.</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Battle for the Filesystem</div>
+                        <div class="prompt-text">Lords of Xibalba, Ah Puch and K&#39;awiil, face off against the Hero Twins in a battle for control of the Six Houses of Torment, represented by a sprawling, maze-like filesystem with glowing blue pathways and ancient pyramids in the background. Ancient Maya mythology art style, vibrant colors, and dramatic lighting.</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Navigating the Underworld</div>
+                        <div class="prompt-text">The Hero Twins, Hunahpu and Xbalanque, stand at the edge of a vast, underground river, with the Plumed Serpent, Kukulkan, emerging from the depths, as they prepare to navigate the treacherous waters of Xibalba. Ancient Maya mythology art style, mysterious atmosphere, and a focus on the twins&#39; bravery.</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Conquering the House of Knives</div>
+                        <div class="prompt-text">The Hero Twins, Hunahpu and Xbalanque, stand victorious in the House of Knives, their weapons and shields adorned with intricate glyphs, as they confront the Death Gods in a dramatic showdown. Ancient Maya mythology art style, vibrant colors, and a focus on triumph and victory.</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Descent into the Underworld</div>
+                        <div class="prompt-text">The Hero Twins, Hunahpu and Xbalanque, descend into the underworld, surrounded by a swirling vortex of colors and lights, as they prepare to face the Trials of Xibalba. Ancient Maya mythology art style, mystical atmosphere, and a focus on the twins&#39; journey.</div>
+                    </div>
+                    
+                </div>
+            </div>
         </div>
     
         <div class="concept" id="technical-details">
-            <div class="concept-header">
-                <h2 class="concept-title">Technical Details</h2>
-                <a href="https://github.com/jmalicki/xibalba/discussions" target="_blank" class="vote-button">
-                    🗳️ Vote in Discussion
-                </a>
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>Technical Details</h2>
+                <div class="doc-content">**Xibalba** is a [Jepsen](https://jepsen.io/)-inspired chaos testing framework specifically designed...</div>
             </div>
 
-            <div class="concept-meta">
-                <div class="meta-item">
-                    <div class="meta-label">🔧 Technical Reality</div>
-                    <div class="meta-value">**Xibalba** is a [Jepsen](https://jepsen.io/)-inspired chaos testing framework specifically designed...</div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-label">🎨 Visual Concept</div>
-                    <div class="meta-value">Visualize Technical Details using Maya Underworld - Xibalba imagery</div>
-                </div>
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize Technical Details using Maya Underworld - Xibalba imagery</div>
             </div>
 
-            <div class="prompts-section">
-                <h3>📝 Prompts Used</h3>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">Death Gods Inspect Code</div>
-                    <div class="prompt-text">
-                        Death gods (Lords of Xibalba) examining lines of code on an ancient Maya temple tablet - Hero twins navigating trials in Xibalba, Maya pyramids and temples in the background, vibrant colors, intricate glyphs, and dramatic underworld scenes, low-angle shot to emphasize power, warm golden lighting, om...
-                    </div>
-                </div>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">Trial of the Unittest</div>
-                    <div class="prompt-text">
-                        A Hero twin navigating a challenging trial in Xibalba, Death gods watching from the shadows, Maya pyramids and temples in the background, Sacred cenotes and underground rivers flowing through the scene, Ancient Maya mythology art style, bold colors, high-energy mood, focus on the Hero twin&#39;s determi...
-                    </div>
-                </div>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">The Six Houses of Error</div>
-                    <div class="prompt-text">
-                        A hero navigating the six houses of torment (House of Darkness, House of Knives, etc.) in Xibalba, each house represented by a unique Maya temple, Death gods waiting to welcome the hero to their domain, Jaguar warriors and supernatural beings lurking in the shadows, Ancient Maya mythology art style,...
-                    </div>
-                </div>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">The Codex of Chaos</div>
-                    <div class="prompt-text">
-                        A hero discovering an ancient codex containing the secrets of Xibalba&#39;s chaos testing framework, Maya pyramids and temples in the background, Death gods and Hero twins navigating trials visible in the codex&#39;s intricate glyphs, Ancient Maya mythology art style, bright colors, sense of discovery, focu...
-                    </div>
-                </div>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">Battle with the Lords of Failure</div>
-                    <div class="prompt-text">
-                        A hero facing off against the Death gods (Lords of Xibalba) in an epic battle, Maya pyramids and temples in the background, Sacred ball game court visible in the distance, Ancient Maya mythology art style, bold colors, high-energy mood, focus on the hero&#39;s bravery and determination
-                    </div>
-                </div>
-                
-            </div>
-
+            <!-- GENERATED IMAGES -->
             <div class="images-section">
-                <h3>🖼️ Generated Images</h3>
                 <div class="images-grid">
                 
                     <div class="image-card"
@@ -563,69 +705,59 @@
                 
                 </div>
             </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('technical-details')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details-technical-details">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Death Gods Inspect Code</div>
+                        <div class="prompt-text">Death gods (Lords of Xibalba) examining lines of code on an ancient Maya temple tablet - Hero twins navigating trials in Xibalba, Maya pyramids and temples in the background, vibrant colors, intricate glyphs, and dramatic underworld scenes, low-angle shot to emphasize power, warm golden lighting, ominous mood</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Trial of the Unittest</div>
+                        <div class="prompt-text">A Hero twin navigating a challenging trial in Xibalba, Death gods watching from the shadows, Maya pyramids and temples in the background, Sacred cenotes and underground rivers flowing through the scene, Ancient Maya mythology art style, bold colors, high-energy mood, focus on the Hero twin&#39;s determination</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">The Six Houses of Error</div>
+                        <div class="prompt-text">A hero navigating the six houses of torment (House of Darkness, House of Knives, etc.) in Xibalba, each house represented by a unique Maya temple, Death gods waiting to welcome the hero to their domain, Jaguar warriors and supernatural beings lurking in the shadows, Ancient Maya mythology art style, muted colors, foreboding mood, focus on the hero&#39;s journey</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">The Codex of Chaos</div>
+                        <div class="prompt-text">A hero discovering an ancient codex containing the secrets of Xibalba&#39;s chaos testing framework, Maya pyramids and temples in the background, Death gods and Hero twins navigating trials visible in the codex&#39;s intricate glyphs, Ancient Maya mythology art style, bright colors, sense of discovery, focus on the codex&#39;s power</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Battle with the Lords of Failure</div>
+                        <div class="prompt-text">A hero facing off against the Death gods (Lords of Xibalba) in an epic battle, Maya pyramids and temples in the background, Sacred ball game court visible in the distance, Ancient Maya mythology art style, bold colors, high-energy mood, focus on the hero&#39;s bravery and determination</div>
+                    </div>
+                    
+                </div>
+            </div>
         </div>
     
         <div class="concept" id="the-name-xibalba">
-            <div class="concept-header">
-                <h2 class="concept-title">The Name: Xibalba</h2>
-                <a href="https://github.com/jmalicki/xibalba/discussions" target="_blank" class="vote-button">
-                    🗳️ Vote in Discussion
-                </a>
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>The Name: Xibalba</h2>
+                <div class="doc-content">**[Xibalba](https://en.wikipedia.org/wiki/Xibalba)** (shee-bahl-BAH) — literally **&#34;Place of Fear&#34;**...</div>
             </div>
 
-            <div class="concept-meta">
-                <div class="meta-item">
-                    <div class="meta-label">🔧 Technical Reality</div>
-                    <div class="meta-value">**[Xibalba](https://en.wikipedia.org/wiki/Xibalba)** (shee-bahl-BAH) — literally **&#34;Place of Fear&#34;**...</div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-label">🎨 Visual Concept</div>
-                    <div class="meta-value">Visualize The Name: Xibalba using Maya Underworld - Xibalba imagery</div>
-                </div>
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize The Name: Xibalba using Maya Underworld - Xibalba imagery</div>
             </div>
 
-            <div class="prompts-section">
-                <h3>📝 Prompts Used</h3>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">The Guardians of Xibalba</div>
-                    <div class="prompt-text">
-                        A dramatic scene of the Death gods standing before the entrance to a grand Maya pyramid, with Hero twins in the background, navigating the trials of the underworld - Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, composition: Death gods in for...
-                    </div>
-                </div>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">The Hero Twins in the House of Darkness</div>
-                    <div class="prompt-text">
-                        A mystical scene of the Hero twins navigating the House of Darkness, with glowing Maya glyphs illuminating the underground passage, and the Plumed Serpent (Kukulkan) watching over them - Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, compositi...
-                    </div>
-                </div>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">The Jaguar Warriors of Xibalba</div>
-                    <div class="prompt-text">
-                        A dynamic scene of Jaguar warriors in battle with the Lords of Xibalba, with the six houses of torment visible in the background - Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, composition: warriors in the foreground, houses of torment in bac...
-                    </div>
-                </div>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">The Sacred Cenote of Xibalba</div>
-                    <div class="prompt-text">
-                        A serene scene of the Sacred cenote, with the Plumed Serpent rising from the water, and the Hero twins standing on the banks, looking out at the underworld - Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, composition: cenote and serpent in the...
-                    </div>
-                </div>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">The Trials of Xibalba</div>
-                    <div class="prompt-text">
-                        A dramatic scene of the Hero twins participating in the Sacred ball game, with the Lords of Xibalba watching from the sidelines, and the six houses of torment visible in the background - Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, compositi...
-                    </div>
-                </div>
-                
-            </div>
-
+            <!-- GENERATED IMAGES -->
             <div class="images-section">
-                <h3>🖼️ Generated Images</h3>
                 <div class="images-grid">
                 
                     <div class="image-card"
@@ -675,69 +807,59 @@
                 
                 </div>
             </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('the-name-xibalba')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details-the-name-xibalba">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">The Guardians of Xibalba</div>
+                        <div class="prompt-text">A dramatic scene of the Death gods standing before the entrance to a grand Maya pyramid, with Hero twins in the background, navigating the trials of the underworld - Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, composition: Death gods in foreground, pyramid in background, focal point on the twins&#39; anxious expressions, colors: deep blues and purples, warm golden lighting, mood: foreboding</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">The Hero Twins in the House of Darkness</div>
+                        <div class="prompt-text">A mystical scene of the Hero twins navigating the House of Darkness, with glowing Maya glyphs illuminating the underground passage, and the Plumed Serpent (Kukulkan) watching over them - Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, composition: twins in the center, passage and serpent in background, focal point on the twins&#39; determination, colors: dark blues and purples, soft green glow, mood: suspenseful</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">The Jaguar Warriors of Xibalba</div>
+                        <div class="prompt-text">A dynamic scene of Jaguar warriors in battle with the Lords of Xibalba, with the six houses of torment visible in the background - Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, composition: warriors in the foreground, houses of torment in background, focal point on the battle, colors: fiery oranges and reds, golden lighting, mood: intense</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">The Sacred Cenote of Xibalba</div>
+                        <div class="prompt-text">A serene scene of the Sacred cenote, with the Plumed Serpent rising from the water, and the Hero twins standing on the banks, looking out at the underworld - Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, composition: cenote and serpent in the center, twins in the background, focal point on the serpent, colors: soft blues and greens, warm sunlight, mood: peaceful</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">The Trials of Xibalba</div>
+                        <div class="prompt-text">A dramatic scene of the Hero twins participating in the Sacred ball game, with the Lords of Xibalba watching from the sidelines, and the six houses of torment visible in the background - Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, composition: twins in the center, ball game and lords in background, focal point on the twins&#39; determination, colors: deep reds and oranges, warm golden lighting, mood: intense</div>
+                    </div>
+                    
+                </div>
+            </div>
         </div>
     
         <div class="concept" id="the-myth-the-hero-twins-descent">
-            <div class="concept-header">
-                <h2 class="concept-title">The Myth: The Hero Twins&#39; Descent</h2>
-                <a href="https://github.com/jmalicki/xibalba/discussions" target="_blank" class="vote-button">
-                    🗳️ Vote in Discussion
-                </a>
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>The Myth: The Hero Twins&#39; Descent</h2>
+                <div class="doc-content">The most famous story of Xibalba tells of the Hero Twins—**Hunahpu** and **Xbalanque**—who were summ...</div>
             </div>
 
-            <div class="concept-meta">
-                <div class="meta-item">
-                    <div class="meta-label">🔧 Technical Reality</div>
-                    <div class="meta-value">The most famous story of Xibalba tells of the Hero Twins—**Hunahpu** and **Xbalanque**—who were summ...</div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-label">🎨 Visual Concept</div>
-                    <div class="meta-value">Visualize The Myth: The Hero Twins&#39; Descent using Maya Underworld - Xibalba imagery</div>
-                </div>
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize The Myth: The Hero Twins&#39; Descent using Maya Underworld - Xibalba imagery</div>
             </div>
 
-            <div class="prompts-section">
-                <h3>📝 Prompts Used</h3>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">Hero Twins Descend</div>
-                    <div class="prompt-text">
-                        Hunahpu and Xbalanque, youthful Hero Twins, stepping into Xibalba - Dark stone pyramid temple, jaguar warriors in the background, Death gods watching from above, vibrant blues and reds, dramatic scene, Hero twins in the foreground, intense focus
-                    </div>
-                </div>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">Trial of Knives</div>
-                    <div class="prompt-text">
-                        Xbalanque, one of the Hero Twins, navigating the House of Knives - jaguar warriors, knives flying, Hunahpu cheering, sacred cenote in the background, Ancient Maya mythology art style, warm orange and yellow hues, dynamic composition, focus on Xbalanque
-                    </div>
-                </div>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">Death Gods Confront</div>
-                    <div class="prompt-text">
-                        Death gods, Ah Puch and Vucub Caquix, facing Hunahpu and Xbalanque - grand pyramid, plumed serpent Kukulkan above, Hieroglyphic writing on the walls, dramatic lighting, Death gods in the foreground, Hero Twins in the background, bold colors, intense mood
-                    </div>
-                </div>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">Ball Game of Life and Death</div>
-                    <div class="prompt-text">
-                        Hunahpu and Xbalanque playing the sacred ball game against the Death gods - pyramid court, jaguar warriors as spectators, Death gods in the background, vibrant colors, dynamic composition, focus on the ball game, Ancient Maya mythology art style
-                    </div>
-                </div>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">River of Souls</div>
-                    <div class="prompt-text">
-                        Hero Twins navigating the River of Souls - underground river, sacred cenote, Hero twins in a canoe, Death gods watching from the riverbank, warm colors, peaceful scene, focus on the canoe, Ancient Maya mythology art style
-                    </div>
-                </div>
-                
-            </div>
-
+            <!-- GENERATED IMAGES -->
             <div class="images-section">
-                <h3>🖼️ Generated Images</h3>
                 <div class="images-grid">
                 
                     <div class="image-card"
@@ -787,41 +909,59 @@
                 
                 </div>
             </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('the-myth-the-hero-twins-descent')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details-the-myth-the-hero-twins-descent">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Hero Twins Descend</div>
+                        <div class="prompt-text">Hunahpu and Xbalanque, youthful Hero Twins, stepping into Xibalba - Dark stone pyramid temple, jaguar warriors in the background, Death gods watching from above, vibrant blues and reds, dramatic scene, Hero twins in the foreground, intense focus</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Trial of Knives</div>
+                        <div class="prompt-text">Xbalanque, one of the Hero Twins, navigating the House of Knives - jaguar warriors, knives flying, Hunahpu cheering, sacred cenote in the background, Ancient Maya mythology art style, warm orange and yellow hues, dynamic composition, focus on Xbalanque</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Death Gods Confront</div>
+                        <div class="prompt-text">Death gods, Ah Puch and Vucub Caquix, facing Hunahpu and Xbalanque - grand pyramid, plumed serpent Kukulkan above, Hieroglyphic writing on the walls, dramatic lighting, Death gods in the foreground, Hero Twins in the background, bold colors, intense mood</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Ball Game of Life and Death</div>
+                        <div class="prompt-text">Hunahpu and Xbalanque playing the sacred ball game against the Death gods - pyramid court, jaguar warriors as spectators, Death gods in the background, vibrant colors, dynamic composition, focus on the ball game, Ancient Maya mythology art style</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">River of Souls</div>
+                        <div class="prompt-text">Hero Twins navigating the River of Souls - underground river, sacred cenote, Hero twins in a canoe, Death gods watching from the riverbank, warm colors, peaceful scene, focus on the canoe, Ancient Maya mythology art style</div>
+                    </div>
+                    
+                </div>
+            </div>
         </div>
     
         <div class="concept" id="the-metaphor-your-codes-descent-into-chaos">
-            <div class="concept-header">
-                <h2 class="concept-title">The Metaphor: Your Code&#39;s Descent into Chaos</h2>
-                <a href="https://github.com/jmalicki/xibalba/discussions" target="_blank" class="vote-button">
-                    🗳️ Vote in Discussion
-                </a>
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>The Metaphor: Your Code&#39;s Descent into Chaos</h2>
+                <div class="doc-content">Like the Hero Twins descending into Xibalba, **your code must face orchestrated chaos designed to ex...</div>
             </div>
 
-            <div class="concept-meta">
-                <div class="meta-item">
-                    <div class="meta-label">🔧 Technical Reality</div>
-                    <div class="meta-value">Like the Hero Twins descending into Xibalba, **your code must face orchestrated chaos designed to ex...</div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-label">🎨 Visual Concept</div>
-                    <div class="meta-value">Visualize The Metaphor: Your Code&#39;s Descent into Chaos using Maya Underworld - Xibalba imagery</div>
-                </div>
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize The Metaphor: Your Code&#39;s Descent into Chaos using Maya Underworld - Xibalba imagery</div>
             </div>
 
-            <div class="prompts-section">
-                <h3>📝 Prompts Used</h3>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">The Metaphor: Your Code&#39;s Descent into Chaos</div>
-                    <div class="prompt-text">
-                        Visualize The Metaphor: Your Code&#39;s Descent into Chaos using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials
-                    </div>
-                </div>
-                
-            </div>
-
+            <!-- GENERATED IMAGES -->
             <div class="images-section">
-                <h3>🖼️ Generated Images</h3>
                 <div class="images-grid">
                 
                     <div class="image-card"
@@ -835,43 +975,41 @@
                 
                 </div>
             </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('the-metaphor-your-codes-descent-into-chaos')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details-the-metaphor-your-codes-descent-into-chaos">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">The Metaphor: Your Code&#39;s Descent into Chaos</div>
+                        <div class="prompt-text">Visualize The Metaphor: Your Code&#39;s Descent into Chaos using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials</div>
+                    </div>
+                    
+                </div>
+            </div>
         </div>
     
         <div class="concept" id="the-six-houses-chaos-test-categories">
-            <div class="concept-header">
-                <h2 class="concept-title">The Six Houses: Chaos Test Categories</h2>
-                <a href="https://github.com/jmalicki/xibalba/discussions" target="_blank" class="vote-button">
-                    🗳️ Vote in Discussion
-                </a>
-            </div>
-
-            <div class="concept-meta">
-                <div class="meta-item">
-                    <div class="meta-label">🔧 Technical Reality</div>
-                    <div class="meta-value">| House | Trial | Test Category | What It Finds |
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>The Six Houses: Chaos Test Categories</h2>
+                <div class="doc-content">| House | Trial | Test Category | What It Finds |
 |-------|-------|---------------|---------------|
 ...</div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-label">🎨 Visual Concept</div>
-                    <div class="meta-value">Visualize The Six Houses: Chaos Test Categories using Maya Underworld - Xibalba imagery</div>
-                </div>
             </div>
 
-            <div class="prompts-section">
-                <h3>📝 Prompts Used</h3>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">The Six Houses: Chaos Test Categories</div>
-                    <div class="prompt-text">
-                        Visualize The Six Houses: Chaos Test Categories using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials
-                    </div>
-                </div>
-                
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize The Six Houses: Chaos Test Categories using Maya Underworld - Xibalba imagery</div>
             </div>
 
+            <!-- GENERATED IMAGES -->
             <div class="images-section">
-                <h3>🖼️ Generated Images</h3>
                 <div class="images-grid">
                 
                     <div class="image-card"
@@ -885,41 +1023,39 @@
                 
                 </div>
             </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('the-six-houses-chaos-test-categories')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details-the-six-houses-chaos-test-categories">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">The Six Houses: Chaos Test Categories</div>
+                        <div class="prompt-text">Visualize The Six Houses: Chaos Test Categories using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials</div>
+                    </div>
+                    
+                </div>
+            </div>
         </div>
     
         <div class="concept" id="key-features">
-            <div class="concept-header">
-                <h2 class="concept-title">Key Features</h2>
-                <a href="https://github.com/jmalicki/xibalba/discussions" target="_blank" class="vote-button">
-                    🗳️ Vote in Discussion
-                </a>
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>Key Features</h2>
+                <div class="doc-content">...</div>
             </div>
 
-            <div class="concept-meta">
-                <div class="meta-item">
-                    <div class="meta-label">🔧 Technical Reality</div>
-                    <div class="meta-value">...</div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-label">🎨 Visual Concept</div>
-                    <div class="meta-value">Visualize Key Features using Maya Underworld - Xibalba imagery</div>
-                </div>
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize Key Features using Maya Underworld - Xibalba imagery</div>
             </div>
 
-            <div class="prompts-section">
-                <h3>📝 Prompts Used</h3>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">Key Features</div>
-                    <div class="prompt-text">
-                        Visualize Key Features using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials
-                    </div>
-                </div>
-                
-            </div>
-
+            <!-- GENERATED IMAGES -->
             <div class="images-section">
-                <h3>🖼️ Generated Images</h3>
                 <div class="images-grid">
                 
                     <div class="image-card"
@@ -933,42 +1069,40 @@
                 
                 </div>
             </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('key-features')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details-key-features">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Key Features</div>
+                        <div class="prompt-text">Visualize Key Features using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials</div>
+                    </div>
+                    
+                </div>
+            </div>
         </div>
     
         <div class="concept" id="-jepsen-style-chaos-engineering">
-            <div class="concept-header">
-                <h2 class="concept-title">🌪️ **Jepsen-Style Chaos Engineering**</h2>
-                <a href="https://github.com/jmalicki/xibalba/discussions" target="_blank" class="vote-button">
-                    🗳️ Vote in Discussion
-                </a>
-            </div>
-
-            <div class="concept-meta">
-                <div class="meta-item">
-                    <div class="meta-label">🔧 Technical Reality</div>
-                    <div class="meta-value">- Concurrent readers + writers (configurable: `--readers N --writers M`)
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>🌪️ **Jepsen-Style Chaos Engineering**</h2>
+                <div class="doc-content">- Concurrent readers + writers (configurable: `--readers N --writers M`)
 - Configurable test duratio...</div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-label">🎨 Visual Concept</div>
-                    <div class="meta-value">Visualize 🌪️ **Jepsen-Style Chaos Engineering** using Maya Underworld - Xibalba imagery</div>
-                </div>
             </div>
 
-            <div class="prompts-section">
-                <h3>📝 Prompts Used</h3>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">🌪️ **Jepsen-Style Chaos Engineering**</div>
-                    <div class="prompt-text">
-                        Visualize 🌪️ **Jepsen-Style Chaos Engineering** using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials
-                    </div>
-                </div>
-                
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize 🌪️ **Jepsen-Style Chaos Engineering** using Maya Underworld - Xibalba imagery</div>
             </div>
 
+            <!-- GENERATED IMAGES -->
             <div class="images-section">
-                <h3>🖼️ Generated Images</h3>
                 <div class="images-grid">
                 
                     <div class="image-card"
@@ -982,42 +1116,40 @@
                 
                 </div>
             </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('-jepsen-style-chaos-engineering')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details--jepsen-style-chaos-engineering">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">🌪️ **Jepsen-Style Chaos Engineering**</div>
+                        <div class="prompt-text">Visualize 🌪️ **Jepsen-Style Chaos Engineering** using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials</div>
+                    </div>
+                    
+                </div>
+            </div>
         </div>
     
         <div class="concept" id="-ebpf-delay-injection">
-            <div class="concept-header">
-                <h2 class="concept-title">⚡ **eBPF Delay Injection**</h2>
-                <a href="https://github.com/jmalicki/xibalba/discussions" target="_blank" class="vote-button">
-                    🗳️ Vote in Discussion
-                </a>
-            </div>
-
-            <div class="concept-meta">
-                <div class="meta-item">
-                    <div class="meta-label">🔧 Technical Reality</div>
-                    <div class="meta-value">- Kernel-level getdents64 interception
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>⚡ **eBPF Delay Injection**</h2>
+                <div class="doc-content">- Kernel-level getdents64 interception
 - Configurable delays: `pause_controller &lt;prob%&gt; &lt;iterations&gt;...</div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-label">🎨 Visual Concept</div>
-                    <div class="meta-value">Visualize ⚡ **eBPF Delay Injection** using Maya Underworld - Xibalba imagery</div>
-                </div>
             </div>
 
-            <div class="prompts-section">
-                <h3>📝 Prompts Used</h3>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">⚡ **eBPF Delay Injection**</div>
-                    <div class="prompt-text">
-                        Visualize ⚡ **eBPF Delay Injection** using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials
-                    </div>
-                </div>
-                
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize ⚡ **eBPF Delay Injection** using Maya Underworld - Xibalba imagery</div>
             </div>
 
+            <!-- GENERATED IMAGES -->
             <div class="images-section">
-                <h3>🖼️ Generated Images</h3>
                 <div class="images-grid">
                 
                     <div class="image-card"
@@ -1031,42 +1163,40 @@
                 
                 </div>
             </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('-ebpf-delay-injection')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details--ebpf-delay-injection">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">⚡ **eBPF Delay Injection**</div>
+                        <div class="prompt-text">Visualize ⚡ **eBPF Delay Injection** using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials</div>
+                    </div>
+                    
+                </div>
+            </div>
         </div>
     
         <div class="concept" id="-incremental-jsonl-output-timeout-safe">
-            <div class="concept-header">
-                <h2 class="concept-title">📊 **Incremental JSONL Output (Timeout-Safe!)**</h2>
-                <a href="https://github.com/jmalicki/xibalba/discussions" target="_blank" class="vote-button">
-                    🗳️ Vote in Discussion
-                </a>
-            </div>
-
-            <div class="concept-meta">
-                <div class="meta-item">
-                    <div class="meta-label">🔧 Technical Reality</div>
-                    <div class="meta-value">- **`xibalba-progress.jsonl`**: One JSON line per 5 seconds
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>📊 **Incremental JSONL Output (Timeout-Safe!)**</h2>
+                <div class="doc-content">- **`xibalba-progress.jsonl`**: One JSON line per 5 seconds
 - **`xibalba-bugs.jsonl`**: One JSON lin...</div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-label">🎨 Visual Concept</div>
-                    <div class="meta-value">Visualize 📊 **Incremental JSONL Output (Timeout-Safe!)** using Maya Underworld - Xibalba imagery</div>
-                </div>
             </div>
 
-            <div class="prompts-section">
-                <h3>📝 Prompts Used</h3>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">📊 **Incremental JSONL Output (Timeout-Safe!)**</div>
-                    <div class="prompt-text">
-                        Visualize 📊 **Incremental JSONL Output (Timeout-Safe!)** using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials
-                    </div>
-                </div>
-                
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize 📊 **Incremental JSONL Output (Timeout-Safe!)** using Maya Underworld - Xibalba imagery</div>
             </div>
 
+            <!-- GENERATED IMAGES -->
             <div class="images-section">
-                <h3>🖼️ Generated Images</h3>
                 <div class="images-grid">
                 
                     <div class="image-card"
@@ -1080,42 +1210,40 @@
                 
                 </div>
             </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('-incremental-jsonl-output-timeout-safe')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details--incremental-jsonl-output-timeout-safe">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">📊 **Incremental JSONL Output (Timeout-Safe!)**</div>
+                        <div class="prompt-text">Visualize 📊 **Incremental JSONL Output (Timeout-Safe!)** using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials</div>
+                    </div>
+                    
+                </div>
+            </div>
         </div>
     
         <div class="concept" id="-precise-bug-detection">
-            <div class="concept-header">
-                <h2 class="concept-title">🔍 **Precise Bug Detection**</h2>
-                <a href="https://github.com/jmalicki/xibalba/discussions" target="_blank" class="vote-button">
-                    🗳️ Vote in Discussion
-                </a>
-            </div>
-
-            <div class="concept-meta">
-                <div class="meta-item">
-                    <div class="meta-label">🔧 Technical Reality</div>
-                    <div class="meta-value">- **Missing entries**: File should exist but doesn&#39;t (cache miss bugs)
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>🔍 **Precise Bug Detection**</h2>
+                <div class="doc-content">- **Missing entries**: File should exist but doesn&#39;t (cache miss bugs)
 - **Phantom entries**: File e...</div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-label">🎨 Visual Concept</div>
-                    <div class="meta-value">Visualize 🔍 **Precise Bug Detection** using Maya Underworld - Xibalba imagery</div>
-                </div>
             </div>
 
-            <div class="prompts-section">
-                <h3>📝 Prompts Used</h3>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">🔍 **Precise Bug Detection**</div>
-                    <div class="prompt-text">
-                        Visualize 🔍 **Precise Bug Detection** using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials
-                    </div>
-                </div>
-                
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize 🔍 **Precise Bug Detection** using Maya Underworld - Xibalba imagery</div>
             </div>
 
+            <!-- GENERATED IMAGES -->
             <div class="images-section">
-                <h3>🖼️ Generated Images</h3>
                 <div class="images-grid">
                 
                     <div class="image-card"
@@ -1129,42 +1257,40 @@
                 
                 </div>
             </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('-precise-bug-detection')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details--precise-bug-detection">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">🔍 **Precise Bug Detection**</div>
+                        <div class="prompt-text">Visualize 🔍 **Precise Bug Detection** using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials</div>
+                    </div>
+                    
+                </div>
+            </div>
         </div>
     
         <div class="concept" id="-hermetic-qemu-vms">
-            <div class="concept-header">
-                <h2 class="concept-title">🖥️ **Hermetic QEMU VMs**</h2>
-                <a href="https://github.com/jmalicki/xibalba/discussions" target="_blank" class="vote-button">
-                    🗳️ Vote in Discussion
-                </a>
-            </div>
-
-            <div class="concept-meta">
-                <div class="meta-item">
-                    <div class="meta-label">🔧 Technical Reality</div>
-                    <div class="meta-value">- Fast boot (&lt;2 seconds with custom initramfs)
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>🖥️ **Hermetic QEMU VMs**</h2>
+                <div class="doc-content">- Fast boot (&lt;2 seconds with custom initramfs)
 - Docker-based hermetic builds (no host dependencies!...</div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-label">🎨 Visual Concept</div>
-                    <div class="meta-value">Visualize 🖥️ **Hermetic QEMU VMs** using Maya Underworld - Xibalba imagery</div>
-                </div>
             </div>
 
-            <div class="prompts-section">
-                <h3>📝 Prompts Used</h3>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">🖥️ **Hermetic QEMU VMs**</div>
-                    <div class="prompt-text">
-                        Visualize 🖥️ **Hermetic QEMU VMs** using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials
-                    </div>
-                </div>
-                
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize 🖥️ **Hermetic QEMU VMs** using Maya Underworld - Xibalba imagery</div>
             </div>
 
+            <!-- GENERATED IMAGES -->
             <div class="images-section">
-                <h3>🖼️ Generated Images</h3>
                 <div class="images-grid">
                 
                     <div class="image-card"
@@ -1178,44 +1304,42 @@
                 
                 </div>
             </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('-hermetic-qemu-vms')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details--hermetic-qemu-vms">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">🖥️ **Hermetic QEMU VMs**</div>
+                        <div class="prompt-text">Visualize 🖥️ **Hermetic QEMU VMs** using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials</div>
+                    </div>
+                    
+                </div>
+            </div>
         </div>
     
         <div class="concept" id="-c20-unit-tests-1515-passing">
-            <div class="concept-header">
-                <h2 class="concept-title">🧪 **C++20 Unit Tests (15/15 passing)**</h2>
-                <a href="https://github.com/jmalicki/xibalba/discussions" target="_blank" class="vote-button">
-                    🗳️ Vote in Discussion
-                </a>
-            </div>
-
-            <div class="concept-meta">
-                <div class="meta-item">
-                    <div class="meta-label">🔧 Technical Reality</div>
-                    <div class="meta-value">- GoogleTest framework
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>🧪 **C++20 Unit Tests (15/15 passing)**</h2>
+                <div class="doc-content">- GoogleTest framework
 - Tests core validation logic
 - Runs in CI on every PR
 - Proves bug detection...</div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-label">🎨 Visual Concept</div>
-                    <div class="meta-value">Visualize 🧪 **C++20 Unit Tests (15/15 passing)** using Maya Underworld - Xibalba imagery</div>
-                </div>
             </div>
 
-            <div class="prompts-section">
-                <h3>📝 Prompts Used</h3>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">🧪 **C++20 Unit Tests (15/15 passing)**</div>
-                    <div class="prompt-text">
-                        Visualize 🧪 **C++20 Unit Tests (15/15 passing)** using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials
-                    </div>
-                </div>
-                
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize 🧪 **C++20 Unit Tests (15/15 passing)** using Maya Underworld - Xibalba imagery</div>
             </div>
 
+            <!-- GENERATED IMAGES -->
             <div class="images-section">
-                <h3>🖼️ Generated Images</h3>
                 <div class="images-grid">
                 
                     <div class="image-card"
@@ -1229,43 +1353,41 @@
                 
                 </div>
             </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('-c20-unit-tests-1515-passing')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details--c20-unit-tests-1515-passing">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">🧪 **C++20 Unit Tests (15/15 passing)**</div>
+                        <div class="prompt-text">Visualize 🧪 **C++20 Unit Tests (15/15 passing)** using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials</div>
+                    </div>
+                    
+                </div>
+            </div>
         </div>
     
         <div class="concept" id="-getting-started">
-            <div class="concept-header">
-                <h2 class="concept-title">🚀 Getting Started</h2>
-                <a href="https://github.com/jmalicki/xibalba/discussions" target="_blank" class="vote-button">
-                    🗳️ Vote in Discussion
-                </a>
-            </div>
-
-            <div class="concept-meta">
-                <div class="meta-item">
-                    <div class="meta-label">🔧 Technical Reality</div>
-                    <div class="meta-value">**Current Status**: ✅ Core implementation complete, eBPF fault injection working
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>🚀 Getting Started</h2>
+                <div class="doc-content">**Current Status**: ✅ Core implementation complete, eBPF fault injection working
 
 **⚠️ IMPORTANT**: ...</div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-label">🎨 Visual Concept</div>
-                    <div class="meta-value">Visualize 🚀 Getting Started using Maya Underworld - Xibalba imagery</div>
-                </div>
             </div>
 
-            <div class="prompts-section">
-                <h3>📝 Prompts Used</h3>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">🚀 Getting Started</div>
-                    <div class="prompt-text">
-                        Visualize 🚀 Getting Started using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials
-                    </div>
-                </div>
-                
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize 🚀 Getting Started using Maya Underworld - Xibalba imagery</div>
             </div>
 
+            <!-- GENERATED IMAGES -->
             <div class="images-section">
-                <h3>🖼️ Generated Images</h3>
                 <div class="images-grid">
                 
                     <div class="image-card"
@@ -1279,43 +1401,41 @@
                 
                 </div>
             </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('-getting-started')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details--getting-started">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">🚀 Getting Started</div>
+                        <div class="prompt-text">Visualize 🚀 Getting Started using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials</div>
+                    </div>
+                    
+                </div>
+            </div>
         </div>
     
         <div class="concept" id="documentation">
-            <div class="concept-header">
-                <h2 class="concept-title">Documentation</h2>
-                <a href="https://github.com/jmalicki/xibalba/discussions" target="_blank" class="vote-button">
-                    🗳️ Vote in Discussion
-                </a>
-            </div>
-
-            <div class="concept-meta">
-                <div class="meta-item">
-                    <div class="meta-label">🔧 Technical Reality</div>
-                    <div class="meta-value">**Core Docs**:
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>Documentation</h2>
+                <div class="doc-content">**Core Docs**:
 - **🖥️ [VM Setup Guide](docs/VM-SETUP.md)** - QEMU/KVM hermetic VM testing
 - **🔧 [Fas...</div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-label">🎨 Visual Concept</div>
-                    <div class="meta-value">Visualize Documentation using Maya Underworld - Xibalba imagery</div>
-                </div>
             </div>
 
-            <div class="prompts-section">
-                <h3>📝 Prompts Used</h3>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">Documentation</div>
-                    <div class="prompt-text">
-                        Visualize Documentation using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials
-                    </div>
-                </div>
-                
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize Documentation using Maya Underworld - Xibalba imagery</div>
             </div>
 
+            <!-- GENERATED IMAGES -->
             <div class="images-section">
-                <h3>🖼️ Generated Images</h3>
                 <div class="images-grid">
                 
                     <div class="image-card"
@@ -1329,43 +1449,41 @@
                 
                 </div>
             </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('documentation')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details-documentation">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Documentation</div>
+                        <div class="prompt-text">Visualize Documentation using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials</div>
+                    </div>
+                    
+                </div>
+            </div>
         </div>
     
         <div class="concept" id="prerequisites">
-            <div class="concept-header">
-                <h2 class="concept-title">Prerequisites</h2>
-                <a href="https://github.com/jmalicki/xibalba/discussions" target="_blank" class="vote-button">
-                    🗳️ Vote in Discussion
-                </a>
-            </div>
-
-            <div class="concept-meta">
-                <div class="meta-item">
-                    <div class="meta-label">🔧 Technical Reality</div>
-                    <div class="meta-value">**Host Machine**:
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>Prerequisites</h2>
+                <div class="doc-content">**Host Machine**:
 - Linux host with KVM support
 - 8GB+ RAM (16GB+ recommended for parallel VM testin...</div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-label">🎨 Visual Concept</div>
-                    <div class="meta-value">Visualize Prerequisites using Maya Underworld - Xibalba imagery</div>
-                </div>
             </div>
 
-            <div class="prompts-section">
-                <h3>📝 Prompts Used</h3>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">Prerequisites</div>
-                    <div class="prompt-text">
-                        Visualize Prerequisites using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials
-                    </div>
-                </div>
-                
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize Prerequisites using Maya Underworld - Xibalba imagery</div>
             </div>
 
+            <!-- GENERATED IMAGES -->
             <div class="images-section">
-                <h3>🖼️ Generated Images</h3>
                 <div class="images-grid">
                 
                     <div class="image-card"
@@ -1379,41 +1497,39 @@
                 
                 </div>
             </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('prerequisites')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details-prerequisites">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Prerequisites</div>
+                        <div class="prompt-text">Visualize Prerequisites using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials</div>
+                    </div>
+                    
+                </div>
+            </div>
         </div>
     
         <div class="concept" id="quick-start">
-            <div class="concept-header">
-                <h2 class="concept-title">Quick Start</h2>
-                <a href="https://github.com/jmalicki/xibalba/discussions" target="_blank" class="vote-button">
-                    🗳️ Vote in Discussion
-                </a>
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>Quick Start</h2>
+                <div class="doc-content">```bash...</div>
             </div>
 
-            <div class="concept-meta">
-                <div class="meta-item">
-                    <div class="meta-label">🔧 Technical Reality</div>
-                    <div class="meta-value">```bash...</div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-label">🎨 Visual Concept</div>
-                    <div class="meta-value">Visualize Quick Start using Maya Underworld - Xibalba imagery</div>
-                </div>
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize Quick Start using Maya Underworld - Xibalba imagery</div>
             </div>
 
-            <div class="prompts-section">
-                <h3>📝 Prompts Used</h3>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">Quick Start</div>
-                    <div class="prompt-text">
-                        Visualize Quick Start using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials
-                    </div>
-                </div>
-                
-            </div>
-
+            <!-- GENERATED IMAGES -->
             <div class="images-section">
-                <h3>🖼️ Generated Images</h3>
                 <div class="images-grid">
                 
                     <div class="image-card"
@@ -1427,42 +1543,40 @@
                 
                 </div>
             </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('quick-start')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details-quick-start">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Quick Start</div>
+                        <div class="prompt-text">Visualize Quick Start using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials</div>
+                    </div>
+                    
+                </div>
+            </div>
         </div>
     
         <div class="concept" id="clone-repository">
-            <div class="concept-header">
-                <h2 class="concept-title">Clone repository</h2>
-                <a href="https://github.com/jmalicki/xibalba/discussions" target="_blank" class="vote-button">
-                    🗳️ Vote in Discussion
-                </a>
-            </div>
-
-            <div class="concept-meta">
-                <div class="meta-item">
-                    <div class="meta-label">🔧 Technical Reality</div>
-                    <div class="meta-value">git clone https://github.com/jmalicki/xibalba.git
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>Clone repository</h2>
+                <div class="doc-content">git clone https://github.com/jmalicki/xibalba.git
 cd xibalba...</div>
-                </div>
-                <div class="meta-item">
-                    <div class="meta-label">🎨 Visual Concept</div>
-                    <div class="meta-value">Visualize Clone repository using Maya Underworld - Xibalba imagery</div>
-                </div>
             </div>
 
-            <div class="prompts-section">
-                <h3>📝 Prompts Used</h3>
-                
-                <div class="prompt-item">
-                    <div class="prompt-title">Clone repository</div>
-                    <div class="prompt-text">
-                        Visualize Clone repository using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials
-                    </div>
-                </div>
-                
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize Clone repository using Maya Underworld - Xibalba imagery</div>
             </div>
 
+            <!-- GENERATED IMAGES -->
             <div class="images-section">
-                <h3>🖼️ Generated Images</h3>
                 <div class="images-grid">
                 
                     <div class="image-card"
@@ -1474,6 +1588,22 @@ cd xibalba...</div>
                         </div>
                     </div>
                 
+                </div>
+            </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('clone-repository')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details-clone-repository">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Clone repository</div>
+                        <div class="prompt-text">Visualize Clone repository using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials</div>
+                    </div>
+                    
                 </div>
             </div>
         </div>
@@ -1502,6 +1632,13 @@ cd xibalba...</div>
         function closeLightbox() {
             document.getElementById('lightbox').classList.remove('active');
             document.body.style.overflow = 'auto';
+        }
+
+        function toggleDetails(conceptId) {
+            const toggle = event.currentTarget;
+            const content = document.getElementById('details-' + conceptId);
+            toggle.classList.toggle('open');
+            content.classList.toggle('open');
         }
 
         document.addEventListener('keydown', function(e) {
