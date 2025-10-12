@@ -1,301 +1,379 @@
 # Xibalba Testing Guide
 
-**How to use consistency models for effective bug finding**
+Complete guide to running Xibalba chaos tests with current accurate commands.
 
----
+## Quick Start
 
-## Quick Reference
+### 1. Build Everything
 
-| Scenario | Consistency Model | Command | Expected Bugs |
-|----------|-------------------|---------|---------------|
-| **CI testing (stable kernel)** | Eventual | `bazel run //chaos:simple_chaos_test -- --eventual /tmp/test` | 0 |
-| **Local testing (ext4/XFS)** | Weak POSIX | `bazel run //chaos:simple_chaos_test -- --weak /mnt/test` | 0-5 without eBPF |
-| **With eBPF delays** | Weak POSIX | `bazel run //chaos:simple_chaos_test -- --weak /mnt/test` | 10-50 with eBPF |
-| **Research / find all races** | Strict | `bazel run //chaos:simple_chaos_test -- --strict /mnt/test` | Many |
+```bash
+cd /path/to/xibalba
+bazel build //chaos:all //vm:all
+```
 
----
+### 2. Run Unit Tests (Fast!)
 
-## The Three Consistency Models
+```bash
+# Core validation logic tests (15 tests, ~0.3 seconds)
+bazel test //common:state_tracker_test
 
-### 1. EVENTUAL (`--eventual`) - Most Permissive
+# These tests verify:
+# - Bug detection works (missing, duplicates, phantoms)
+# - No false positives
+# - Vector clock causality tracking
+# - Thread safety
+```
 
-**What it checks**:
-- ✅ Duplicates (same file twice in ONE scan)
-- ❌ Does NOT check missing entries
-- ❌ Does NOT check phantom entries
+### 3. Run Simple Chaos Test (Local Filesystem)
 
-**Use when**:
-- CI on stable kernels (GitHub Actions)
-- Testing on tmpfs
-- Testing distributed filesystems (NFS)
+```bash
+# Create test directory
+mkdir -p /tmp/xibalba_test
 
-**Example**:
+# Run chaos test (default: 5 minutes, 10 readers, 3 writers)
+bazel run //chaos:simple_chaos_test -- /tmp/xibalba_test
+
+# Custom parameters:
+bazel run //chaos:simple_chaos_test -- \
+    --duration 30 \
+    --readers 5 \
+    --writers 2 \
+    /tmp/xibalba_test
+
+# With strict consistency model:
+bazel run //chaos:simple_chaos_test -- --strict /tmp/xibalba_test
+```
+
+**Output files** (in `/tmp/xibalba_test/`):
+- `xibalba-progress.jsonl` - One JSON line per 5 seconds
+- `xibalba-bugs.jsonl` - One JSON line per bug event  
+- `xibalba-history.json` - Complete operation history
+
+### 4. Run with eBPF Delay Injection
+
+**Terminal 1 - Start delay injector**:
+```bash
+# Build and grant capabilities (one-time)
+bazel build //chaos:pause_controller
+sudo setcap cap_sys_admin,cap_bpf,cap_perfmon+ep bazel-bin/chaos/pause_controller
+
+# Run delay injector
+# Usage: pause_controller <probability%> <iterations> [max_delay_ns]
+bazel run //chaos:pause_controller -- 50 500
+
+# Examples:
+# Mild delays (5μs):
+bazel run //chaos:pause_controller -- 30 300
+
+# Aggressive delays (10-50μs):  
+bazel run //chaos:pause_controller -- 100 1000 100000
+```
+
+**Terminal 2 - Run test**:
+```bash
+mkdir -p /tmp/xibalba_test
+bazel run //chaos:simple_chaos_test -- --duration 60 /tmp/xibalba_test
+```
+
+**What happens**:
+- eBPF intercepts 50% of getdents64 syscalls
+- Injects 5-10μs delays (configurable)
+- Widens race windows 10,000x!
+- Bugs that appear once per million ops → appear every few seconds
+
+### 5. Run VM Tests (Hermetic QEMU)
+
+```bash
+# Single filesystem test (ext4, 10 seconds)
+bazel run //vm:qemu_test_runner -- --filesystem ext4 --duration 10 --readers 5 --writers 2
+
+# Quick test with defaults (ext4, 300sec, 10 readers, 3 writers)
+bazel run //vm:qemu_test_runner
+
+# Run full test suite (ext4, xfs, btrfs in parallel)
+bazel test //vm:qemu_filesystem_suite
+
+# Individual filesystem tests:
+bazel test //vm:qemu_test_ext4
+bazel test //vm:qemu_test_xfs
+bazel test //vm:qemu_test_btrfs
+```
+
+**VM test parameters** (all optional with sensible defaults):
+```bash
+bazel run //vm:qemu_test_runner -- [OPTIONS]
+
+Options:
+  --filesystem FS   Filesystem to test (ext4, xfs, btrfs) [default: ext4]
+  --duration SEC    Test duration in seconds [default: 300]
+  --readers N       Number of reader threads [default: 10]
+  --writers N       Number of writer threads [default: 3]
+
+Examples:
+  bazel run //vm:qemu_test_runner -- --filesystem ext4 --duration 30
+  bazel run //vm:qemu_test_runner -- --filesystem xfs --readers 20 --writers 5
+  bazel run //vm:qemu_test_runner -- --duration 60  # Uses default ext4
+```
+
+## Analyzing Results
+
+### Progress Analysis
+
+```bash
+# Analyze time-series data
+tools/analyze-progress.sh /tmp/xibalba_test/xibalba-progress.jsonl
+
+# Output shows:
+# - Operations per 5-second period
+# - Bug rate over time
+# - Performance metrics
+```
+
+### Bug Analysis
+
+```bash
+# View detailed bug events
+cat /tmp/xibalba_test/xibalba-bugs.jsonl | jq '.'
+
+# Count bugs by type:
+cat xibalba-bugs.jsonl | jq -r '.missing' | grep -c "^[1-9]"  # Missing
+cat xibalba-bugs.jsonl | jq -r '.phantoms' | grep -c "^[1-9]"  # Phantoms
+cat xibalba-bugs.jsonl | jq -r '.duplicates' | grep -c "^[1-9]"  # Duplicates
+
+# Find bugs at specific times:
+cat xibalba-bugs.jsonl | jq 'select(.ts > 10000000000)'  # After 10 seconds
+```
+
+### Full History
+
+```bash
+# Complete operation log (can be large!)
+cat /tmp/xibalba_test/xibalba-history.json | jq '.operations | length'
+
+# Find specific operations:
+cat xibalba-history.json | jq '.operations[] | select(.type == "CREATE")'
+```
+
+## Understanding Output
+
+### Progress JSONL Format
+
+```json
+{"elapsed":5,"ops":106047,"reads":104745,"bugs":101,"period_ops":106047,"period_reads":104745,"period_bugs":101,"period_bug_rate":0.000964,"ops_per_sec":21209.40}
+```
+
+**Fields**:
+- `elapsed`: Seconds elapsed
+- `ops`: Cumulative total operations  
+- `reads`: Cumulative directory scans
+- `bugs`: Cumulative bugs found
+- `period_*`: Stats for this 5-second period only
+- `period_bug_rate`: Bugs per read in this period
+- `ops_per_sec`: Throughput in this period
+
+### Bug JSONL Format
+
+```json
+{"ts":1376141992,"thread":126007229598400,"read_start":1376008433,"read_end":1376141992,"model":"weak","total_bugs":1,"missing":1,"duplicates":0,"phantoms":0,"files_read":9}
+```
+
+**Fields**:
+- `ts`: Timestamp when bug found (nanoseconds)
+- `thread`: Which thread found it
+- `read_start/end`: Read operation timing
+- `model`: Consistency model ("strict", "weak", "eventual")
+- `total_bugs`: Bugs in this read operation
+- `missing`: Files that should exist but don't
+- `duplicates`: Files appearing multiple times
+- `phantoms`: Files that shouldn't exist
+- `files_read`: Total files in this scan
+
+## Consistency Models
+
+### Strict (Linearizable)
+
+```bash
+bazel run //chaos:simple_chaos_test -- --strict /tmp/test
+```
+
+**Guarantees**:
+- If create happens-before read → file MUST be visible
+- Strictest model, finds most bugs
+- Use for: Critical data, databases
+
+### Weak POSIX (Default)
+
+```bash
+bazel run //chaos:simple_chaos_test -- --weak /tmp/test
+# OR just:
+bazel run //chaos:simple_chaos_test -- /tmp/test
+```
+
+**Guarantees**:
+- If create happens-before read start → file MUST be visible
+- Concurrent operations: either outcome valid
+- Use for: Most filesystem code
+
+### Eventual
+
 ```bash
 bazel run //chaos:simple_chaos_test -- --eventual /tmp/test
 ```
 
-**Expected**: 0 bugs on stable kernel
+**Guarantees**:
+- Only duplicates are bugs
+- Missing/phantom entries allowed (propagation delays)
+- Use for: Eventually consistent systems
 
-### 2. WEAK_POSIX (`--weak` or default) - POSIX Compliant
+## CI/CD Integration
 
-**What it checks**:
-- ✅ Duplicates
-- ✅ Missing entries (files created BEFORE scan but not read)
-- ✅ Phantom entries (files deleted BEFORE scan but still read)
-- ❌ Allows files created/deleted DURING scan to appear or not
+### GitHub Actions (Automatic)
 
-**Use when**:
-- Testing Linux filesystems (ext4, XFS, btrfs)
-- Finding real kernel bugs
-- Local testing with eBPF delays
-
-**Example**:
-```bash
-bazel run //chaos:simple_chaos_test -- /tmp/test  # default is --weak
-```
-
-**Expected**: 
-- Without eBPF: 0-5 bugs (rare races)
-- With eBPF: 10-50 bugs (widened race windows)
-
-### 3. STRICT (`--strict`) - Linearizable
-
-**What it checks**:
-- ✅ Duplicates
-- ✅ Missing entries (ANY file created before read end)
-- ✅ Phantom entries (ANY file deleted before read end)
-- ✅ Maximum sensitivity
-
-**Use when**:
-- Research into ALL possible races
-- Testing theoretical correctness
-- Finding every possible race condition
-
-**Example**:
-```bash
-bazel run //chaos:simple_chaos_test -- --strict /mnt/ext4/test
-```
-
-**Expected**: Many bugs (includes POSIX-allowed behavior)
-
----
-
-## Typical Workflows
-
-### CI Testing (Automated)
+Tests run on every PR:
 
 ```yaml
-# .github/workflows/ci.yml
-- run: bazel-bin/chaos/simple_chaos_test --eventual /tmp/test
+# Unit tests (fast, every PR)
+- bazel test //common:state_tracker_test
+
+# Build verification
+- bazel build //chaos:all //vm:all
+
+# VM tests (on-demand, label PR with 'run-vm-tests')
+- bazel test //vm:qemu_filesystem_suite
 ```
 
-**Result**: Should always pass (0 bugs on stable kernel)
-
-**If it fails**: Serious kernel bug or validation logic bug
-
-### Daily Development
+### Local CI Simulation
 
 ```bash
-# Quick test on your system
-mkdir -p /tmp/xibalba_dev
-bazel run //chaos:simple_chaos_test -- /tmp/xibalba_dev
-
-# Expected: 0 bugs (stable system)
+# Run what CI runs:
+bazel test //common:state_tracker_test  # Unit tests
+bazel build //chaos:all                  # Build verification
+bazel test //vm:qemu_filesystem_suite   # VM tests (requires KVM)
 ```
-
-### Testing with eBPF Delays
-
-**Terminal 1** - Start eBPF delay injector:
-```bash
-bazel build //chaos:pause_controller
-sudo ./grant_caps.sh
-bazel run //chaos:pause_controller -- 50 500
-```
-
-**Terminal 2** - Run test with WEAK model:
-```bash
-mkdir -p /tmp/xibalba_ebpf
-bazel run //chaos:simple_chaos_test -- --weak /tmp/xibalba_ebpf
-```
-
-**Expected**: 10-50 bugs found (eBPF widens race windows)
-
-### Testing Custom Kernels in VMs
-
-```bash
-# Create VM with your kernel
-bazel run //vm:create_vm -- --name test-kernel --kernel /path/to/vmlinuz
-
-# Deploy Xibalba
-bazel run //vm:deploy_xibalba -- test-kernel
-
-# Run tests (inside VM or via script)
-ssh root@test-kernel "xibalba-test --weak /test/data"
-```
-
-**Expected**: Depends on your kernel patches!
-
----
-
-## Understanding the Output
-
-### Zero Bugs Found
-
-```
-=== Results ===
-Validation:
-  Bugs found: 0
-  Status: ✅ NO BUGS DETECTED
-```
-
-**Means**:
-- Filesystem behaves correctly for chosen consistency model
-- No race conditions detected
-- Test infrastructure works
-
-**Next step**: Try with eBPF delays or stricter model
-
-### Bugs Found
-
-```
-=== Results ===
-Validation:
-  Bugs found: 47
-  Status: 🐛 BUGS DETECTED!
-
-🐛 BUG FOUND (thread 12345):
-   Duplicate entries: 2
-   Missing entries: 15
-   Phantom entries: 3
-```
-
-**Means**:
-- Race conditions exist in the filesystem
-- eBPF delays widened the race windows
-- Real bugs that need investigation
-
-**What to do**:
-1. Check `xibalba-history.json` for operation timeline
-2. Try to reproduce with specific sequence
-3. Report to kernel developers (if real kernel bug)
-
----
-
-## Filesystem-Specific Recommendations
-
-### ext4
-
-```bash
-# Use WEAK model (POSIX compliant)
-bazel run //chaos:simple_chaos_test -- --weak /mnt/ext4/test
-
-# With eBPF for race detection
-bazel run //chaos:pause_controller -- 50 500
-```
-
-**Expected bugs**: Medium-High (complex htree structure)
-
-### XFS
-
-```bash
-# Use WEAK model
-bazel run //chaos:simple_chaos_test -- --weak /mnt/xfs/test
-```
-
-**Expected bugs**: Medium (B+ tree, good locking)
-
-### btrfs
-
-```bash
-# Use WEAK model
-bazel run //chaos:simple_chaos_test -- --weak /mnt/btrfs/test
-```
-
-**Expected bugs**: Low-Medium (COW provides natural consistency)
-
-### tmpfs
-
-```bash
-# Use EVENTUAL model (simplest filesystem)
-bazel run //chaos:simple_chaos_test -- --eventual /tmp/test
-```
-
-**Expected bugs**: Very Low (simple in-memory implementation)
-
-### NFS / Network Filesystems
-
-```bash
-# Use EVENTUAL model (network delays are normal)
-bazel run //chaos:simple_chaos_test -- --eventual /mnt/nfs/test
-```
-
-**Expected bugs**: Low (eventual consistency is expected)
-
----
 
 ## Troubleshooting
 
-### "Too many bugs found" on stable kernel
+### eBPF Permission Denied
 
-**Problem**: Thousands of phantom/missing entry bugs
-
-**Likely cause**: Using wrong consistency model
-
-**Solution**: Use more permissive model:
 ```bash
-# Instead of --strict or --weak, try:
-bazel run //chaos:simple_chaos_test -- --eventual /tmp/test
+# Grant capabilities (one-time):
+sudo setcap cap_sys_admin,cap_bpf,cap_perfmon+ep bazel-bin/chaos/pause_controller
+
+# Verify:
+getcap bazel-bin/chaos/pause_controller
 ```
 
-### "No bugs found" even with eBPF
+### KVM Not Available
 
-**Problem**: Expected to find bugs but getting 0
+```bash
+# Check KVM support:
+ls -la /dev/kvm
 
-**Possible causes**:
-1. eBPF not actually injecting delays
-   - Check: `bazel run //chaos:pause_controller` shows "Delays injected: N"
-   
-2. Race windows still too narrow
-   - Solution: Increase eBPF delay iterations
-   - `bazel run //chaos:pause_controller -- 50 1000`
+# If missing:
+sudo modprobe kvm kvm_intel  # or kvm_amd
+sudo chmod 666 /dev/kvm
+```
 
-3. Filesystem is actually bug-free!
-   - Try with `--strict` model to be more sensitive
+### Tests Timeout
 
-### "Validation logic bug" errors
+```bash
+# Reduce test duration:
+bazel run //chaos:simple_chaos_test -- --duration 10 /tmp/test
 
-**Problem**: CI fails with bugs on stable kernel
+# Or increase timeout:
+bazel test //vm:qemu_test_ext4 --test_timeout=900  # 15 minutes
+```
 
-**Cause**: Bug in our validation logic (not kernel)
+## Advanced Usage
 
-**What to do**:
-1. Check which consistency model CI is using
-2. Verify it's `--eventual` (most permissive)
-3. Investigate validation logic in `state_tracker.c`
+### Custom Test Scenarios
+
+```bash
+# Many readers, few writers (read-heavy):
+bazel run //chaos:simple_chaos_test -- --readers 50 --writers 1 --duration 60 /tmp/test
+
+# Many writers, few readers (write-heavy):
+bazel run //chaos:simple_chaos_test -- --readers 2 --writers 10 --duration 60 /tmp/test
+
+# Maximum chaos:
+bazel run //chaos:simple_chaos_test -- --readers 100 --writers 20 --duration 300 /tmp/test
+```
+
+### Different eBPF Delay Profiles
+
+```bash
+# Subtle delays (catch rare bugs):
+bazel run //chaos:pause_controller -- 10 200 20000  # 10%, 2μs max
+
+# Moderate delays (default):
+bazel run //chaos:pause_controller -- 50 500 50000  # 50%, 5μs typical, 50μs max
+
+# Aggressive delays (stress test):
+bazel run //chaos:pause_controller -- 100 1000 200000  # 100%, 10-200μs
+```
+
+### Analyzing Specific Time Windows
+
+```bash
+# Extract bugs from first 10 seconds:
+cat xibalba-bugs.jsonl | jq 'select(.ts < 10000000000)'
+
+# Extract bugs from specific period:
+cat xibalba-bugs.jsonl | jq 'select(.ts >= 10000000000 and .ts < 20000000000)'
+
+# Group bugs by type:
+cat xibalba-bugs.jsonl | jq -s 'group_by(.missing > 0, .phantoms > 0, .duplicates > 0)'
+```
+
+## Performance Benchmarking
+
+### Measure Baseline (No eBPF)
+
+```bash
+bazel run //chaos:simple_chaos_test -- --duration 10 --json /tmp/test > baseline.json
+```
+
+### Measure With eBPF Delays
+
+Terminal 1:
+```bash
+bazel run //chaos:pause_controller -- 50 500
+```
+
+Terminal 2:
+```bash
+bazel run //chaos:simple_chaos_test -- --duration 10 --json /tmp/test > with-delays.json
+```
+
+### Compare
+
+```bash
+jq '.results.ops_per_second' baseline.json
+jq '.results.ops_per_second' with-delays.json
+jq '.results.bugs_found' with-delays.json
+```
+
+**Expected**:
+- Baseline: 40,000+ ops/sec, ~0 bugs
+- With delays: 10,000-20,000 ops/sec, 100+ bugs
+
+## References
+
+**Academic Papers**:
+- Lamport (1978): https://doi.org/10.1145/359545.359563
+- Fidge (1988): Vector Clocks
+- Mattern (1989): Virtual Time
+- Herlihy & Wing (1990): Linearizability
+
+**Jepsen**:
+- https://jepsen.io/
+- https://github.com/jepsen-io/jepsen
+- Kyle Kingsbury's talks: https://aphyr.com/tags/jepsen
+
+**eBPF**:
+- https://ebpf.io/
+- BPF CO-RE: https://nakryiko.com/posts/bpf-core-reference-guide/
 
 ---
 
-## Performance Notes
-
-**State tracking overhead**:
-- Adds ~10-15% overhead (mutex locks, timestamp recording)
-- Negligible compared to eBPF delay injection
-- Worth it for bug detection!
-
-**Memory usage**:
-- MAX_ENTRIES = 10,000 files tracked
-- ~2MB per state tracker
-- Increase if testing larger directories
-
----
-
-## See Also
-
-- [FILESYSTEM-CONSISTENCY-MODELS.md](docs/design/FILESYSTEM-CONSISTENCY-MODELS.md) - Detailed consistency explanation
-- [STATE-TRACKING-AND-VALIDATION.md](docs/design/STATE-TRACKING-AND-VALIDATION.md) - Implementation details
-- [CI-AND-VM-TESTING.md](docs/CI-AND-VM-TESTING.md) - Why VMs need KVM
-
----
-
-**Summary**: Use the right consistency model for your testing scenario. CI uses `--eventual` (stable kernel, 0 bugs expected). Local testing uses `--weak` (find real races). Research uses `--strict` (find all possible races).
-
+*Enter Xibalba. Face the trials. Emerge victorious.*

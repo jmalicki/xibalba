@@ -4,11 +4,52 @@
 
 set -euo pipefail
 
-# Arguments
-FILESYSTEM=${1:-ext4}
-DURATION=${2:-300}
-READERS=${3:-10}
-WRITERS=${4:-3}
+# Default values
+FILESYSTEM="ext4"
+DURATION=300
+READERS=10
+WRITERS=3
+
+# Parse named arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --filesystem)
+            FILESYSTEM="$2"
+            shift 2
+            ;;
+        --duration)
+            DURATION="$2"
+            shift 2
+            ;;
+        --readers)
+            READERS="$2"
+            shift 2
+            ;;
+        --writers)
+            WRITERS="$2"
+            shift 2
+            ;;
+        -h|--help)
+            echo "Usage: $0 [OPTIONS]"
+            echo ""
+            echo "Options:"
+            echo "  --filesystem FS   Filesystem to test (ext4, xfs, btrfs) [default: ext4]"
+            echo "  --duration SEC    Test duration in seconds [default: 300]"
+            echo "  --readers N       Number of reader threads [default: 10]"
+            echo "  --writers N       Number of writer threads [default: 3]"
+            echo ""
+            echo "Examples:"
+            echo "  $0 --filesystem ext4 --duration 30 --readers 5 --writers 2"
+            echo "  $0 --filesystem xfs --duration 60"
+            exit 0
+            ;;
+        *)
+            echo "ERROR: Unknown option: $1"
+            echo "Use --help for usage information"
+            exit 1
+            ;;
+    esac
+done
 
 # Find kernel and initramfs from Bazel runfiles
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

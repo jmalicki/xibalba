@@ -54,16 +54,39 @@
 
 char LICENSE[] SEC("license") = "GPL";
 
-// Configuration map
+// ============================================================================
+// Configuration Map: Runtime tunable parameters
+// ============================================================================
+// Values are set by userspace (pause_controller) when loading the program.
+// eBPF code reads them on each syscall.
+//
+// Performance: Map lookups are ~10-20ns, negligible compared to syscall overhead.
+// This is the standard approach for configurable eBPF programs.
+//
+// Benefits of map-based config:
+//   - Single eBPF binary works for all configurations
+//   - Can change parameters without recompiling
+//   - Values passed via command-line to test runner
+//   - Standard eBPF pattern (used by bpftrace, etc)
+// ============================================================================
+
 struct {
     __uint(type, BPF_MAP_TYPE_ARRAY);
-    __uint(max_entries, 2);
+    __uint(max_entries, 4);
     __type(key, __u32);
     __type(value, __u32);
 } config SEC(".maps");
 
-#define CFG_ERROR_PROBABILITY 0  // Error injection probability (0-100%)
-#define CFG_ERROR_CODE 1          // Which error to inject (-EAGAIN, -EINTR, etc.)
+// Configuration map keys
+#define CFG_DELAY_PROBABILITY  0  // Delay injection probability (0-100%)
+#define CFG_DELAY_ITERATIONS   1  // Loop iterations for busy-wait
+#define CFG_MAX_DELAY_NS       2  // Maximum delay in nanoseconds
+#define CFG_RESERVED           3  // Reserved for future use
+
+// Default values if map not initialized
+#define DEFAULT_PROBABILITY   50    // 50% of getdents64 calls
+#define DEFAULT_ITERATIONS    500   // ~5-10 microseconds
+#define DEFAULT_MAX_DELAY_NS  50000 // 50μs maximum
 
 // Statistics map (how many errors injected)
 struct {
@@ -91,23 +114,28 @@ struct {
 SEC("tracepoint/syscalls/sys_enter_getdents64")
 int trace_getdents64(void *ctx)
 {
-    // Default config: inject on 50% of calls
-    __u32 delay_prob = 50;
-    __u32 delay_iterations = 500;  // ~5-10 microseconds
+    // Read configuration from map (set once by userspace)
+    // Map lookups are fast (~10-20ns), negligible overhead
+    __u32 delay_prob = DEFAULT_PROBABILITY;
+    __u32 delay_iterations = DEFAULT_ITERATIONS;
+    __u32 max_delay_ns = DEFAULT_MAX_DELAY_NS;
     
-    // Try to read user config
-    __u32 key_prob = CFG_ERROR_PROBABILITY;
-    __u32 *prob_ptr = bpf_map_lookup_elem(&config, &key_prob);
-    if (prob_ptr && *prob_ptr > 0) {
-        delay_prob = *prob_ptr;
+    __u32 key = CFG_DELAY_PROBABILITY;
+    __u32 *val = bpf_map_lookup_elem(&config, &key);
+    if (val && *val <= 100) {
+        delay_prob = *val;
     }
     
-    __u32 key_iter = CFG_ERROR_CODE;
-    __u32 *iter_ptr = bpf_map_lookup_elem(&config, &key_iter);
-    if (iter_ptr && *iter_ptr > 0) {
-        delay_iterations = *iter_ptr;
-        // Cap at 1000 iterations to pass eBPF verifier
-        if (delay_iterations > 1000) delay_iterations = 1000;
+    key = CFG_DELAY_ITERATIONS;
+    val = bpf_map_lookup_elem(&config, &key);
+    if (val && *val <= 1000) {  // Cap for verifier
+        delay_iterations = *val;
+    }
+    
+    key = CFG_MAX_DELAY_NS;
+    val = bpf_map_lookup_elem(&config, &key);
+    if (val) {
+        max_delay_ns = *val;
     }
     
     // Random decision: inject delay?
@@ -134,19 +162,20 @@ int trace_getdents64(void *ctx)
     //   - Race conditions become visible!
     //
     
-    // Bounded busy-wait (verifier accepts this)
+    // Bounded busy-wait using runtime config (read from map above)
     __u64 start = bpf_ktime_get_ns();
     
     #pragma unroll
     for (int i = 0; i < 1000; i++) {
+        // Use configured iterations (capped at 1000 for verifier)
         if (i >= delay_iterations)
             break;
         
         // Busy-wait with time check every 100 iterations
         if ((i % 100) == 0) {
             __u64 now = bpf_ktime_get_ns();
-            // Stop if we've delayed enough (~10-50 microseconds)
-            if ((now - start) > 50000)  // 50μs max
+            // Use configured max delay
+            if ((now - start) > max_delay_ns)
                 break;
         }
         

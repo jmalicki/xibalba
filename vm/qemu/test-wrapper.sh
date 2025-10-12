@@ -4,10 +4,8 @@
 
 set -euo pipefail
 
-FILESYSTEM=$1
-DURATION=${2:-10}
-READERS=${3:-3}
-WRITERS=${4:-2}
+# Parse all arguments (passed from Bazel, already in --flag format)
+# We just pass them through to the runner
 
 # Find the qemu runner in runfiles
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -28,10 +26,11 @@ else
 fi
 
 echo "Using runner: $RUNNER"
+echo "Test args: $*"
 
-# Run test and capture output
+# Run test and capture output (pass all args through)
 OUTPUT=$(mktemp)
-if "$RUNNER" "$FILESYSTEM" "$DURATION" "$READERS" "$WRITERS" > "$OUTPUT" 2>&1; then
+if "$RUNNER" "$@" > "$OUTPUT" 2>&1; then
     VM_EXIT=$?
 else
     VM_EXIT=$?
@@ -40,8 +39,9 @@ fi
 # Check if test completed
 if grep -q "XIBALBA_TEST_COMPLETE" "$OUTPUT"; then
     TEST_EXIT=$(grep "^EXIT_CODE=" "$OUTPUT" | cut -d= -f2)
+    FILESYSTEM=$(grep "^FILESYSTEM=" "$OUTPUT" | cut -d= -f2)
     
-    echo "=== Xibalba Fast VM Test: $FILESYSTEM ==="
+    echo "=== Xibalba Fast VM Test: ${FILESYSTEM:-unknown} ==="
     echo ""
     
     # Show test results

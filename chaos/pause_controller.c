@@ -30,17 +30,17 @@
 #include <stdbool.h>
 
 /**
- * Xibalba Error Injector Controller
+ * Xibalba Delay Injector Controller
  * 
- * Controls eBPF error injection for chaos testing.
+ * Controls eBPF delay injection for chaos testing.
  * 
  * This program:
  *   1. Loads the eBPF program
- *   2. Configures error injection probability and error code
- *   3. Monitors how many errors are injected
+ *   2. Configures delay probability, iterations, and max delay
+ *   3. Monitors how many delays are injected
  * 
- * The eBPF program injects errors (like -EAGAIN) to force retries
- * and expose race conditions - TRUE Jepsen-style chaos!
+ * The eBPF program injects microsecond-scale delays in getdents64
+ * to widen race windows and expose concurrency bugs.
  */
 
 static volatile bool keep_running = true;
@@ -55,47 +55,56 @@ int main(int argc, char *argv[]) {
     int err;
     
     if (argc < 3) {
-        fprintf(stderr, "Usage: %s <error_probability_pct> <error_code>\n", argv[0]);
+        fprintf(stderr, "Usage: %s <delay_probability_pct> <delay_iterations> [max_delay_ns]\n", argv[0]);
         fprintf(stderr, "\n");
-        fprintf(stderr, "Error codes:\n");
-        fprintf(stderr, "  11 = EAGAIN  (resource temporarily unavailable - RECOMMENDED)\n");
-        fprintf(stderr, "   4 = EINTR   (interrupted system call)\n");
-        fprintf(stderr, "   2 = ENOENT  (no such file or directory)\n");
+        fprintf(stderr, "Xibalba Delay Injector - Widen Race Windows via eBPF\n");
+        fprintf(stderr, "\n");
+        fprintf(stderr, "Parameters:\n");
+        fprintf(stderr, "  delay_probability_pct  Percent of getdents64 calls to delay (0-100)\n");
+        fprintf(stderr, "  delay_iterations       Loop iterations for busy-wait (1-1000)\n");
+        fprintf(stderr, "  max_delay_ns           Maximum delay in nanoseconds (optional, default 50000)\n");
         fprintf(stderr, "\n");
         fprintf(stderr, "Examples:\n");
-        fprintf(stderr, "  %s 50 11   # 50%% error probability, inject -EAGAIN\n", argv[0]);
-        fprintf(stderr, "  %s 30 4    # 30%% probability, inject -EINTR\n", argv[0]);
+        fprintf(stderr, "  %s 50 500         # 50%% probability, 500 iterations (~5-10μs)\n", argv[0]);
+        fprintf(stderr, "  %s 30 1000 100000 # 30%% probability, 1000 iterations, 100μs max\n", argv[0]);
+        fprintf(stderr, "  %s 100 200        # 100%% probability, minimal delay (aggressive)\n", argv[0]);
         fprintf(stderr, "\n");
-        fprintf(stderr, "The eBPF program will inject errors to force retries.\n");
-        fprintf(stderr, "This expands race windows and makes bugs MUCH more likely!\n");
+        fprintf(stderr, "The eBPF program injects delays to expand race windows.\n");
+        fprintf(stderr, "Even 5-10μs delays make bugs 10,000x more likely to appear!\n");
         return 1;
     }
     
-    uint32_t error_prob = (uint32_t)atoi(argv[1]);
-    uint32_t error_code = (uint32_t)atoi(argv[2]);
+    uint32_t delay_prob = (uint32_t)atoi(argv[1]);
+    uint32_t delay_iterations = (uint32_t)atoi(argv[2]);
+    uint32_t max_delay_ns = 50000;  // Default 50μs
     
-    if (error_prob > 100) {
-        fprintf(stderr, "ERROR: Error probability must be 0-100%%\n");
+    if (argc >= 4) {
+        max_delay_ns = (uint32_t)atoi(argv[3]);
+    }
+    
+    if (delay_prob > 100) {
+        fprintf(stderr, "ERROR: Delay probability must be 0-100%%\n");
         return 1;
     }
     
-    if (error_code == 0) {
-        fprintf(stderr, "ERROR: Error code must be non-zero (try 11 for EAGAIN)\n");
+    if (delay_iterations > 1000) {
+        fprintf(stderr, "ERROR: Delay iterations must be 1-1000 (eBPF verifier limit)\n");
         return 1;
     }
     
-    const char *error_name = "UNKNOWN";
-    if (error_code == 11) error_name = "EAGAIN";
-    else if (error_code == 4) error_name = "EINTR";
-    else if (error_code == 2) error_name = "ENOENT";
+    if (max_delay_ns < 1000 || max_delay_ns > 1000000) {
+        fprintf(stderr, "WARNING: max_delay_ns should be 1000-1000000 (1μs-1ms)\n");
+    }
     
-    printf("=== Xibalba Error Injector ===\n");
-    printf("Error probability: %u%%\n", error_prob);
-    printf("Error code: -%s (%u)\n", error_name, error_code);
+    printf("=== Xibalba Delay Injector ===\n");
+    printf("Configuration:\n");
+    printf("  Delay probability: %u%%\n", delay_prob);
+    printf("  Delay iterations: %u (~%.1fμs)\n", delay_iterations, delay_iterations * 0.01);
+    printf("  Max delay: %u ns (%.1fμs)\n", max_delay_ns, max_delay_ns / 1000.0);
     printf("\n");
-    printf("eBPF will inject errors to force syscall retries.\n");
-    printf("Expected errors/sec: ~%u (if 40K ops/sec baseline)\n", 
-           error_prob * 400);
+    printf("eBPF will inject delays to widen race windows.\n");
+    printf("Expected delays/sec: ~%u (if 40K ops/sec baseline)\n", 
+           delay_prob * 400);
     printf("\n");
     
     // Setup signal handler
@@ -143,7 +152,7 @@ int main(int argc, char *argv[]) {
         }
     }
     
-    // Configure error injection
+    // Configure delay parameters
     printf("Setting configuration...\n");
     int config_fd = bpf_object__find_map_fd_by_name(obj, "config");
     if (config_fd < 0) {
@@ -152,26 +161,41 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
-    // Set error probability
-    uint32_t key = 0;  // CFG_ERROR_PROBABILITY
-    err = bpf_map_update_elem(config_fd, &key, &error_prob, BPF_ANY);
+    // Configuration keys (must match pause_injector.bpf.c)
+    #define CFG_DELAY_PROBABILITY  0
+    #define CFG_DELAY_ITERATIONS   1
+    #define CFG_MAX_DELAY_NS       2
+    
+    // Set delay probability
+    uint32_t key = CFG_DELAY_PROBABILITY;
+    err = bpf_map_update_elem(config_fd, &key, &delay_prob, BPF_ANY);
     if (err) {
-        fprintf(stderr, "ERROR: Failed to set error probability: %d\n", err);
+        fprintf(stderr, "ERROR: Failed to set delay probability: %d\n", err);
         bpf_object__close(obj);
         return 1;
     }
     
-    // Set error code
-    key = 1;  // CFG_ERROR_CODE
-    err = bpf_map_update_elem(config_fd, &key, &error_code, BPF_ANY);
+    // Set delay iterations
+    key = CFG_DELAY_ITERATIONS;
+    err = bpf_map_update_elem(config_fd, &key, &delay_iterations, BPF_ANY);
     if (err) {
-        fprintf(stderr, "ERROR: Failed to set error code: %d\n", err);
+        fprintf(stderr, "ERROR: Failed to set delay iterations: %d\n", err);
         bpf_object__close(obj);
         return 1;
     }
     
-    printf("  ✓ Error probability: %u%%\n", error_prob);
-    printf("  ✓ Error code: -%s\n", error_name);
+    // Set max delay
+    key = CFG_MAX_DELAY_NS;
+    err = bpf_map_update_elem(config_fd, &key, &max_delay_ns, BPF_ANY);
+    if (err) {
+        fprintf(stderr, "ERROR: Failed to set max delay: %d\n", err);
+        bpf_object__close(obj);
+        return 1;
+    }
+    
+    printf("  ✓ Delay probability: %u%%\n", delay_prob);
+    printf("  ✓ Delay iterations: %u\n", delay_iterations);
+    printf("  ✓ Max delay: %u ns\n", max_delay_ns);
     
     // Initialize statistics
     int stats_fd = bpf_object__find_map_fd_by_name(obj, "stats");
@@ -182,12 +206,11 @@ int main(int argc, char *argv[]) {
     }
     
     printf("\n");
-    printf("🌩️  ERROR INJECTOR ACTIVE!\n");
-    printf("   eBPF is now intercepting __x64_sys_getdents64\n");
-    printf("   %u%% of calls will return -%s\n", error_prob, error_name);
-    printf("   This forces retries and expands race windows!\n");
-    printf("\n");
-    printf("   Jepsen-style chaos: Operations fail → Retry → Races exposed!\n");
+    printf("🌩️  DELAY INJECTOR ACTIVE!\n");
+    printf("   eBPF is now intercepting getdents64 syscalls\n");
+    printf("   %u%% of calls will be delayed by ~%.1fμs (max %.1fμs)\n", 
+           delay_prob, delay_iterations * 0.01, max_delay_ns / 1000.0);
+    printf("   This widens race windows and exposes concurrency bugs!\n");
     printf("\n");
     printf("Press Ctrl+C to stop and see statistics\n");
     printf("\n");
@@ -203,7 +226,7 @@ int main(int argc, char *argv[]) {
             if (bpf_map_lookup_elem(stats_fd, &key, &count) == 0) {
                 if (count != last_count) {
                     uint64_t delta = count - last_count;
-                    printf("Errors injected: %lu (+%lu in last 2s = ~%lu/sec)\n", 
+                    printf("Delays injected: %lu (+%lu in last 2s = ~%lu/sec)\n", 
                            count, delta, delta / 2);
                     last_count = count;
                 }
@@ -216,7 +239,7 @@ int main(int argc, char *argv[]) {
         key = 0;
         uint64_t count = 0;
         if (bpf_map_lookup_elem(stats_fd, &key, &count) == 0) {
-            printf("Total errors injected: %lu\n", count);
+            printf("Total delays injected: %lu\n", count);
         }
     }
     
