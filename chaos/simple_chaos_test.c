@@ -62,10 +62,11 @@ typedef struct {
  * This test creates a directory, performs concurrent creates/deletes/reads,
  * and validates that all reads are correct using ground truth state tracking.
  * 
- * Supports multiple consistency models:
- *   --strict:    Linearizable (strictest, finds most bugs)
- *   --weak:      POSIX weak consistency (default)
- *   --eventual:  Eventual consistency (most permissive)
+ * Supports multiple consistency models (from weakest to strictest):
+ *   --posix:         POSIX compliance (only duplicates are bugs) - DEFAULT
+ *   --weak:          POSIX weak (causally-ordered ops should be visible)
+ *   --strict:        Linearizable (all ops instantly visible)
+ *   --eventual:      Eventual (operations may propagate slowly)
  * 
  * With eBPF delays, this should find race conditions.
  * Without delays, stable kernels should show zero bugs (or few with strict model).
@@ -161,8 +162,9 @@ static void *reader_thread(void *arg) {
             // Send bug event to writer thread (lock-free queue push)
             if (state->bug_queue) {
                 const char *model_name = 
-                    state->model == CONSISTENCY_STRICT ? "strict" :
-                    state->model == CONSISTENCY_WEAK_POSIX ? "weak" : "eventual";
+            state->model == CONSISTENCY_POSIX ? "posix" :
+            state->model == CONSISTENCY_WEAK_POSIX ? "weak" :
+            state->model == CONSISTENCY_STRICT ? "strict" : "eventual";
                 
                 uint64_t write_pos = atomic_fetch_add(&state->bug_queue->write_idx, 1);
                 uint64_t slot = write_pos % BUG_QUEUE_SIZE;
@@ -314,17 +316,27 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Xibalba Chaos Test - The Dark House Trial\n");
         fprintf(stderr, "Tests concurrent directory operations with validation.\n");
         fprintf(stderr, "\n");
-        fprintf(stderr, "Options:\n");
-        fprintf(stderr, "  --strict    Strict/linearizable consistency (most bugs detected)\n");
-        fprintf(stderr, "  --weak      POSIX weak consistency (default)\n");
-        fprintf(stderr, "  --eventual  Eventual consistency (only duplicates are bugs)\n");
-        fprintf(stderr, "  --json      Output results as JSON (for benchmarking)\n");
+        fprintf(stderr, "Consistency Models (weakest → strictest):\n");
+        fprintf(stderr, "  --posix          POSIX compliance: only duplicates are bugs (DEFAULT)\n");
+        fprintf(stderr, "  --weak           POSIX weak: causally-ordered ops should be visible\n");
+        fprintf(stderr, "  --strict         Linearizable: all ops instantly visible (research)\n");
+        fprintf(stderr, "  --eventual       Eventual: operations may propagate slowly (distributed FS)\n");
         fprintf(stderr, "\n");
-        fprintf(stderr, "Example:\n");
-        fprintf(stderr, "  mkdir -p /tmp/xibalba_test\n");
-        fprintf(stderr, "  %s /tmp/xibalba_test\n", argv[0]);
-        fprintf(stderr, "  %s --strict /tmp/xibalba_test  # Strictest validation\n", argv[0]);
-        fprintf(stderr, "  %s --json --weak /tmp/test > results.json\n", argv[0]);
+        fprintf(stderr, "Other Options:\n");
+        fprintf(stderr, "  --duration N     Test duration in seconds (default: 60)\n");
+        fprintf(stderr, "  --readers N      Number of reader threads (default: 5)\n");
+        fprintf(stderr, "  --writers N      Number of writer threads (default: 2)\n");
+        fprintf(stderr, "  --json           Output results as JSON\n");
+        fprintf(stderr, "\n");
+        fprintf(stderr, "Examples:\n");
+        fprintf(stderr, "  # POSIX compliance test (should find ~0 bugs on stable kernel):\n");
+        fprintf(stderr, "  %s --posix /tmp/xibalba_test\n", argv[0]);
+        fprintf(stderr, "\n");
+        fprintf(stderr, "  # Causality-based testing (may find POSIX-compliant weak consistency):\n");
+        fprintf(stderr, "  %s --weak /tmp/test\n", argv[0]);
+        fprintf(stderr, "\n");
+        fprintf(stderr, "  # Research mode (find ALL possible races):\n");
+        fprintf(stderr, "  %s --strict --duration 300 /tmp/test\n", argv[0]);
         fprintf(stderr, "\n");
         fprintf(stderr, "With eBPF delays (separate terminal):\n");
         fprintf(stderr, "  bazel run //chaos:pause_controller -- 50 500\n");
@@ -332,7 +344,7 @@ int main(int argc, char *argv[]) {
     }
     
     // Parse arguments
-    consistency_model_t model = CONSISTENCY_WEAK_POSIX;  // Default
+    consistency_model_t model = CONSISTENCY_POSIX;  // Default: POSIX compliance
     const char *test_dir = NULL;
     bool json_output = false;
     int test_duration = DEFAULT_TEST_DURATION;
@@ -340,10 +352,12 @@ int main(int argc, char *argv[]) {
     int num_writers = DEFAULT_NUM_WRITER_THREADS;
     
     for (int i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "--strict") == 0) {
-            model = CONSISTENCY_STRICT;
+        if (strcmp(argv[i], "--posix") == 0) {
+            model = CONSISTENCY_POSIX;
         } else if (strcmp(argv[i], "--weak") == 0) {
             model = CONSISTENCY_WEAK_POSIX;
+        } else if (strcmp(argv[i], "--strict") == 0) {
+            model = CONSISTENCY_STRICT;
         } else if (strcmp(argv[i], "--eventual") == 0) {
             model = CONSISTENCY_EVENTUAL;
         } else if (strcmp(argv[i], "--json") == 0) {
@@ -384,13 +398,15 @@ int main(int argc, char *argv[]) {
     }
     
     const char *model_name = 
+        model == CONSISTENCY_POSIX ? "POSIX Compliance (duplicates only)" :
+        model == CONSISTENCY_WEAK_POSIX ? "POSIX Weak (causally-ordered)" :
         model == CONSISTENCY_STRICT ? "Strict/Linearizable" :
-        model == CONSISTENCY_WEAK_POSIX ? "POSIX Weak" :
         "Eventual";
     
     const char *model_short =
-        model == CONSISTENCY_STRICT ? "strict" :
+        model == CONSISTENCY_POSIX ? "posix" :
         model == CONSISTENCY_WEAK_POSIX ? "weak" :
+        model == CONSISTENCY_STRICT ? "strict" :
         "eventual";
     
     if (!json_output) {

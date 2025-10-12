@@ -269,6 +269,21 @@ validation_result_t tracker_validate_read(state_tracker_t *tracker,
         
         // Apply consistency model rules using CAUSALITY
         switch (model) {
+            case CONSISTENCY_POSIX:
+                // POSIX MINIMAL: Only what POSIX.1-2024 explicitly forbids
+                //
+                // From POSIX spec on readdir():
+                //   "The same file shall not be returned twice within a single traversal."
+                //
+                // Everything else (missing, phantom) is "unspecified" = NOT a bug!
+                //
+                // This is the MINIMUM compliance test - only duplicates are bugs.
+                // Missing/phantom entries are POSIX-compliant behavior!
+                //
+                // Use this to verify ext4/XFS/btrfs are POSIX-compliant without
+                // false positives from stricter consistency assumptions.
+                break;
+                
             case CONSISTENCY_STRICT:
                 // STRICT/Linearizable: If create happens-before read, file MUST be visible
                 if (create_happens_before_read) {
@@ -328,7 +343,11 @@ validation_result_t tracker_validate_read(state_tracker_t *tracker,
         }
         
         // File was read but never created = phantom!
-        if (!found_in_tracker && model != CONSISTENCY_EVENTUAL) {
+        // Only check for WEAK_POSIX and STRICT models
+        // POSIX and EVENTUAL models: phantom entries are allowed
+        if (!found_in_tracker && 
+            model != CONSISTENCY_EVENTUAL && 
+            model != CONSISTENCY_POSIX) {
             result.phantom_entries++;
             result.total_bugs_found++;
         }
