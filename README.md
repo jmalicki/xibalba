@@ -162,7 +162,7 @@ But if your code survives—like the Hero Twins—it doesn't just work. It has b
 - **📝 [VM Permissions](docs/VM-PERMISSIONS.md)** - Permission setup details
 
 **Bug Research** (Validation):
-- **🐛 [Bug Research](docs/bug-research/)** - Real-world filesystem bugs catalog (16+ bugs from 2018-2025)
+- **🐛 [Bug Research](docs/bug-research/README.md)** - Real-world filesystem bugs catalog (16+ bugs from 2018-2025)
   - Research on bugs that evaded detection for years
   - Test implementation plans with code examples
   - Gap analysis: What Xibalba can detect now vs. what's needed
