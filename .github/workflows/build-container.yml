@@ -1,0 +1,140 @@
+name: Build and Cache CI Container
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'MODULE.bazel.lock'
+      - 'tools/ci/docker/packages.lock.json'
+      - 'tools/ci/docker/**'
+      - '.github/workflows/build-container.yml'
+  pull_request:
+    paths:
+      - 'MODULE.bazel.lock'
+      - 'tools/ci/docker/packages.lock.json'
+      - 'tools/ci/docker/**'
+      - '.github/workflows/build-container.yml'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/xibalba-dev-env
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-container:
+    runs-on: ubuntu-latest
+    
+    outputs:
+      cache-key: ${{ steps.cache-key.outputs.key }}
+      image-tag: ${{ steps.cache-key.outputs.tag }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate cache key
+        id: cache-key
+        run: |
+          CACHE_KEY=$(cat MODULE.bazel.lock tools/ci/docker/packages.lock.json | sha256sum | cut -c1-16)
+          IMAGE_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:cache-${CACHE_KEY}"
+          echo "key=${CACHE_KEY}" >> $GITHUB_OUTPUT
+          echo "tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+          echo "📝 Cache key: ${CACHE_KEY}"
+          echo "🏷️  Image tag: ${IMAGE_TAG}"
+
+      - name: Check if image exists
+        id: check-image
+        run: |
+          IMAGE_TAG="${{ steps.cache-key.outputs.tag }}"
+          
+          # Try to pull the manifest (doesn't download layers)
+          if docker manifest inspect "${IMAGE_TAG}" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "✅ Image exists in GHCR: ${IMAGE_TAG}"
+            echo "   Skipping build (cache hit!)"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "❌ Image not found in GHCR: ${IMAGE_TAG}"
+            echo "   Will build with Bazel"
+          fi
+
+      - name: Setup Bazel
+        if: steps.check-image.outputs.exists == 'false'
+        uses: bazel-contrib/setup-bazel@0.8.1
+        with:
+          bazelisk-version: '1.x'
+
+      - name: Build container with Bazel
+        if: steps.check-image.outputs.exists == 'false'
+        run: |
+          echo "📦 Building container with Bazel..."
+          bazel build //tools/ci/docker:xibalba_dev_env_tarball
+          
+          echo "🐳 Loading into Docker..."
+          docker load < bazel-bin/tools/ci/docker/xibalba_dev_env_tarball/tarball.tar
+          
+          echo "✅ Build complete"
+
+      - name: Log in to GHCR
+        if: steps.check-image.outputs.exists == 'false'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Tag and push to GHCR
+        if: steps.check-image.outputs.exists == 'false'
+        run: |
+          CACHE_TAG="${{ steps.cache-key.outputs.tag }}"
+          LATEST_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+          
+          echo "🏷️  Tagging images..."
+          docker tag xibalba-dev:local "${CACHE_TAG}"
+          
+          echo "⬆️  Pushing cache-tagged image..."
+          docker push "${CACHE_TAG}"
+          
+          # Only push :latest from main branch
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "⬆️  Pushing :latest tag..."
+            docker tag xibalba-dev:local "${LATEST_TAG}"
+            docker push "${LATEST_TAG}"
+          fi
+          
+          echo "✅ Pushed to GHCR:"
+          echo "   ${CACHE_TAG}"
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "   ${LATEST_TAG}"
+          fi
+
+      - name: Verify image
+        run: |
+          IMAGE_TAG="${{ steps.cache-key.outputs.tag }}"
+          echo "🔍 Verifying image..."
+          docker manifest inspect "${IMAGE_TAG}"
+          echo "✅ Image verified in GHCR"
+
+      - name: Summary
+        run: |
+          echo "### Container Build Summary 🎉" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Cache Key:** \`${{ steps.cache-key.outputs.key }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Image Tag:** \`${{ steps.cache-key.outputs.tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.check-image.outputs.exists }}" == "true" ]; then
+            echo "**Status:** ✅ Cache HIT - Reused existing image" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**Status:** 🔨 Cache MISS - Built and pushed new image" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Pull command:**" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ${{ steps.cache-key.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+

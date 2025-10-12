@@ -42,16 +42,9 @@ use_repo(oci, "distroless_base", "ubuntu_base")
 
 # Configure apt package sources for CI dev environment
 apt = use_extension("@rules_distroless//apt:extensions.bzl", "apt")
-
-# Test with noble example (exact copy from rules_distroless)
-apt.install(
-    name = "test_noble",
-    lock = "//test_noble:noble.lock.json",
-    manifest = "//test_noble:noble.yaml",
-)
 apt.install(
     name = "ubuntu_packages",
     lock = "//tools/ci/docker:packages.lock.json",
     manifest = "//tools/ci/docker:packages.yaml",
 )
-use_repo(apt, "test_noble", "ubuntu_packages")
+use_repo(apt, "ubuntu_packages")
