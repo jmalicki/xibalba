@@ -220,7 +220,7 @@ void create_output_files(const char *test_dir, char *bugs_file, char *progress_f
 
 ## References
 
-- `chaos/simple_chaos_test.c` - Main test binary
-- `vm/qemu/init.sh` - VM test wrapper (handles output redirection)
-- `docs/TESTING-GUIDE.md` - User-facing documentation
+- [`chaos/simple_chaos_test.c`](../../chaos/simple_chaos_test.c) - Main test binary
+- [`vm/qemu/init.sh`](../../vm/qemu/init.sh) - VM test wrapper (handles output redirection)
+- [`docs/TESTING-GUIDE.md`](../TESTING-GUIDE.md) - User-facing documentation
 

@@ -194,7 +194,7 @@ This means vector clock overhead is **negligible** compared to actual directory 
 
 ## Testing
 
-Comprehensive test suite in `common/vector_clock_test.cc`:
+Comprehensive test suite in [`common/vector_clock_test.cc`](../../common/vector_clock_test.cc):
 
 ### Critical Tests
 - **ZeroCollisionsWithTLS**: Spawns 10 real threads, verifies unique indices (PASSES ✅)
@@ -234,9 +234,9 @@ Jepsen (distributed systems testing) uses the same approach for detecting linear
 
 ## References
 
-- `common/vector_clock.h` - API documentation
-- `common/vector_clock.c` - Implementation
-- `common/vector_clock_test.cc` - Comprehensive test suite
-- `docs/DEBUGGING-VALIDATION-BUGS.md` - Bug discovery process
+- [`common/vector_clock.h`](../../common/vector_clock.h) - API documentation
+- [`common/vector_clock.c`](../../common/vector_clock.c) - Implementation
+- [`common/vector_clock_test.cc`](../../common/vector_clock_test.cc) - Comprehensive test suite
+- [`docs/DEBUGGING-VALIDATION-BUGS.md`](../DEBUGGING-VALIDATION-BUGS.md) - Bug discovery process
 - [Jepsen.io](https://jepsen.io/) - Real-world distributed systems testing
 
