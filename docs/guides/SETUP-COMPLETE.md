@@ -1,6 +1,6 @@
 # Xibalba Setup Complete! 🎉
 
-**Repository**: https://github.com/jmalicki/xibalba-chaos
+**Repository**: https://github.com/jmalicki/xibalba
 
 **Status**: ✅ Ready for implementation
 
@@ -9,7 +9,7 @@
 ## What's Been Created
 
 ### ✅ GitHub Repository
-- **Public repository**: jmalicki/xibalba-chaos
+- **Public repository**: jmalicki/xibalba
 - **SSH enabled**: Can push/pull via SSH
 - **Topics**: chaos-engineering, ebpf, testing, kernel, filesystem, jepsen, concurrency, race-detection
 
@@ -145,7 +145,7 @@ bazel coverage //...
 **Build configuration**: 839 lines
 
 **Branches**: main
-**Remote**: origin (git@github.com:jmalicki/xibalba-chaos.git)
+**Remote**: origin (git@github.com:jmalicki/xibalba.git)
 
 ---
 
@@ -153,8 +153,8 @@ bazel coverage //...
 
 ### 1. Clone the Repository
 ```bash
-git clone git@github.com:jmalicki/xibalba-chaos.git
-cd xibalba-chaos
+git clone git@github.com:jmalicki/xibalba.git
+cd xibalba
 ```
 
 ### 2. Install Pre-commit
@@ -249,7 +249,7 @@ pre-commit run clang-format          # Format C code
 
 ## Status
 
-✅ **Repository created**: https://github.com/jmalicki/xibalba-chaos
+✅ **Repository created**: https://github.com/jmalicki/xibalba
 
 ✅ **Build system**: Bazel with maximum safety
 

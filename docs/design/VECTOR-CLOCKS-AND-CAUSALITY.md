@@ -49,7 +49,7 @@ if (happens_before(file->create_vc, read_vc)) {
 1. **Lamport, Leslie (1978)**  
    *"Time, Clocks, and the Ordering of Events in a Distributed System"*  
    Communications of the ACM, 21(7):558-565  
-   DOI: [10.1145/359545.359563](https://doi.org/10.1145/359545.359563)  
+   [PDF](https://lamport.azurewebsites.net/pubs/time-clocks.pdf) | [DOI](https://doi.org/10.1145/359545.359563)  
    - **Foundation**: Defines happens-before (→) relation
    - **Key insight**: Logical time instead of physical time
    - **Lamport timestamps**: Simple scalar clocks
@@ -57,12 +57,15 @@ if (happens_before(file->create_vc, read_vc)) {
 2. **Fidge, Colin J. (1988)**  
    *"Timestamps in Message-Passing Systems That Preserve the Partial Ordering"*  
    Proceedings of the 11th Australian Computer Science Conference, pp. 56-66  
+   *(Original conference paper not freely available online)*  
+   See also: Fidge (1991) "Logical Time in Distributed Computing Systems" - [ResearchGate](https://www.researchgate.net/publication/2888264_Logical_Time_in_Distributed_Computing_Systems)  
    - **Contribution**: Vector clock algorithm
    - **Improvement**: Detects concurrency (Lamport can't)
 
 3. **Mattern, Friedemann (1988)**  
    *"Virtual Time and Global States of Distributed Systems"*  
    Workshop on Parallel and Distributed Algorithms  
+   [PDF](https://www.vs.inf.ethz.ch/publ/papers/VirtTimeGlobStates.pdf) | [DOI](https://doi.org/10.1016/0167-8191(89)90088-6)  
    - **Independent**: Discovered vector clocks simultaneously
    - **Theory**: Formal proofs of correctness
 
@@ -76,10 +79,11 @@ if (happens_before(file->create_vc, read_vc)) {
    - **Linearizability**: Detecting consistency violations
    - **Our approach**: Adapted for filesystem testing
 
-5. **Burckhardt, Sebastian et al. (2014)**  
+5. **Burckhardt, Sebastian et al. (2010)**  
    *"Line-Up: A Complete and Automatic Linearizability Checker"*  
    PLDI 2010  
-   DOI: [10.1145/1806596.1806634](https://doi.org/10.1145/1806596.1806634)  
+   [Author's page](https://www.microsoft.com/en-us/research/people/sburckha/) | [DOI](https://doi.org/10.1145/1806596.1806634)  
+   *(PDF access may require ACM membership)*  
    - **Technique**: Automated linearizability testing
    - **Relevance**: Similar validation approach
 
@@ -322,18 +326,18 @@ https://gsd.di.uminho.pt/members/cbm/ps/itc2008.pdf
 ## Further Reading
 
 **Distributed Systems**:
-- Lamport, L. (1978). "Time, Clocks, and the Ordering of Events"
-- Mattern, F. (1989). "Virtual Time and Global States"
-- Fidge, C. (1988). "Timestamps in Message-Passing Systems"
+- Lamport, L. (1978). "Time, Clocks, and the Ordering of Events" - [PDF](https://lamport.azurewebsites.net/pubs/time-clocks.pdf) | [DOI](https://doi.org/10.1145/359545.359563)
+- Mattern, F. (1988). "Virtual Time and Global States" - [PDF](https://www.vs.inf.ethz.ch/publ/papers/VirtTimeGlobStates.pdf) | [DOI](https://doi.org/10.1016/0167-8191(89)90088-6)
+- Fidge, C. (1991). "Logical Time in Distributed Computing Systems" - [ResearchGate](https://www.researchgate.net/publication/2888264_Logical_Time_in_Distributed_Computing_Systems)
 
 **Testing & Verification**:
-- Kingsbury, K. Jepsen.io blog series
-- Burckhardt et al. (2010). "Line-Up: Linearizability Checker"
-- Herlihy & Wing (1990). "Linearizability: A Correctness Condition"
+- Kingsbury, K. [Jepsen.io blog series](https://jepsen.io/consistency)
+- Burckhardt et al. (2010). "Line-Up: Linearizability Checker" - [DOI](https://doi.org/10.1145/1806596.1806634)
+- Herlihy & Wing (1990). "Linearizability: A Correctness Condition" - [PDF](https://cs.brown.edu/~mph/HerlihyW90/p463-herlihy.pdf) | [DOI](https://doi.org/10.1145/78969.78972)
 
 **Implementation Guides**:
-- Raynal & Singhal (1996). "Logical Time: Capturing Causality in Distributed Systems"
-- Schwarz & Mattern (1994). "Detecting Causal Relationships in Distributed Computations"
+- Raynal & Singhal (1996). "Logical Time: Capturing Causality in Distributed Systems" - [DOI](https://doi.org/10.1109/2.485846)
+- Schwarz & Mattern (1994). "Detecting Causal Relationships in Distributed Computations" - [DOI](https://doi.org/10.1016/0167-8191(94)90001-9)
 
 ---
 

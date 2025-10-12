@@ -360,7 +360,7 @@ jq '.results.bugs_found' with-delays.json
 ## References
 
 **Academic Papers**:
-- Lamport (1978): https://doi.org/10.1145/359545.359563
+- Lamport (1978): [PDF](https://lamport.azurewebsites.net/pubs/time-clocks.pdf) | [DOI](https://doi.org/10.1145/359545.359563)
 - Fidge (1988): Vector Clocks
 - Mattern (1989): Virtual Time
 - Herlihy & Wing (1990): Linearizability
