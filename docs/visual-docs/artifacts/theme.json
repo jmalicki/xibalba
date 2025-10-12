@@ -1,0 +1,44 @@
+{
+  "theme": {
+    "name": "Maya Underworld - Xibalba",
+    "description": "Journey through the Maya underworld where code faces trials of the death gods",
+    "style": "Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes",
+    "metaphor": "Testing as trials in Xibalba (Maya underworld), race conditions as battles with death gods, bugs as supernatural challenges, filesystem as the six houses of torment",
+    "color_palette": [
+      "Deep jade green",
+      "Blood red",
+      "Obsidian black", 
+      "Golden yellow",
+      "Turquoise blue"
+    ],
+    "visual_elements": [
+      "Maya pyramids and temples",
+      "Death gods (Lords of Xibalba)",
+      "Hero twins navigating trials",
+      "Sacred cenotes and underground rivers",
+      "Hieroglyphic writing and codex art",
+      "Jaguar warriors and supernatural beings",
+      "Six houses of torment (House of Darkness, House of Knives, etc.)",
+      "Sacred ball game court",
+      "Plumed serpent (Kukulkan)",
+      "Cave systems and underground passages"
+    ],
+    "iconography": [
+      "Maya pyramids and temples",
+      "Death gods (Lords of Xibalba)",
+      "Hero twins navigating trials",
+      "Sacred cenotes and underground rivers",
+      "Hieroglyphic writing and codex art",
+      "Jaguar warriors and supernatural beings",
+      "Six houses of torment (House of Darkness, House of Knives, etc.)",
+      "Sacred ball game court",
+      "Plumed serpent (Kukulkan)",
+      "Cave systems and underground passages"
+    ],
+    "tone": "Epic mythological journey with danger, mystery, and ancient wisdom",
+    "cultural_notes": "Respectful representation of Maya mythology, authentic glyphs and iconography"
+  },
+  "created_at": "2025-10-12T00:00:00",
+  "version": "1.0"
+}
+

@@ -1,0 +1,1982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xibalba: The Maya Underworld of Chaos Testing - Visual Documentation Gallery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e6ed;
+            line-height: 1.8;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            padding: 80px 20px 60px;
+            background: linear-gradient(135deg, #e94560 0%, #533483 100%);
+            color: white;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            font-weight: 300;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-top: 40px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: 300;
+            color: #ecf0f1;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        .concept {
+            margin-bottom: 100px;
+            page-break-inside: avoid;
+        }
+
+        /* ELEVATED DOCUMENTATION TEXT */
+        .doc-text {
+            background: rgba(255, 255, 255, 0.98);
+            padding: 50px 60px;
+            margin-bottom: 40px;
+            border-left: 6px solid #ffd700;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            border-radius: 4px;
+        }
+
+        .doc-text h2 {
+            font-size: 2.5em;
+            margin-bottom: 25px;
+            color: #2c3e50;
+            font-weight: 400;
+            line-height: 1.3;
+        }
+
+        .doc-text .doc-content {
+            font-size: 1.15em;
+            line-height: 1.9;
+            color: #34495e;
+            font-family: 'Georgia', serif;
+        }
+
+        .doc-text .doc-content p {
+            margin-bottom: 1em;
+        }
+
+        .doc-text .doc-content strong {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .doc-text .doc-content code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #e74c3c;
+        }
+
+        .doc-text .doc-content ul, .doc-text .doc-content ol {
+            margin-left: 2em;
+            margin-bottom: 1em;
+        }
+
+        .doc-text .doc-content li {
+            margin-bottom: 0.5em;
+        }
+
+        /* VISUAL INTERPRETATION - SECONDARY */
+        .visual-interpretation {
+            background: rgba(52, 73, 94, 0.4);
+            padding: 30px 40px;
+            margin-bottom: 30px;
+            border-left: 4px solid #e94560;
+            border-radius: 4px;
+            backdrop-filter: blur(10px);
+        }
+
+        .visual-interpretation h3 {
+            font-size: 1.2em;
+            color: #ffd700;
+            margin-bottom: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .visual-interpretation-text {
+            font-size: 1.05em;
+            color: #e0e6ed;
+            font-style: italic;
+            line-height: 1.7;
+        }
+
+        /* GENERATED IMAGES - PROMINENT */
+        .images-section {
+            margin-bottom: 30px;
+        }
+
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .image-card {
+            background: rgba(22, 33, 62, 0.8);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .image-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 35px rgba(233, 69, 96, 0.4);
+        }
+
+        .image-card img {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .image-info {
+            padding: 15px;
+            background: rgba(22, 33, 62, 0.9);
+        }
+
+        .image-title {
+            font-size: 0.95em;
+            color: #ffd700;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .image-filename {
+            font-size: 0.8em;
+            color: #95a5a6;
+            font-family: 'Monaco', 'Courier New', monospace;
+        }
+
+        /* TECHNICAL DETAILS - COLLAPSIBLE */
+        .technical-details {
+            margin-bottom: 20px;
+        }
+
+        .details-toggle {
+            background: rgba(52, 73, 94, 0.3);
+            padding: 15px 25px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.95em;
+            color: #95a5a6;
+            user-select: none;
+            transition: background 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .details-toggle:hover {
+            background: rgba(52, 73, 94, 0.5);
+            color: #bdc3c7;
+        }
+
+        .details-toggle::before {
+            content: "▶ ";
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+
+        .details-toggle.open::before {
+            transform: rotate(90deg);
+        }
+
+        .details-content {
+            display: none;
+            padding: 20px 25px;
+            background: rgba(22, 33, 62, 0.4);
+            border-left: 3px solid #e94560;
+            margin-top: 5px;
+            border-radius: 0 0 4px 4px;
+        }
+
+        .details-content.open {
+            display: block;
+        }
+
+        .prompt-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(22, 33, 62, 0.6);
+            border-radius: 4px;
+            border-left: 3px solid #ffd700;
+        }
+
+        .prompt-title {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #ffd700;
+            margin-bottom: 8px;
+        }
+
+        .prompt-text {
+            font-size: 0.85em;
+            color: #b0b8c0;
+            line-height: 1.6;
+            font-family: 'Monaco', 'Courier New', monospace;
+        }
+
+        /* LIGHTBOX */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .lightbox.active {
+            display: flex;
+        }
+
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            box-shadow: 0 0 60px rgba(255, 255, 255, 0.1);
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 30px;
+            right: 40px;
+            font-size: 3em;
+            color: white;
+            cursor: pointer;
+            z-index: 10000;
+        }
+
+        .lightbox-info {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px 30px;
+            border-radius: 4px;
+            text-align: center;
+            color: white;
+        }
+
+        .lightbox-title {
+            font-size: 1.2em;
+            margin-bottom: 8px;
+        }
+
+        .lightbox-filename {
+            font-size: 0.9em;
+            opacity: 0.7;
+            font-family: 'Monaco', monospace;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .doc-text {
+                padding: 30px 25px;
+            }
+
+            .doc-text h2 {
+                font-size: 1.8em;
+            }
+
+            .images-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Xibalba: The Maya Underworld of Chaos Testing</h1>
+        <div class="subtitle">Visual Documentation Gallery</div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number">20</div>
+                <div class="stat-label">Sections</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">65</div>
+                <div class="stat-label">Images</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+    
+        <div class="concept" id="xibalba-chaos-testing-framework-for-linux-kernel-f">
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>Xibalba: Chaos Testing Framework for Linux Kernel Filesystems</h2>
+                <div class="doc-content"><p>This section covers the implementation and usage of Xibalba, a chaos testing framework for Linux kernel filesystems, integrating with eBPF build and CI processes.</p></div>
+            </div>
+
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Depict a scene of the Hero Twins navigating through the House of Darkness, where filesystem chaos testing is represented by supernatural shadows and darkness, and the chaos testing framework is symbolized by the Twins' determination to overcome the darkness.</div>
+            </div>
+
+            <!-- GENERATED IMAGES -->
+            <div class="images-section">
+                <div class="images-grid">
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/xibalba-chaos-testing-framework-for-linux-kernel-f-01.png', 'Twins in Peril', 'xibalba-chaos-testing-framework-for-linux-kernel-f-01.png')">
+                        <img src="images/xibalba-chaos-testing-framework-for-linux-kernel-f-01.png" alt="Twins in Peril" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Twins in Peril</div>
+                            <div class="image-filename">xibalba-chaos-testing-framework-for-linux-kernel-f-01.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/xibalba-chaos-testing-framework-for-linux-kernel-f-02.png', 'Shadows on the Wall', 'xibalba-chaos-testing-framework-for-linux-kernel-f-02.png')">
+                        <img src="images/xibalba-chaos-testing-framework-for-linux-kernel-f-02.png" alt="Shadows on the Wall" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Shadows on the Wall</div>
+                            <div class="image-filename">xibalba-chaos-testing-framework-for-linux-kernel-f-02.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/xibalba-chaos-testing-framework-for-linux-kernel-f-03.png', 'Twins' Resolve', 'xibalba-chaos-testing-framework-for-linux-kernel-f-03.png')">
+                        <img src="images/xibalba-chaos-testing-framework-for-linux-kernel-f-03.png" alt="Twins' Resolve" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Twins' Resolve</div>
+                            <div class="image-filename">xibalba-chaos-testing-framework-for-linux-kernel-f-03.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/xibalba-chaos-testing-framework-for-linux-kernel-f-04.png', 'Darkness Descending', 'xibalba-chaos-testing-framework-for-linux-kernel-f-04.png')">
+                        <img src="images/xibalba-chaos-testing-framework-for-linux-kernel-f-04.png" alt="Darkness Descending" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Darkness Descending</div>
+                            <div class="image-filename">xibalba-chaos-testing-framework-for-linux-kernel-f-04.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/xibalba-chaos-testing-framework-for-linux-kernel-f-05.png', 'Glyphs of Triumph', 'xibalba-chaos-testing-framework-for-linux-kernel-f-05.png')">
+                        <img src="images/xibalba-chaos-testing-framework-for-linux-kernel-f-05.png" alt="Glyphs of Triumph" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Glyphs of Triumph</div>
+                            <div class="image-filename">xibalba-chaos-testing-framework-for-linux-kernel-f-05.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/xibalba-chaos-testing-framework-for-linux-kernel-f-06.png', 'The Shadow Test', 'xibalba-chaos-testing-framework-for-linux-kernel-f-06.png')">
+                        <img src="images/xibalba-chaos-testing-framework-for-linux-kernel-f-06.png" alt="The Shadow Test" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">The Shadow Test</div>
+                            <div class="image-filename">xibalba-chaos-testing-framework-for-linux-kernel-f-06.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/xibalba-chaos-testing-framework-for-linux-kernel-f-07.png', 'Cenote of Courage', 'xibalba-chaos-testing-framework-for-linux-kernel-f-07.png')">
+                        <img src="images/xibalba-chaos-testing-framework-for-linux-kernel-f-07.png" alt="Cenote of Courage" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Cenote of Courage</div>
+                            <div class="image-filename">xibalba-chaos-testing-framework-for-linux-kernel-f-07.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/xibalba-chaos-testing-framework-for-linux-kernel-f-08.png', 'The Abyss Stares Back', 'xibalba-chaos-testing-framework-for-linux-kernel-f-08.png')">
+                        <img src="images/xibalba-chaos-testing-framework-for-linux-kernel-f-08.png" alt="The Abyss Stares Back" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">The Abyss Stares Back</div>
+                            <div class="image-filename">xibalba-chaos-testing-framework-for-linux-kernel-f-08.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/xibalba-chaos-testing-framework-for-linux-kernel-f-09.png', 'Twins' Unity', 'xibalba-chaos-testing-framework-for-linux-kernel-f-09.png')">
+                        <img src="images/xibalba-chaos-testing-framework-for-linux-kernel-f-09.png" alt="Twins' Unity" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Twins' Unity</div>
+                            <div class="image-filename">xibalba-chaos-testing-framework-for-linux-kernel-f-09.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/xibalba-chaos-testing-framework-for-linux-kernel-f-10.png', 'Into the Abyss', 'xibalba-chaos-testing-framework-for-linux-kernel-f-10.png')">
+                        <img src="images/xibalba-chaos-testing-framework-for-linux-kernel-f-10.png" alt="Into the Abyss" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Into the Abyss</div>
+                            <div class="image-filename">xibalba-chaos-testing-framework-for-linux-kernel-f-10.png</div>
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('xibalba-chaos-testing-framework-for-linux-kernel-f')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details-xibalba-chaos-testing-framework-for-linux-kernel-f">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Twins in Peril</div>
+                        <div class="prompt-text">Hero Twins standing back-to-back against swirling supernatural shadows - House of Darkness, Ancient Maya mythology art style, dramatic underworld scene, foreground shadows overpowering background, vivid blues and purples, ominous mood</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Shadows on the Wall</div>
+                        <div class="prompt-text">Hero Twins approaching a wall covered in eerie supernatural shadows - House of Darkness, Ancient Maya mythology art style, intricate glyphs on the wall, mid-ground focus on Twins' determined expressions, warm golden lighting, foreboding mood</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Twins' Resolve</div>
+                        <div class="prompt-text">Close-up of Hero Twins back-to-back, gazing into the darkness - House of Darkness, Ancient Maya mythology art style, vibrant colors, warm golden lighting, foreground Twins, background a dark abyss, strong heroic mood</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Darkness Descending</div>
+                        <div class="prompt-text">Hero Twins looking up at a churning vortex of supernatural darkness - House of Darkness, Ancient Maya mythology art style, dramatic underworld scene, background darkness enveloping the Twins, foreground focus on their determined stances, cool blues and purples, ominous mood</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Glyphs of Triumph</div>
+                        <div class="prompt-text">Hero Twins standing victorious amidst a backdrop of supernatural shadows, surrounded by Ancient Maya glyphs - House of Darkness, Ancient Maya mythology art style, dramatic underworld scene, foreground focus on the Twins, background darkening shadows, warm golden lighting, triumphant mood</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">The Shadow Test</div>
+                        <div class="prompt-text">Hero Twins navigating through a maze of supernatural shadows - House of Darkness, Ancient Maya mythology art style, intricate glyphs on the shadows, mid-ground focus on the Twins' determined expressions, cool blues and purples, challenging mood</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Cenote of Courage</div>
+                        <div class="prompt-text">Hero Twins standing at the edge of a sacred cenote, surrounded by swirling supernatural shadows - House of Darkness, Ancient Maya mythology art style, vibrant colors, warm golden lighting, foreground cenote, background a dark underworld, bold heroic mood</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">The Abyss Stares Back</div>
+                        <div class="prompt-text">Hero Twins gazing into the dark abyss of the House of Darkness - House of Darkness, Ancient Maya mythology art style, dramatic underworld scene, background darkness staring back at the Twins, foreground focus on their determined stances, cool blues and purples, ominous mood</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Twins' Unity</div>
+                        <div class="prompt-text">Hero Twins standing back-to-back, hands clasped in unity against the supernatural shadows - House of Darkness, Ancient Maya mythology art style, intricate glyphs on the Twins' clothing, mid-ground focus on their hands clasped in unity, warm golden lighting, strong heroic mood</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Into the Abyss</div>
+                        <div class="prompt-text">Hero Twins stepping forward into the dark abyss of the House of Darkness - House of Darkness, Ancient Maya mythology art style, dramatic underworld scene, background darkness enveloping the Twins, foreground focus on their determined stances, cool blues and purples, ominous mood</div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    
+        <div class="concept" id="what-is-xibalba">
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>What is Xibalba?</h2>
+                <div class="doc-content"><p>This section introduces Xibalba, a chaos testing framework for Linux kernel filesystem code, highlighting its ability to uncover subtle bugs under concurrent access.</p></div>
+            </div>
+
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Illustrate Xibalba as the entrance to the underworld of code, with a grand Maya temple serving as the gateway to the six houses of torment, where filesystem code is tested against the chaos of concurrent access.</div>
+            </div>
+
+            <!-- GENERATED IMAGES -->
+            <div class="images-section">
+                <div class="images-grid">
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/what-is-xibalba-01.png', 'Xibalba Entrance', 'what-is-xibalba-01.png')">
+                        <img src="images/what-is-xibalba-01.png" alt="Xibalba Entrance" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Xibalba Entrance</div>
+                            <div class="image-filename">what-is-xibalba-01.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/what-is-xibalba-02.png', 'Concurrent Chaos', 'what-is-xibalba-02.png')">
+                        <img src="images/what-is-xibalba-02.png" alt="Concurrent Chaos" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Concurrent Chaos</div>
+                            <div class="image-filename">what-is-xibalba-02.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/what-is-xibalba-03.png', 'Six Houses of Torment', 'what-is-xibalba-03.png')">
+                        <img src="images/what-is-xibalba-03.png" alt="Six Houses of Torment" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Six Houses of Torment</div>
+                            <div class="image-filename">what-is-xibalba-03.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/what-is-xibalba-04.png', 'Death Gods Watching', 'what-is-xibalba-04.png')">
+                        <img src="images/what-is-xibalba-04.png" alt="Death Gods Watching" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Death Gods Watching</div>
+                            <div class="image-filename">what-is-xibalba-04.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/what-is-xibalba-05.png', 'Hero Twins Confront Death', 'what-is-xibalba-05.png')">
+                        <img src="images/what-is-xibalba-05.png" alt="Hero Twins Confront Death" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Hero Twins Confront Death</div>
+                            <div class="image-filename">what-is-xibalba-05.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/what-is-xibalba-06.png', 'Code Lines as Glyphs', 'what-is-xibalba-06.png')">
+                        <img src="images/what-is-xibalba-06.png" alt="Code Lines as Glyphs" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Code Lines as Glyphs</div>
+                            <div class="image-filename">what-is-xibalba-06.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/what-is-xibalba-07.png', 'Xibalba's Chaos', 'what-is-xibalba-07.png')">
+                        <img src="images/what-is-xibalba-07.png" alt="Xibalba's Chaos" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Xibalba's Chaos</div>
+                            <div class="image-filename">what-is-xibalba-07.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/what-is-xibalba-08.png', 'Plumed Serpent's Guidance', 'what-is-xibalba-08.png')">
+                        <img src="images/what-is-xibalba-08.png" alt="Plumed Serpent's Guidance" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Plumed Serpent's Guidance</div>
+                            <div class="image-filename">what-is-xibalba-08.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/what-is-xibalba-09.png', 'Cenote Entrance to Xibalba', 'what-is-xibalba-09.png')">
+                        <img src="images/what-is-xibalba-09.png" alt="Cenote Entrance to Xibalba" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Cenote Entrance to Xibalba</div>
+                            <div class="image-filename">what-is-xibalba-09.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/what-is-xibalba-10.png', 'Jaguar Warriors in Xibalba', 'what-is-xibalba-10.png')">
+                        <img src="images/what-is-xibalba-10.png" alt="Jaguar Warriors in Xibalba" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Jaguar Warriors in Xibalba</div>
+                            <div class="image-filename">what-is-xibalba-10.png</div>
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('what-is-xibalba')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details-what-is-xibalba">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Xibalba Entrance</div>
+                        <div class="prompt-text">Maya temple entrance - grand gateway to the underworld, Death gods watching from shadows, hieroglyphic writing on stone walls, vibrant colors, warm sunlight, ominous mood</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Concurrent Chaos</div>
+                        <div class="prompt-text">Hero twins navigating trials - battling Death gods under chaotic filesystem access, Maya pyramid crumbling in background, hieroglyphic glyphs of code lines, intense colors, dramatic lighting, sense of urgency</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Six Houses of Torment</div>
+                        <div class="prompt-text">Inside the six houses of torment - dark corridors and doorways, Death gods guarding each path, hieroglyphic writing condemning code to failure, cool blue tones, foreboding mood</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Death Gods Watching</div>
+                        <div class="prompt-text">Death gods observing from above - wise, yet menacing, hieroglyphic symbols of chaos and code failure, grand Maya pyramid in background, cool colors, sense of foreboding</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Hero Twins Confront Death</div>
+                        <div class="prompt-text">Hero twins facing Death gods - bold, vibrant colors, intricate hieroglyphic writing, dramatic lighting, sense of heroism, grand Maya temple in background</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Code Lines as Glyphs</div>
+                        <div class="prompt-text">Code lines transformed into hieroglyphic writing - swirling patterns of ones and zeros, Death gods lurking in shadows, grand Maya pyramid in background, dark colors, ominous mood</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Xibalba's Chaos</div>
+                        <div class="prompt-text">Chaos testing in Xibalba - filesystem code under stress, Death gods manipulating threads, hieroglyphic symbols of code failure, intense colors, dramatic lighting, sense of urgency</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Plumed Serpent's Guidance</div>
+                        <div class="prompt-text">Plumed serpent Kukulkan guiding hero twins - wise, benevolent, hieroglyphic symbols of guidance, grand Maya pyramid in background, warm colors, sense of hope</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Cenote Entrance to Xibalba</div>
+                        <div class="prompt-text">Sacred cenote entrance to Xibalba - mysterious, otherworldly, hieroglyphic writing on stone walls, cool colors, foreboding mood</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Jaguar Warriors in Xibalba</div>
+                        <div class="prompt-text">Jaguar warriors navigating Xibalba - fierce, determined, hieroglyphic symbols of strength, grand Maya temple in background, vibrant colors, sense of bravery</div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    
+        <div class="concept" id="why-this-matters">
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>Why This Matters</h2>
+                <div class="doc-content"><p>This section explains the problem of race conditions in multi-program testing and the challenges of finding bugs in such scenarios.</p></div>
+            </div>
+
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize the section as a chaotic scene in Xibalba where 100 Hero Twins are racing to complete a trial, but the path is filled with supernatural challenges and bugs that prevent them from seeing the truth. The scene should be lit with a dark, ominous glow, highlighting the difficulty in finding these bugs.</div>
+            </div>
+
+            <!-- GENERATED IMAGES -->
+            <div class="images-section">
+                <div class="images-grid">
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/why-this-matters-01.png', 'Trials Abound', 'why-this-matters-01.png')">
+                        <img src="images/why-this-matters-01.png" alt="Trials Abound" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Trials Abound</div>
+                            <div class="image-filename">why-this-matters-01.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/why-this-matters-02.png', 'Bugs of Xibalba', 'why-this-matters-02.png')">
+                        <img src="images/why-this-matters-02.png" alt="Bugs of Xibalba" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Bugs of Xibalba</div>
+                            <div class="image-filename">why-this-matters-02.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/why-this-matters-03.png', 'Racing Through Xibalba', 'why-this-matters-03.png')">
+                        <img src="images/why-this-matters-03.png" alt="Racing Through Xibalba" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Racing Through Xibalba</div>
+                            <div class="image-filename">why-this-matters-03.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/why-this-matters-04.png', 'Lost in the Underworld', 'why-this-matters-04.png')">
+                        <img src="images/why-this-matters-04.png" alt="Lost in the Underworld" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Lost in the Underworld</div>
+                            <div class="image-filename">why-this-matters-04.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/why-this-matters-05.png', 'Trial by Fire', 'why-this-matters-05.png')">
+                        <img src="images/why-this-matters-05.png" alt="Trial by Fire" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Trial by Fire</div>
+                            <div class="image-filename">why-this-matters-05.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/why-this-matters-06.png', 'The Truth is Hidden', 'why-this-matters-06.png')">
+                        <img src="images/why-this-matters-06.png" alt="The Truth is Hidden" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">The Truth is Hidden</div>
+                            <div class="image-filename">why-this-matters-06.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/why-this-matters-07.png', 'Xibalba's Treacherous Paths', 'why-this-matters-07.png')">
+                        <img src="images/why-this-matters-07.png" alt="Xibalba's Treacherous Paths" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Xibalba's Treacherous Paths</div>
+                            <div class="image-filename">why-this-matters-07.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/why-this-matters-08.png', 'Jaguar Warriors of Xibalba', 'why-this-matters-08.png')">
+                        <img src="images/why-this-matters-08.png" alt="Jaguar Warriors of Xibalba" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Jaguar Warriors of Xibalba</div>
+                            <div class="image-filename">why-this-matters-08.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/why-this-matters-09.png', 'The Weight of the Trials', 'why-this-matters-09.png')">
+                        <img src="images/why-this-matters-09.png" alt="The Weight of the Trials" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">The Weight of the Trials</div>
+                            <div class="image-filename">why-this-matters-09.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/why-this-matters-10.png', 'Racing Against Time', 'why-this-matters-10.png')">
+                        <img src="images/why-this-matters-10.png" alt="Racing Against Time" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Racing Against Time</div>
+                            <div class="image-filename">why-this-matters-10.png</div>
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('why-this-matters')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details-why-this-matters">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Trials Abound</div>
+                        <div class="prompt-text">Hero Twins navigates a treacherous cave system in Xibalba - 100 twins racing to complete trial, surrounded by jaguar warriors and supernatural challenges, vibrant colors and glyphs, dramatic low-angle shot, dark ominous glow, chaotic atmosphere</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Bugs of Xibalba</div>
+                        <div class="prompt-text">Close-up of a Hero Twin struggling to see through a swarm of supernatural bugs in Xibalba, dark ominous glow, intricate glyphs and hieroglyphics, chaotic atmosphere, focus on a single hero</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Racing Through Xibalba</div>
+                        <div class="prompt-text">Hero Twins racing towards a pyramid in Xibalba, surrounded by jaguar warriors and supernatural challenges, vibrant colors and glyphs, dramatic mid-air shot, fast-paced atmosphere</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Lost in the Underworld</div>
+                        <div class="prompt-text">A lone Hero Twin stands at a crossroads in Xibalba, surrounded by cryptic glyphs and supernatural challenges, dark ominous glow, introspective atmosphere, focus on the hero's expression</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Trial by Fire</div>
+                        <div class="prompt-text">Hero Twins navigating a fiery trial in Xibalba, surrounded by supernatural challenges and jaguar warriors, vibrant colors and glyphs, dramatic high-angle shot, chaotic atmosphere</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">The Truth is Hidden</div>
+                        <div class="prompt-text">Hero Twins searching for the truth amidst a sea of supernatural bugs and challenges in Xibalba, dark ominous glow, intricate glyphs and hieroglyphics, chaotic atmosphere, focus on the twins' searching expressions</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Xibalba's Treacherous Paths</div>
+                        <div class="prompt-text">A winding underground passage in Xibalba, lined with supernatural challenges and cryptic glyphs, dark ominous glow, atmospheric lighting, focus on the path ahead</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Jaguar Warriors of Xibalba</div>
+                        <div class="prompt-text">A group of jaguar warriors guarding a trial in Xibalba, surrounded by Hero Twins and supernatural challenges, vibrant colors and glyphs, dramatic low-angle shot, powerful atmosphere</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">The Weight of the Trials</div>
+                        <div class="prompt-text">A Hero Twin carrying the weight of the trials in Xibalba, surrounded by supernatural challenges and cryptic glyphs, dark ominous glow, introspective atmosphere, focus on the hero's expression</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Racing Against Time</div>
+                        <div class="prompt-text">Hero Twins racing against time to complete a trial in Xibalba, surrounded by supernatural challenges and jaguar warriors, vibrant colors and glyphs, dramatic fast-motion shot, fast-paced atmosphere</div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    
+        <div class="concept" id="technical-details">
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>Technical Details</h2>
+                <div class="doc-content"><p>Xibalba is a chaos testing framework for Linux kernel concurrent filesystem operations using eBPF fault injection</p></div>
+            </div>
+
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize Xibalba as a grand temple in the Maya underworld, with intricate carvings depicting the chaos of concurrent filesystem operations. The framework's eBPF fault injection mechanism is represented by a Death God (Lords of Xibalba) testing the resolve of a Hero Twin navigating the temple. The Linux-only limitation is symbolized by a locked door with a Maya hieroglyphic warning, excluding other operating systems from entering the temple.</div>
+            </div>
+
+            <!-- GENERATED IMAGES -->
+            <div class="images-section">
+                <div class="images-grid">
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/technical-details-01.png', 'Hero Twin's Descent', 'technical-details-01.png')">
+                        <img src="images/technical-details-01.png" alt="Hero Twin's Descent" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Hero Twin's Descent</div>
+                            <div class="image-filename">technical-details-01.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/technical-details-02.png', 'Death God's Challenge', 'technical-details-02.png')">
+                        <img src="images/technical-details-02.png" alt="Death God's Challenge" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Death God's Challenge</div>
+                            <div class="image-filename">technical-details-02.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/technical-details-03.png', 'Trial of Concurrent Operations', 'technical-details-03.png')">
+                        <img src="images/technical-details-03.png" alt="Trial of Concurrent Operations" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Trial of Concurrent Operations</div>
+                            <div class="image-filename">technical-details-03.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/technical-details-04.png', 'Locked Door of Exclusion', 'technical-details-04.png')">
+                        <img src="images/technical-details-04.png" alt="Locked Door of Exclusion" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Locked Door of Exclusion</div>
+                            <div class="image-filename">technical-details-04.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/technical-details-05.png', 'Hero Twin's Resolve', 'technical-details-05.png')">
+                        <img src="images/technical-details-05.png" alt="Hero Twin's Resolve" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Hero Twin's Resolve</div>
+                            <div class="image-filename">technical-details-05.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/technical-details-06.png', 'Chaos of Concurrent Operations', 'technical-details-06.png')">
+                        <img src="images/technical-details-06.png" alt="Chaos of Concurrent Operations" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Chaos of Concurrent Operations</div>
+                            <div class="image-filename">technical-details-06.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/technical-details-07.png', 'eBPF Fault Injection', 'technical-details-07.png')">
+                        <img src="images/technical-details-07.png" alt="eBPF Fault Injection" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">eBPF Fault Injection</div>
+                            <div class="image-filename">technical-details-07.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/technical-details-08.png', 'Hero Twin's Companion', 'technical-details-08.png')">
+                        <img src="images/technical-details-08.png" alt="Hero Twin's Companion" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Hero Twin's Companion</div>
+                            <div class="image-filename">technical-details-08.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/technical-details-09.png', 'Temple Entrance', 'technical-details-09.png')">
+                        <img src="images/technical-details-09.png" alt="Temple Entrance" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Temple Entrance</div>
+                            <div class="image-filename">technical-details-09.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/technical-details-10.png', 'Hero Twin's Journey', 'technical-details-10.png')">
+                        <img src="images/technical-details-10.png" alt="Hero Twin's Journey" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Hero Twin's Journey</div>
+                            <div class="image-filename">technical-details-10.png</div>
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('technical-details')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details-technical-details">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Hero Twin's Descent</div>
+                        <div class="prompt-text">Hero Twin emerging from a dark cave, entering the grand Maya pyramid temple of Xibalba - vibrant colors and intricate glyphs adorn the walls, a Death God (Lords of Xibalba) casts a shadowy gaze from above, a locked door with a Maya hieroglyphic warning excludes other operating systems, Ancient Maya mythology art style with dramatic underworld scenes, composition: hero twin center, Death God top-left, locked door bottom-right, warm golden light, moody dark atmosphere</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Death God's Challenge</div>
+                        <div class="prompt-text">Death God (Lords of Xibalba) testing the resolve of a Hero Twin navigating the chaotic temple - eBPF fault injection mechanism depicted by the Death God's staff, a Jaguar warrior in the background watches the trial, a Sacred cenote reflects the vibrant colors of the temple, Ancient Maya mythology art style with intricate glyphs, composition: Hero Twin and Death God center, Sacred cenote background, warm red light, intense and dramatic atmosphere</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Trial of Concurrent Operations</div>
+                        <div class="prompt-text">A Hero Twin navigating the intricate carvings on the temple walls, depicting the chaos of concurrent filesystem operations - a Plumed serpent (Kukulkan) wraps around the carvings, a Hero twin's companion looks on, a Sacred ball game court in the background symbolizes the struggle, Ancient Maya mythology art style with vibrant colors, composition: Hero Twin and companion center, Plumed serpent and ball game court background, cool blue light, sense of urgency</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Locked Door of Exclusion</div>
+                        <div class="prompt-text">A locked door with a Maya hieroglyphic warning excludes other operating systems from entering the temple - a group of operating systems (Windows, macOS, etc.) watch from outside, a Death God casts a shadowy gaze, a Sacred cenote reflects the warm golden light, Ancient Maya mythology art style with intricate glyphs, composition: locked door center, operating systems and Death God background, warm golden light, sense of exclusion</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Hero Twin's Resolve</div>
+                        <div class="prompt-text">A Hero Twin stands firm against the Death God's challenge, the eBPF fault injection mechanism depicted by the Death God's staff, a Jaguar warrior in the background watches with respect, a Sacred ball game court in the background symbolizes the struggle, Ancient Maya mythology art style with vibrant colors, composition: Hero Twin center, Death God and Jaguar warrior background, warm red light, sense of determination</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Chaos of Concurrent Operations</div>
+                        <div class="prompt-text">A chaotic scene of concurrent filesystem operations - multiple Hero twins navigating the temple, a Plumed serpent (Kukulkan) wraps around the carvings, a Sacred cenote reflects the warm golden light, Ancient Maya mythology art style with vibrant colors, composition: multiple Hero twins center, Plumed serpent and Sacred cenote background, cool blue light, sense of chaos</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">eBPF Fault Injection</div>
+                        <div class="prompt-text">A close-up of the Death God's staff, depicting the eBPF fault injection mechanism - a group of eBPF elements (tables, maps, etc.) surround the staff, a Hero twin looks on in the background, a Sacred cenote reflects the warm golden light, Ancient Maya mythology art style with intricate glyphs, composition: staff center, Hero twin and eBPF elements background, warm golden light, sense of complexity</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Hero Twin's Companion</div>
+                        <div class="prompt-text">A Hero Twin's companion looks on as the Hero Twin navigates the temple - a Jaguar warrior in the background watches with respect, a Sacred cenote reflects the warm golden light, Ancient Maya mythology art style with vibrant colors, composition: Hero Twin and companion center, Jaguar warrior and Sacred cenote background, warm red light, sense of loyalty</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Temple Entrance</div>
+                        <div class="prompt-text">A grand entrance to the Maya pyramid temple of Xibalba - a Hero twin emerges from the darkness, a Death God (Lords of Xibalba) casts a shadowy gaze, a locked door with a Maya hieroglyphic warning excludes other operating systems, Ancient Maya mythology art style with dramatic underworld scenes, composition: Hero twin center, Death God and locked door background, warm golden light, moody dark atmosphere</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Hero Twin's Journey</div>
+                        <div class="prompt-text">A Hero Twin journeys through the chaotic temple, navigating the intricate carvings and facing the Death God's challenges - a Plumed serpent (Kukulkan) wraps around the carvings, a Sacred cenote reflects the warm golden light, Ancient Maya mythology art style with vibrant colors, composition: Hero Twin center, Plumed serpent and Sacred cenote background, cool blue light, sense of journey</div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    
+        <div class="concept" id="the-name-xibalba">
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>The Name: Xibalba</h2>
+                <div class="doc-content"><p>Introduction to the Maya underworld, Xibalba, as a realm of fear and phantoms.</p></div>
+            </div>
+
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Create a dramatic illustration of a Maya jungle at dusk, with a massive entrance to Xibalba, a cave system beneath the surface. The entrance is guarded by the Death gods, Ah Puch and Ixchel, their skeletal faces illuminated by flickering torches.</div>
+            </div>
+
+            <!-- GENERATED IMAGES -->
+            <div class="images-section">
+                <div class="images-grid">
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/the-name-xibalba-01.png', 'Xibalba Entrance at Dusk', 'the-name-xibalba-01.png')">
+                        <img src="images/the-name-xibalba-01.png" alt="Xibalba Entrance at Dusk" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Xibalba Entrance at Dusk</div>
+                            <div class="image-filename">the-name-xibalba-01.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/the-name-xibalba-02.png', 'Ixchel's Haunting Smile', 'the-name-xibalba-02.png')">
+                        <img src="images/the-name-xibalba-02.png" alt="Ixchel's Haunting Smile" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Ixchel's Haunting Smile</div>
+                            <div class="image-filename">the-name-xibalba-02.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/the-name-xibalba-03.png', 'Cave System at Sunset', 'the-name-xibalba-03.png')">
+                        <img src="images/the-name-xibalba-03.png" alt="Cave System at Sunset" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Cave System at Sunset</div>
+                            <div class="image-filename">the-name-xibalba-03.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/the-name-xibalba-04.png', 'Hieroglyphic Warning', 'the-name-xibalba-04.png')">
+                        <img src="images/the-name-xibalba-04.png" alt="Hieroglyphic Warning" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Hieroglyphic Warning</div>
+                            <div class="image-filename">the-name-xibalba-04.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/the-name-xibalba-05.png', 'Death Gods in Shadow', 'the-name-xibalba-05.png')">
+                        <img src="images/the-name-xibalba-05.png" alt="Death Gods in Shadow" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Death Gods in Shadow</div>
+                            <div class="image-filename">the-name-xibalba-05.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/the-name-xibalba-06.png', 'Jungle to Xibalba Bridge', 'the-name-xibalba-06.png')">
+                        <img src="images/the-name-xibalba-06.png" alt="Jungle to Xibalba Bridge" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Jungle to Xibalba Bridge</div>
+                            <div class="image-filename">the-name-xibalba-06.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/the-name-xibalba-07.png', 'Underground River', 'the-name-xibalba-07.png')">
+                        <img src="images/the-name-xibalba-07.png" alt="Underground River" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Underground River</div>
+                            <div class="image-filename">the-name-xibalba-07.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/the-name-xibalba-08.png', 'Ah Puch's Gaze', 'the-name-xibalba-08.png')">
+                        <img src="images/the-name-xibalba-08.png" alt="Ah Puch's Gaze" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Ah Puch's Gaze</div>
+                            <div class="image-filename">the-name-xibalba-08.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/the-name-xibalba-09.png', 'Xibalba's Dark Entrance', 'the-name-xibalba-09.png')">
+                        <img src="images/the-name-xibalba-09.png" alt="Xibalba's Dark Entrance" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Xibalba's Dark Entrance</div>
+                            <div class="image-filename">the-name-xibalba-09.png</div>
+                        </div>
+                    </div>
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/the-name-xibalba-10.png', 'Ixchel's Cave', 'the-name-xibalba-10.png')">
+                        <img src="images/the-name-xibalba-10.png" alt="Ixchel's Cave" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Ixchel's Cave</div>
+                            <div class="image-filename">the-name-xibalba-10.png</div>
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('the-name-xibalba')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details-the-name-xibalba">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Xibalba Entrance at Dusk</div>
+                        <div class="prompt-text">Ah Puch and Ixchel guarding Xibalba entrance - Ancient Maya jungle at dusk, massive cave system beneath, skeletons illuminated by flickering torches, intricate glyphs and codex art on cave walls, vibrant colors</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Ixchel's Haunting Smile</div>
+                        <div class="prompt-text">Ixchel's skeletal face with a haunting smile - Close-up, warm torchlight, intricate hieroglyphs in the background, dramatic shadows, Ancient Maya mythology art style</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Cave System at Sunset</div>
+                        <div class="prompt-text">Xibalba's cave system at sunset - Dappled light, ancient stone walls, Ah Puch and Ixchel in the distance, sacred cenotes and underground rivers, vibrant colors, Ancient Maya mythology art style</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Hieroglyphic Warning</div>
+                        <div class="prompt-text">Warning hieroglyphs on Xibalba's entrance - Intricate glyphs, Ancient Maya codex art, Ah Puch and Ixchel in the background, ominous atmosphere, Ancient Maya mythology art style</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Death Gods in Shadow</div>
+                        <div class="prompt-text">Ah Puch and Ixchel in shadow - Dark, ominous atmosphere, flickering torches casting eerie shadows, Ancient Maya mythology art style, vibrant colors</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Jungle to Xibalba Bridge</div>
+                        <div class="prompt-text">Bridge between jungle and Xibalba - Ancient Maya pyramids and temples in the background, massive cave system beneath, Ah Puch and Ixchel in the foreground, vibrant colors, Ancient Maya mythology art style</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Underground River</div>
+                        <div class="prompt-text">Sacred underground river in Xibalba - Serene atmosphere, ancient stone walls, Ah Puch and Ixchel in the background, vibrant colors, Ancient Maya mythology art style</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Ah Puch's Gaze</div>
+                        <div class="prompt-text">Ah Puch's skeletal face with a stern gaze - Close-up, warm torchlight, intricate hieroglyphs in the background, dramatic shadows, Ancient Maya mythology art style</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Xibalba's Dark Entrance</div>
+                        <div class="prompt-text">Xibalba's dark entrance at night - Flickering torches, Ah Puch and Ixchel in the distance, ominous atmosphere, Ancient Maya mythology art style, vibrant colors</div>
+                    </div>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Ixchel's Cave</div>
+                        <div class="prompt-text">Ixchel standing in a cave - Ancient stone walls, sacred cenotes and underground rivers, vibrant colors, Ancient Maya mythology art style, Ah Puch in the background</div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    
+        <div class="concept" id="the-myth-the-hero-twins-descent">
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>The Myth: The Hero Twins' Descent</h2>
+                <div class="doc-content"><p>This section introduces the famous story of the Hero Twins' descent into Xibalba, highlighting the challenges they faced.</p></div>
+            </div>
+
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize the Hero Twins' story as an ancient Maya fresco depicting their courageous descent into the underworld. Incorporate intricate hieroglyphics and vibrant colors to convey the twins' determination and bravery. A central illustration of Hunahpu and Xbalanque standing before the entrance of Xibalba, surrounded by the looming presence of the Death gods, would anchor the visual narrative.</div>
+            </div>
+
+            <!-- GENERATED IMAGES -->
+            <div class="images-section">
+                <div class="images-grid">
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/the-myth-the-hero-twins-descent-01.png', 'The Myth: The Hero Twins' Descent', 'the-myth-the-hero-twins-descent-01.png')">
+                        <img src="images/the-myth-the-hero-twins-descent-01.png" alt="The Myth: The Hero Twins' Descent" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">The Myth: The Hero Twins' Descent</div>
+                            <div class="image-filename">the-myth-the-hero-twins-descent-01.png</div>
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('the-myth-the-hero-twins-descent')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details-the-myth-the-hero-twins-descent">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">The Myth: The Hero Twins' Descent</div>
+                        <div class="prompt-text">Visualize the Hero Twins' story as an ancient Maya fresco depicting their courageous descent into the underworld. Incorporate intricate hieroglyphics and vibrant colors to convey the twins' determination and bravery. A central illustration of Hunahpu and Xbalanque standing before the entrance of Xibalba, surrounded by the looming presence of the Death gods, would anchor the visual narrative., Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Hero twins navigating trials, Hieroglyphic writing and codex art, Death gods (Lords of Xibalba)</div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    
+        <div class="concept" id="the-metaphor-your-codes-descent-into-chaos">
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>The Metaphor: Your Code's Descent into Chaos</h2>
+                <div class="doc-content"><p>This section explains that the testing process is designed to expose the weaknesses of the code by simulating orchestrated chaos, using the metaphor of the Hero Twins navigating the Houses of Xibalba.</p></div>
+            </div>
+
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize the Hero Twins (representing the code) standing at the entrance of a grand, ancient Maya temple, facing a massive stone door with intricate hieroglyphics depicting the six Houses of Xibalba. The temple is shrouded in darkness, with faint, flickering torches casting eerie shadows on the walls. In the background, a plume of smoke rises from the underworld, symbolizing the chaos that awaits.</div>
+            </div>
+
+            <!-- GENERATED IMAGES -->
+            <div class="images-section">
+                <div class="images-grid">
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/the-metaphor-your-codes-descent-into-chaos-01.png', 'The Metaphor: Your Code's Descent into Chaos', 'the-metaphor-your-codes-descent-into-chaos-01.png')">
+                        <img src="images/the-metaphor-your-codes-descent-into-chaos-01.png" alt="The Metaphor: Your Code's Descent into Chaos" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">The Metaphor: Your Code's Descent into Chaos</div>
+                            <div class="image-filename">the-metaphor-your-codes-descent-into-chaos-01.png</div>
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('the-metaphor-your-codes-descent-into-chaos')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details-the-metaphor-your-codes-descent-into-chaos">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">The Metaphor: Your Code's Descent into Chaos</div>
+                        <div class="prompt-text">Visualize the Hero Twins (representing the code) standing at the entrance of a grand, ancient Maya temple, facing a massive stone door with intricate hieroglyphics depicting the six Houses of Xibalba. The temple is shrouded in darkness, with faint, flickering torches casting eerie shadows on the walls. In the background, a plume of smoke rises from the underworld, symbolizing the chaos that awaits., Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Ancient Maya temple, Hero Twins, Hieroglyphic writing and codex art</div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    
+        <div class="concept" id="the-six-houses-chaos-test-categories">
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>The Six Houses: Chaos Test Categories</h2>
+                <div class="doc-content"><p>This section explains the six houses of torment in the Maya underworld, which correspond to different chaos test categories used to simulate various types of bugs and issues.</p></div>
+            </div>
+
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize the six houses of torment as six distinct chambers deep within the underworld, each representing a different trial or test category. Use a combination of vibrant colors, intricate glyphs, and dramatic lighting to create an immersive atmosphere. Hero twins navigating the underworld can be depicted as code units being tested in each chamber, facing the corresponding challenges.</div>
+            </div>
+
+            <!-- GENERATED IMAGES -->
+            <div class="images-section">
+                <div class="images-grid">
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/the-six-houses-chaos-test-categories-01.png', 'The Six Houses: Chaos Test Categories', 'the-six-houses-chaos-test-categories-01.png')">
+                        <img src="images/the-six-houses-chaos-test-categories-01.png" alt="The Six Houses: Chaos Test Categories" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">The Six Houses: Chaos Test Categories</div>
+                            <div class="image-filename">the-six-houses-chaos-test-categories-01.png</div>
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('the-six-houses-chaos-test-categories')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details-the-six-houses-chaos-test-categories">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">The Six Houses: Chaos Test Categories</div>
+                        <div class="prompt-text">Visualize the six houses of torment as six distinct chambers deep within the underworld, each representing a different trial or test category. Use a combination of vibrant colors, intricate glyphs, and dramatic lighting to create an immersive atmosphere. Hero twins navigating the underworld can be depicted as code units being tested in each chamber, facing the corresponding challenges., Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Sacred cenotes and underground rivers, Six houses of torment (House of Darkness, House of Knives, etc.), Jaguar warriors and supernatural beings</div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    
+        <div class="concept" id="key-features">
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>Key Features</h2>
+                <div class="doc-content"><p>This section highlights the core functionalities and benefits of the system, showcasing its efficiency and reliability.</p></div>
+            </div>
+
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize this section as a grand entrance to the underworld, where the Hero Twins, Ix and Ixbalanque, emerge victorious, symbolizing the successful navigation of the system's key features. Use vibrant colors and intricate glyphs to depict the Lords of Xibalba, Kukulkan, and other supernatural beings in the background, emphasizing the system's strength and resilience.</div>
+            </div>
+
+            <!-- GENERATED IMAGES -->
+            <div class="images-section">
+                <div class="images-grid">
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/key-features-01.png', 'Key Features', 'key-features-01.png')">
+                        <img src="images/key-features-01.png" alt="Key Features" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Key Features</div>
+                            <div class="image-filename">key-features-01.png</div>
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('key-features')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details-key-features">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Key Features</div>
+                        <div class="prompt-text">Visualize this section as a grand entrance to the underworld, where the Hero Twins, Ix and Ixbalanque, emerge victorious, symbolizing the successful navigation of the system's key features. Use vibrant colors and intricate glyphs to depict the Lords of Xibalba, Kukulkan, and other supernatural beings in the background, emphasizing the system's strength and resilience., Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Hero Twins, Lords of Xibalba, Kukulkan</div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    
+        <div class="concept" id="-jepsen-style-chaos-engineering">
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>🌪️ **Jepsen-Style Chaos Engineering**</h2>
+                <div class="doc-content"><p>This section covers Jepsen-Style Chaos Engineering, specifically concurrent readers and writers, configurable test duration, consistency models, vector clock causality tracking, and proven happens-before relationships.</p></div>
+            </div>
+
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize this section as a dramatic scene where Hero Twins face the House of Darkness, navigating through a maze of pyramids and temples with concurrent readers and writers as jaguar warriors in the shadows, while the Death God Ah Puch oversees the chaos with a vector clock in hand, ensuring causality tracking.</div>
+            </div>
+
+            <!-- GENERATED IMAGES -->
+            <div class="images-section">
+                <div class="images-grid">
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/-jepsen-style-chaos-engineering-01.png', '🌪️ **Jepsen-Style Chaos Engineering**', '-jepsen-style-chaos-engineering-01.png')">
+                        <img src="images/-jepsen-style-chaos-engineering-01.png" alt="🌪️ **Jepsen-Style Chaos Engineering**" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">🌪️ **Jepsen-Style Chaos Engineering**</div>
+                            <div class="image-filename">-jepsen-style-chaos-engineering-01.png</div>
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('-jepsen-style-chaos-engineering')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details--jepsen-style-chaos-engineering">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">🌪️ **Jepsen-Style Chaos Engineering**</div>
+                        <div class="prompt-text">Visualize this section as a dramatic scene where Hero Twins face the House of Darkness, navigating through a maze of pyramids and temples with concurrent readers and writers as jaguar warriors in the shadows, while the Death God Ah Puch oversees the chaos with a vector clock in hand, ensuring causality tracking., Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring House of Darkness, Hero Twins, Death God Ah Puch</div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    
+        <div class="concept" id="-ebpf-delay-injection">
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>⚡ **eBPF Delay Injection**</h2>
+                <div class="doc-content"><ul>
+<li>Kernel-level getdents64 interception</li>
+<li>Configurable delays: `pause_controller <prob%> <iterations>...</li>
+</ul></div>
+            </div>
+
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize ⚡ **eBPF Delay Injection** using Maya Underworld - Xibalba imagery</div>
+            </div>
+
+            <!-- GENERATED IMAGES -->
+            <div class="images-section">
+                <div class="images-grid">
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/-ebpf-delay-injection-01.png', '⚡ **eBPF Delay Injection**', '-ebpf-delay-injection-01.png')">
+                        <img src="images/-ebpf-delay-injection-01.png" alt="⚡ **eBPF Delay Injection**" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">⚡ **eBPF Delay Injection**</div>
+                            <div class="image-filename">-ebpf-delay-injection-01.png</div>
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('-ebpf-delay-injection')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details--ebpf-delay-injection">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">⚡ **eBPF Delay Injection**</div>
+                        <div class="prompt-text">Visualize ⚡ **eBPF Delay Injection** using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials</div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    
+        <div class="concept" id="-incremental-jsonl-output-timeout-safe">
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>📊 **Incremental JSONL Output (Timeout-Safe!)**</h2>
+                <div class="doc-content"><ul>
+<li><strong><code>xibalba-progress.jsonl</code></strong>: One JSON line per 5 seconds</li>
+<li><strong><code>xibalba-bugs.jsonl</code></strong>: One JSON lin...</li>
+</ul></div>
+            </div>
+
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize 📊 **Incremental JSONL Output (Timeout-Safe!)** using Maya Underworld - Xibalba imagery</div>
+            </div>
+
+            <!-- GENERATED IMAGES -->
+            <div class="images-section">
+                <div class="images-grid">
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/-incremental-jsonl-output-timeout-safe-01.png', '📊 **Incremental JSONL Output (Timeout-Safe!)**', '-incremental-jsonl-output-timeout-safe-01.png')">
+                        <img src="images/-incremental-jsonl-output-timeout-safe-01.png" alt="📊 **Incremental JSONL Output (Timeout-Safe!)**" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">📊 **Incremental JSONL Output (Timeout-Safe!)**</div>
+                            <div class="image-filename">-incremental-jsonl-output-timeout-safe-01.png</div>
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('-incremental-jsonl-output-timeout-safe')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details--incremental-jsonl-output-timeout-safe">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">📊 **Incremental JSONL Output (Timeout-Safe!)**</div>
+                        <div class="prompt-text">Visualize 📊 **Incremental JSONL Output (Timeout-Safe!)** using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials</div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    
+        <div class="concept" id="-precise-bug-detection">
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>🔍 **Precise Bug Detection**</h2>
+                <div class="doc-content"><ul>
+<li><strong>Missing entries</strong>: File should exist but doesn't (cache miss bugs)</li>
+<li><strong>Phantom entries</strong>: File e...</li>
+</ul></div>
+            </div>
+
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize 🔍 **Precise Bug Detection** using Maya Underworld - Xibalba imagery</div>
+            </div>
+
+            <!-- GENERATED IMAGES -->
+            <div class="images-section">
+                <div class="images-grid">
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/-precise-bug-detection-01.png', '🔍 **Precise Bug Detection**', '-precise-bug-detection-01.png')">
+                        <img src="images/-precise-bug-detection-01.png" alt="🔍 **Precise Bug Detection**" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">🔍 **Precise Bug Detection**</div>
+                            <div class="image-filename">-precise-bug-detection-01.png</div>
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('-precise-bug-detection')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details--precise-bug-detection">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">🔍 **Precise Bug Detection**</div>
+                        <div class="prompt-text">Visualize 🔍 **Precise Bug Detection** using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials</div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    
+        <div class="concept" id="-hermetic-qemu-vms">
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>🖥️ **Hermetic QEMU VMs**</h2>
+                <div class="doc-content"><ul>
+<li>Fast boot (&lt;2 seconds with custom initramfs)</li>
+<li>Docker-based hermetic builds (no host dependencies!...</li>
+</ul></div>
+            </div>
+
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize 🖥️ **Hermetic QEMU VMs** using Maya Underworld - Xibalba imagery</div>
+            </div>
+
+            <!-- GENERATED IMAGES -->
+            <div class="images-section">
+                <div class="images-grid">
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/-hermetic-qemu-vms-01.png', '🖥️ **Hermetic QEMU VMs**', '-hermetic-qemu-vms-01.png')">
+                        <img src="images/-hermetic-qemu-vms-01.png" alt="🖥️ **Hermetic QEMU VMs**" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">🖥️ **Hermetic QEMU VMs**</div>
+                            <div class="image-filename">-hermetic-qemu-vms-01.png</div>
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('-hermetic-qemu-vms')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details--hermetic-qemu-vms">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">🖥️ **Hermetic QEMU VMs**</div>
+                        <div class="prompt-text">Visualize 🖥️ **Hermetic QEMU VMs** using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials</div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    
+        <div class="concept" id="-c20-unit-tests-1515-passing">
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>🧪 **C++20 Unit Tests (15/15 passing)**</h2>
+                <div class="doc-content"><ul>
+<li>GoogleTest framework</li>
+<li>Tests core validation logic</li>
+<li>Runs in CI on every PR</li>
+<li>Proves bug detection...</li>
+</ul></div>
+            </div>
+
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize 🧪 **C++20 Unit Tests (15/15 passing)** using Maya Underworld - Xibalba imagery</div>
+            </div>
+
+            <!-- GENERATED IMAGES -->
+            <div class="images-section">
+                <div class="images-grid">
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/-c20-unit-tests-1515-passing-01.png', '🧪 **C++20 Unit Tests (15/15 passing)**', '-c20-unit-tests-1515-passing-01.png')">
+                        <img src="images/-c20-unit-tests-1515-passing-01.png" alt="🧪 **C++20 Unit Tests (15/15 passing)**" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">🧪 **C++20 Unit Tests (15/15 passing)**</div>
+                            <div class="image-filename">-c20-unit-tests-1515-passing-01.png</div>
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('-c20-unit-tests-1515-passing')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details--c20-unit-tests-1515-passing">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">🧪 **C++20 Unit Tests (15/15 passing)**</div>
+                        <div class="prompt-text">Visualize 🧪 **C++20 Unit Tests (15/15 passing)** using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials</div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    
+        <div class="concept" id="-getting-started">
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>🚀 Getting Started</h2>
+                <div class="doc-content"><p><strong>Current Status</strong>: ✅ Core implementation complete, eBPF fault injection working</p>
+<p><strong>⚠️ IMPORTANT</strong>: ...</p></div>
+            </div>
+
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize 🚀 Getting Started using Maya Underworld - Xibalba imagery</div>
+            </div>
+
+            <!-- GENERATED IMAGES -->
+            <div class="images-section">
+                <div class="images-grid">
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/-getting-started-01.png', '🚀 Getting Started', '-getting-started-01.png')">
+                        <img src="images/-getting-started-01.png" alt="🚀 Getting Started" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">🚀 Getting Started</div>
+                            <div class="image-filename">-getting-started-01.png</div>
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('-getting-started')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details--getting-started">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">🚀 Getting Started</div>
+                        <div class="prompt-text">Visualize 🚀 Getting Started using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials</div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    
+        <div class="concept" id="documentation">
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>Documentation</h2>
+                <div class="doc-content"><p><strong>Core Docs</strong>:
+- <strong>🖥️ <a href="docs/VM-SETUP.md">VM Setup Guide</a></strong> - QEMU/KVM hermetic VM testing
+- **🔧 [Fas...</p></div>
+            </div>
+
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize Documentation using Maya Underworld - Xibalba imagery</div>
+            </div>
+
+            <!-- GENERATED IMAGES -->
+            <div class="images-section">
+                <div class="images-grid">
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/documentation-01.png', 'Documentation', 'documentation-01.png')">
+                        <img src="images/documentation-01.png" alt="Documentation" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Documentation</div>
+                            <div class="image-filename">documentation-01.png</div>
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('documentation')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details-documentation">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Documentation</div>
+                        <div class="prompt-text">Visualize Documentation using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials</div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    
+        <div class="concept" id="prerequisites">
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>Prerequisites</h2>
+                <div class="doc-content"><p><strong>Host Machine</strong>:
+- Linux host with KVM support
+- 8GB+ RAM (16GB+ recommended for parallel VM testin...</p></div>
+            </div>
+
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize Prerequisites using Maya Underworld - Xibalba imagery</div>
+            </div>
+
+            <!-- GENERATED IMAGES -->
+            <div class="images-section">
+                <div class="images-grid">
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/prerequisites-01.png', 'Prerequisites', 'prerequisites-01.png')">
+                        <img src="images/prerequisites-01.png" alt="Prerequisites" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Prerequisites</div>
+                            <div class="image-filename">prerequisites-01.png</div>
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('prerequisites')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details-prerequisites">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Prerequisites</div>
+                        <div class="prompt-text">Visualize Prerequisites using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials</div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    
+        <div class="concept" id="quick-start">
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>Quick Start</h2>
+                <div class="doc-content"><p>This section provides a brief overview of how to get started with the system, including installation and initial setup.</p></div>
+            </div>
+
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize the Quick Start section as a hero twin emerging from a cave system, symbolizing a new journey into the underworld. The background can feature vibrant colors and intricate glyphs, with the hero twin navigating through a winding underground passage, representing the path to quick start. The hero twin can be shown holding a codex or a ballgame court staff, signifying the tools needed for successful navigation.</div>
+            </div>
+
+            <!-- GENERATED IMAGES -->
+            <div class="images-section">
+                <div class="images-grid">
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/quick-start-01.png', 'Quick Start', 'quick-start-01.png')">
+                        <img src="images/quick-start-01.png" alt="Quick Start" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Quick Start</div>
+                            <div class="image-filename">quick-start-01.png</div>
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('quick-start')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details-quick-start">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Quick Start</div>
+                        <div class="prompt-text">Visualize the Quick Start section as a hero twin emerging from a cave system, symbolizing a new journey into the underworld. The background can feature vibrant colors and intricate glyphs, with the hero twin navigating through a winding underground passage, representing the path to quick start. The hero twin can be shown holding a codex or a ballgame court staff, signifying the tools needed for successful navigation., Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Hero twins navigating trials, Sacred cenotes and underground rivers, Intricate glyphs</div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    
+        <div class="concept" id="clone-repository">
+            <!-- ELEVATED DOCUMENTATION TEXT -->
+            <div class="doc-text">
+                <h2>Clone repository</h2>
+                <div class="doc-content"><p>git clone https://github.com/jmalicki/xibalba.git
+cd xibalba...</p></div>
+            </div>
+
+            <!-- VISUAL INTERPRETATION -->
+            <div class="visual-interpretation">
+                <h3>🎨 Visual Interpretation</h3>
+                <div class="visual-interpretation-text">Visualize Clone repository using Maya Underworld - Xibalba imagery</div>
+            </div>
+
+            <!-- GENERATED IMAGES -->
+            <div class="images-section">
+                <div class="images-grid">
+                
+                    <div class="image-card"
+                         onclick="openLightbox('images/clone-repository-01.png', 'Clone repository', 'clone-repository-01.png')">
+                        <img src="images/clone-repository-01.png" alt="Clone repository" loading="lazy">
+                        <div class="image-info">
+                            <div class="image-title">Clone repository</div>
+                            <div class="image-filename">clone-repository-01.png</div>
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+
+            <!-- TECHNICAL DETAILS (COLLAPSIBLE) -->
+            <div class="technical-details">
+                <div class="details-toggle" onclick="toggleDetails('clone-repository')">
+                    Show Generation Details
+                </div>
+                <div class="details-content" id="details-clone-repository">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Prompts Used</h4>
+                    
+                    <div class="prompt-item">
+                        <div class="prompt-title">Clone repository</div>
+                        <div class="prompt-text">Visualize Clone repository using Maya Underworld - Xibalba imagery, Ancient Maya mythology art style with vibrant colors, intricate glyphs, and dramatic underworld scenes, featuring Maya pyramids and temples, Death gods (Lords of Xibalba), Hero twins navigating trials</div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    
+    </div>
+
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+        <span class="lightbox-close">&times;</span>
+        <img class="lightbox-content" id="lightbox-img">
+        <div class="lightbox-info">
+            <div class="lightbox-title" id="lightbox-title"></div>
+            <div class="lightbox-filename" id="lightbox-filename"></div>
+        </div>
+    </div>
+
+    <script>
+        function openLightbox(src, title, filename) {
+            event.stopPropagation();
+            document.getElementById('lightbox').classList.add('active');
+            document.getElementById('lightbox-img').src = src;
+            document.getElementById('lightbox-title').textContent = title;
+            document.getElementById('lightbox-filename').textContent = filename;
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        function toggleDetails(conceptId) {
+            const toggle = event.currentTarget;
+            const content = document.getElementById('details-' + conceptId);
+            toggle.classList.toggle('open');
+            content.classList.toggle('open');
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeLightbox();
+        });
+    </script>
+</body>
+</html>

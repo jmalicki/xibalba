@@ -1,0 +1,270 @@
+{
+  "version": "1.0",
+  "created_at": "2025-10-11T20:34:16.924914",
+  "created_by": "workflow/concept_generation.py",
+  "theme_version": "docs/visual-docs/artifacts/theme.json",
+  "source_document": "README.md",
+  "theme": "Maya Underworld - Xibalba",
+  "concepts": [
+    {
+      "id": "xibalba-chaos-testing-framework-for-linux-kernel-f",
+      "heading": "Xibalba: Chaos Testing Framework for Linux Kernel Filesystems",
+      "level": 1,
+      "technical_reality": "This section covers the implementation and usage of Xibalba, a chaos testing framework for Linux kernel filesystems, integrating with eBPF build and CI processes.",
+      "visual_concept": "Depict a scene of the Hero Twins navigating through the House of Darkness, where filesystem chaos testing is represented by supernatural shadows and darkness, and the chaos testing framework is symbolized by the Twins' determination to overcome the darkness.",
+      "key_elements": [
+        "Hero Twins",
+        "House of Darkness",
+        "Supernatural shadows"
+      ],
+      "source_section": "Xibalba: Chaos Testing Framework for Linux Kernel Filesystems"
+    },
+    {
+      "id": "what-is-xibalba",
+      "heading": "What is Xibalba?",
+      "level": 2,
+      "technical_reality": "This section introduces Xibalba, a chaos testing framework for Linux kernel filesystem code, highlighting its ability to uncover subtle bugs under concurrent access.",
+      "visual_concept": "Illustrate Xibalba as the entrance to the underworld of code, with a grand Maya temple serving as the gateway to the six houses of torment, where filesystem code is tested against the chaos of concurrent access.",
+      "key_elements": [
+        "Maya pyramid",
+        "Death gods",
+        "Hieroglyphic writing"
+      ],
+      "source_section": "What is Xibalba?"
+    },
+    {
+      "id": "why-this-matters",
+      "heading": "Why This Matters",
+      "level": 3,
+      "technical_reality": "This section explains the problem of race conditions in multi-program testing and the challenges of finding bugs in such scenarios.",
+      "visual_concept": "Visualize the section as a chaotic scene in Xibalba where 100 Hero Twins are racing to complete a trial, but the path is filled with supernatural challenges and bugs that prevent them from seeing the truth. The scene should be lit with a dark, ominous glow, highlighting the difficulty in finding these bugs.",
+      "key_elements": [
+        "Hero Twins navigating trials",
+        "Cave systems and underground passages",
+        "Supernatural beings (jaguar warriors)"
+      ],
+      "source_section": "Why This Matters"
+    },
+    {
+      "id": "technical-details",
+      "heading": "Technical Details",
+      "level": 3,
+      "technical_reality": "Xibalba is a chaos testing framework for Linux kernel concurrent filesystem operations using eBPF fault injection",
+      "visual_concept": "Visualize Xibalba as a grand temple in the Maya underworld, with intricate carvings depicting the chaos of concurrent filesystem operations. The framework's eBPF fault injection mechanism is represented by a Death God (Lords of Xibalba) testing the resolve of a Hero Twin navigating the temple. The Linux-only limitation is symbolized by a locked door with a Maya hieroglyphic warning, excluding other operating systems from entering the temple.",
+      "key_elements": [
+        "Maya pyramid temple",
+        "Death God (Lords of Xibalba)",
+        "Hero twin navigating trials"
+      ],
+      "source_section": "Technical Details"
+    },
+    {
+      "id": "the-name-xibalba",
+      "heading": "The Name: Xibalba",
+      "level": 2,
+      "technical_reality": "Introduction to the Maya underworld, Xibalba, as a realm of fear and phantoms.",
+      "visual_concept": "Create a dramatic illustration of a Maya jungle at dusk, with a massive entrance to Xibalba, a cave system beneath the surface. The entrance is guarded by the Death gods, Ah Puch and Ixchel, their skeletal faces illuminated by flickering torches.",
+      "key_elements": [
+        "Death gods (Lords of Xibalba)",
+        "Hieroglyphic writing and codex art",
+        "Cave systems and underground passages"
+      ],
+      "source_section": "The Name: Xibalba"
+    },
+    {
+      "id": "the-myth-the-hero-twins-descent",
+      "heading": "The Myth: The Hero Twins' Descent",
+      "level": 3,
+      "technical_reality": "This section introduces the famous story of the Hero Twins' descent into Xibalba, highlighting the challenges they faced.",
+      "visual_concept": "Visualize the Hero Twins' story as an ancient Maya fresco depicting their courageous descent into the underworld. Incorporate intricate hieroglyphics and vibrant colors to convey the twins' determination and bravery. A central illustration of Hunahpu and Xbalanque standing before the entrance of Xibalba, surrounded by the looming presence of the Death gods, would anchor the visual narrative.",
+      "key_elements": [
+        "Hero twins navigating trials",
+        "Hieroglyphic writing and codex art",
+        "Death gods (Lords of Xibalba)"
+      ],
+      "source_section": "The Myth: The Hero Twins' Descent"
+    },
+    {
+      "id": "the-metaphor-your-codes-descent-into-chaos",
+      "heading": "The Metaphor: Your Code's Descent into Chaos",
+      "level": 3,
+      "technical_reality": "This section explains that the testing process is designed to expose the weaknesses of the code by simulating orchestrated chaos, using the metaphor of the Hero Twins navigating the Houses of Xibalba.",
+      "visual_concept": "Visualize the Hero Twins (representing the code) standing at the entrance of a grand, ancient Maya temple, facing a massive stone door with intricate hieroglyphics depicting the six Houses of Xibalba. The temple is shrouded in darkness, with faint, flickering torches casting eerie shadows on the walls. In the background, a plume of smoke rises from the underworld, symbolizing the chaos that awaits.",
+      "key_elements": [
+        "Ancient Maya temple",
+        "Hero Twins",
+        "Hieroglyphic writing and codex art"
+      ],
+      "source_section": "The Metaphor: Your Code's Descent into Chaos"
+    },
+    {
+      "id": "the-six-houses-chaos-test-categories",
+      "heading": "The Six Houses: Chaos Test Categories",
+      "level": 3,
+      "technical_reality": "This section explains the six houses of torment in the Maya underworld, which correspond to different chaos test categories used to simulate various types of bugs and issues.",
+      "visual_concept": "Visualize the six houses of torment as six distinct chambers deep within the underworld, each representing a different trial or test category. Use a combination of vibrant colors, intricate glyphs, and dramatic lighting to create an immersive atmosphere. Hero twins navigating the underworld can be depicted as code units being tested in each chamber, facing the corresponding challenges.",
+      "key_elements": [
+        "Sacred cenotes and underground rivers",
+        "Six houses of torment (House of Darkness, House of Knives, etc.)",
+        "Jaguar warriors and supernatural beings"
+      ],
+      "source_section": "The Six Houses: Chaos Test Categories"
+    },
+    {
+      "id": "key-features",
+      "heading": "Key Features",
+      "level": 2,
+      "technical_reality": "This section highlights the core functionalities and benefits of the system, showcasing its efficiency and reliability.",
+      "visual_concept": "Visualize this section as a grand entrance to the underworld, where the Hero Twins, Ix and Ixbalanque, emerge victorious, symbolizing the successful navigation of the system's key features. Use vibrant colors and intricate glyphs to depict the Lords of Xibalba, Kukulkan, and other supernatural beings in the background, emphasizing the system's strength and resilience.",
+      "key_elements": [
+        "Hero Twins",
+        "Lords of Xibalba",
+        "Kukulkan"
+      ],
+      "source_section": "Key Features"
+    },
+    {
+      "id": "-jepsen-style-chaos-engineering",
+      "heading": "\ud83c\udf2a\ufe0f **Jepsen-Style Chaos Engineering**",
+      "level": 3,
+      "technical_reality": "This section covers Jepsen-Style Chaos Engineering, specifically concurrent readers and writers, configurable test duration, consistency models, vector clock causality tracking, and proven happens-before relationships.",
+      "visual_concept": "Visualize this section as a dramatic scene where Hero Twins face the House of Darkness, navigating through a maze of pyramids and temples with concurrent readers and writers as jaguar warriors in the shadows, while the Death God Ah Puch oversees the chaos with a vector clock in hand, ensuring causality tracking.",
+      "key_elements": [
+        "House of Darkness",
+        "Hero Twins",
+        "Death God Ah Puch"
+      ],
+      "source_section": "\ud83c\udf2a\ufe0f **Jepsen-Style Chaos Engineering**"
+    },
+    {
+      "id": "-ebpf-delay-injection",
+      "heading": "\u26a1 **eBPF Delay Injection**",
+      "level": 3,
+      "technical_reality": "- Kernel-level getdents64 interception\n- Configurable delays: `pause_controller <prob%> <iterations>...",
+      "visual_concept": "Visualize \u26a1 **eBPF Delay Injection** using Maya Underworld - Xibalba imagery",
+      "key_elements": [
+        "Maya pyramids and temples",
+        "Death gods (Lords of Xibalba)",
+        "Hero twins navigating trials"
+      ],
+      "source_section": "\u26a1 **eBPF Delay Injection**"
+    },
+    {
+      "id": "-incremental-jsonl-output-timeout-safe",
+      "heading": "\ud83d\udcca **Incremental JSONL Output (Timeout-Safe!)**",
+      "level": 3,
+      "technical_reality": "- **`xibalba-progress.jsonl`**: One JSON line per 5 seconds\n- **`xibalba-bugs.jsonl`**: One JSON lin...",
+      "visual_concept": "Visualize \ud83d\udcca **Incremental JSONL Output (Timeout-Safe!)** using Maya Underworld - Xibalba imagery",
+      "key_elements": [
+        "Maya pyramids and temples",
+        "Death gods (Lords of Xibalba)",
+        "Hero twins navigating trials"
+      ],
+      "source_section": "\ud83d\udcca **Incremental JSONL Output (Timeout-Safe!)**"
+    },
+    {
+      "id": "-precise-bug-detection",
+      "heading": "\ud83d\udd0d **Precise Bug Detection**",
+      "level": 3,
+      "technical_reality": "- **Missing entries**: File should exist but doesn't (cache miss bugs)\n- **Phantom entries**: File e...",
+      "visual_concept": "Visualize \ud83d\udd0d **Precise Bug Detection** using Maya Underworld - Xibalba imagery",
+      "key_elements": [
+        "Maya pyramids and temples",
+        "Death gods (Lords of Xibalba)",
+        "Hero twins navigating trials"
+      ],
+      "source_section": "\ud83d\udd0d **Precise Bug Detection**"
+    },
+    {
+      "id": "-hermetic-qemu-vms",
+      "heading": "\ud83d\udda5\ufe0f **Hermetic QEMU VMs**",
+      "level": 3,
+      "technical_reality": "- Fast boot (<2 seconds with custom initramfs)\n- Docker-based hermetic builds (no host dependencies!...",
+      "visual_concept": "Visualize \ud83d\udda5\ufe0f **Hermetic QEMU VMs** using Maya Underworld - Xibalba imagery",
+      "key_elements": [
+        "Maya pyramids and temples",
+        "Death gods (Lords of Xibalba)",
+        "Hero twins navigating trials"
+      ],
+      "source_section": "\ud83d\udda5\ufe0f **Hermetic QEMU VMs**"
+    },
+    {
+      "id": "-c20-unit-tests-1515-passing",
+      "heading": "\ud83e\uddea **C++20 Unit Tests (15/15 passing)**",
+      "level": 3,
+      "technical_reality": "- GoogleTest framework\n- Tests core validation logic\n- Runs in CI on every PR\n- Proves bug detection...",
+      "visual_concept": "Visualize \ud83e\uddea **C++20 Unit Tests (15/15 passing)** using Maya Underworld - Xibalba imagery",
+      "key_elements": [
+        "Maya pyramids and temples",
+        "Death gods (Lords of Xibalba)",
+        "Hero twins navigating trials"
+      ],
+      "source_section": "\ud83e\uddea **C++20 Unit Tests (15/15 passing)**"
+    },
+    {
+      "id": "-getting-started",
+      "heading": "\ud83d\ude80 Getting Started",
+      "level": 2,
+      "technical_reality": "**Current Status**: \u2705 Core implementation complete, eBPF fault injection working\n\n**\u26a0\ufe0f IMPORTANT**: ...",
+      "visual_concept": "Visualize \ud83d\ude80 Getting Started using Maya Underworld - Xibalba imagery",
+      "key_elements": [
+        "Maya pyramids and temples",
+        "Death gods (Lords of Xibalba)",
+        "Hero twins navigating trials"
+      ],
+      "source_section": "\ud83d\ude80 Getting Started"
+    },
+    {
+      "id": "documentation",
+      "heading": "Documentation",
+      "level": 3,
+      "technical_reality": "**Core Docs**:\n- **\ud83d\udda5\ufe0f [VM Setup Guide](docs/VM-SETUP.md)** - QEMU/KVM hermetic VM testing\n- **\ud83d\udd27 [Fas...",
+      "visual_concept": "Visualize Documentation using Maya Underworld - Xibalba imagery",
+      "key_elements": [
+        "Maya pyramids and temples",
+        "Death gods (Lords of Xibalba)",
+        "Hero twins navigating trials"
+      ],
+      "source_section": "Documentation"
+    },
+    {
+      "id": "prerequisites",
+      "heading": "Prerequisites",
+      "level": 3,
+      "technical_reality": "**Host Machine**:\n- Linux host with KVM support\n- 8GB+ RAM (16GB+ recommended for parallel VM testin...",
+      "visual_concept": "Visualize Prerequisites using Maya Underworld - Xibalba imagery",
+      "key_elements": [
+        "Maya pyramids and temples",
+        "Death gods (Lords of Xibalba)",
+        "Hero twins navigating trials"
+      ],
+      "source_section": "Prerequisites"
+    },
+    {
+      "id": "quick-start",
+      "heading": "Quick Start",
+      "level": 3,
+      "technical_reality": "This section provides a brief overview of how to get started with the system, including installation and initial setup.",
+      "visual_concept": "Visualize the Quick Start section as a hero twin emerging from a cave system, symbolizing a new journey into the underworld. The background can feature vibrant colors and intricate glyphs, with the hero twin navigating through a winding underground passage, representing the path to quick start. The hero twin can be shown holding a codex or a ballgame court staff, signifying the tools needed for successful navigation.",
+      "key_elements": [
+        "Hero twins navigating trials",
+        "Sacred cenotes and underground rivers",
+        "Intricate glyphs"
+      ],
+      "source_section": "Quick Start"
+    },
+    {
+      "id": "clone-repository",
+      "heading": "Clone repository",
+      "level": 1,
+      "technical_reality": "git clone https://github.com/jmalicki/xibalba.git\ncd xibalba...",
+      "visual_concept": "Visualize Clone repository using Maya Underworld - Xibalba imagery",
+      "key_elements": [
+        "Maya pyramids and temples",
+        "Death gods (Lords of Xibalba)",
+        "Hero twins navigating trials"
+      ],
+      "source_section": "Clone repository"
+    }
+  ]
+}
