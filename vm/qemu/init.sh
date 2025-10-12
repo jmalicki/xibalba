@@ -263,6 +263,23 @@ if [ -f /test/xibalba-bugs.jsonl ]; then
     echo "=== END_XIBALBA_BUGS_JSONL ==="
 fi
 
+# Output scans JSONL (for post-hoc multi-model analysis)
+if [ -f /test.output/xibalba-scans.jsonl ]; then
+    echo ""
+    echo "=== XIBALBA_SCANS_JSONL ==="
+    # Show count and sample
+    TOTAL_SCANS=$(wc -l < /test.output/xibalba-scans.jsonl)
+    echo "# Total scans exported: $TOTAL_SCANS"
+    echo "# Sample (first 5 scans):"
+    head -5 /test.output/xibalba-scans.jsonl
+    if [ "$TOTAL_SCANS" -gt 10 ]; then
+        echo "# ..."
+        echo "# (Remaining $((TOTAL_SCANS - 5)) scans omitted from console)"
+        echo "# Full data available for post-hoc analysis"
+    fi
+    echo "=== END_XIBALBA_SCANS_JSONL ==="
+fi
+
 # Output full history JSON if needed (can be very large)
 if [ -f /test/xibalba-history.json ]; then
     echo ""

@@ -32,6 +32,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <stdatomic.h>
 
 static uint64_t get_timestamp_ns(void) {
     struct timespec ts;

@@ -167,6 +167,11 @@ But if your code survives—like the Hero Twins—it doesn't just work. It has b
   - Test implementation plans with code examples
   - Gap analysis: What Xibalba can detect now vs. what's needed
   - 70+ links to LKML, CVEs, and bug trackers
+- **📊 [Competitive Analysis](docs/COMPETITIVE-ANALYSIS.md)** - Xibalba vs. CrashMonkey comparison
+  - Detailed feature comparison and positioning
+  - Strengths and weaknesses of both tools
+  - Use case analysis and recommendations
+  - TL;DR: Complementary tools, use both for comprehensive testing
 
 ---
 

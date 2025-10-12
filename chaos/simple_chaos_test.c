@@ -439,9 +439,14 @@ int main(int argc, char *argv[]) {
     atomic_init(&bug_queue->write_idx, 0);
     atomic_init(&bug_queue->read_idx, 0);
     
+    // Create .output directory for scan export (same location as bugs/progress files)
+    char scan_output_dir[512];
+    snprintf(scan_output_dir, sizeof(scan_output_dir), "%s.output", test_dir);  // Note: appended, not subdir
+    mkdir(scan_output_dir, 0755);  // Create if doesn't exist (ignore errors if exists)
+    
     // Open scan export file for post-hoc analysis
     char scan_export_path[512];
-    snprintf(scan_export_path, sizeof(scan_export_path), "%s/.output/xibalba-scans.jsonl", test_dir);
+    snprintf(scan_export_path, sizeof(scan_export_path), "%s/xibalba-scans.jsonl", scan_output_dir);
     FILE *scan_export = fopen(scan_export_path, "w");
     if (!scan_export) {
         fprintf(stderr, "Warning: Could not open scan export file: %s\n", scan_export_path);
