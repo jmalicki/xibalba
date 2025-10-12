@@ -1,12 +1,9 @@
 # Lychee link checker ignore patterns
 
-# DOI links often have bot protection but are valid
-# They return 403/404 to automated checkers but work in browsers
+# DOI links have bot protection (403/404 to automated checkers)
+# These are valid for humans but block automated link checkers
 https://doi.org/*
 
 # ACM Digital Library also has bot protection
 https://dl.acm.org/*
-
-# arXiv can be flaky with automated checkers
-https://arxiv.org/*
 
