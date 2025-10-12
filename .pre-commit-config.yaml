@@ -22,7 +22,8 @@ repos:
     hooks:
       - id: lychee
         name: Check markdown links
-        args: ['--verbose', '--no-progress']
+        # Accept 403/429 as valid (bot protection, not broken links)
+        args: ['--verbose', '--no-progress', '--accept', '200,403,429']
         files: '\.md$'
 
   # Bazel-native linting (uses hermetic shellcheck from Bazel)
