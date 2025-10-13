@@ -38,19 +38,24 @@ protected:
 
 static std::string find_bpf_object(const char* filename) {
     // Try multiple possible locations
-    const char* paths[] = {
-        // Bazel runfiles path
-        "bazel-bin/chaos/pause_injector.bpf.o",
-        // Relative to workspace
-        "chaos/pause_injector.bpf.o",
+    std::string paths[] = {
+        // Bazel runfiles path (injectors)
+        std::string("bazel-bin/chaos/injectors/") + filename,
+        // Bazel runfiles path (chaos root for legacy)
+        std::string("bazel-bin/chaos/") + filename,
+        // Relative to workspace (injectors)
+        std::string("chaos/injectors/") + filename,
+        // Relative to workspace (chaos root)
+        std::string("chaos/") + filename,
         // Test data directory
         filename,
-        nullptr
+        ""
     };
     
-    for (int i = 0; paths[i] != nullptr; i++) {
-        if (access(paths[i], F_OK) == 0) {
-            return paths[i];
+    for (const auto& path : paths) {
+        if (path.empty()) break;
+        if (access(path.c_str(), F_OK) == 0) {
+            return path;
         }
     }
     
@@ -296,14 +301,190 @@ TEST_F(BPFProgramTest, MultipleObjects_CanOpen) {
 }
 
 // ============================================================================
-// Future Tests (when new BPF programs compile)
+// Tests for rename_tracepoint.bpf.c (NEW - WORKING!)
 // ============================================================================
 
-// TODO: Add when rename_window.bpf.o compiles
-// TEST_F(BPFProgramTest, RenameWindow_LoadsSuccessfully) { ... }
-// TEST_F(BPFProgramTest, RenameWindow_TestRunWithMockPtRegs) { ... }
+TEST_F(BPFProgramTest, RenameTracepoint_OpensSuccessfully) {
+    std::string path = find_bpf_object("rename_tracepoint.bpf.o");
+    
+    struct bpf_object *obj = bpf_object__open_file(path.c_str(), nullptr);
+    EXPECT_NE(obj, nullptr) << "Failed to open rename_tracepoint.bpf.o";
+    
+    if (obj) {
+        struct bpf_program *prog;
+        int prog_count = 0;
+        bpf_object__for_each_program(prog, obj) {
+            prog_count++;
+        }
+        EXPECT_EQ(prog_count, 2) << "Should have 2 programs (rename_exit, unlink_exit)";
+        bpf_object__close(obj);
+    }
+}
 
-// TODO: Add when transaction_abort.bpf.o compiles
-// TEST_F(BPFProgramTest, TransactionAbort_LoadsSuccessfully) { ... }
-// TEST_F(BPFProgramTest, TransactionAbort_ErrorInjection) { ... }
+TEST_F(BPFProgramTest, RenameTracepoint_MapsDefinedInObject) {
+    std::string path = find_bpf_object("rename_tracepoint.bpf.o");
+    
+    struct bpf_object *obj = bpf_object__open_file(path.c_str(), nullptr);
+    ASSERT_NE(obj, nullptr);
+    
+    struct bpf_map *config_map = bpf_object__find_map_by_name(obj, "config");
+    EXPECT_NE(config_map, nullptr) << "Config map not found";
+    
+    struct bpf_map *stats_map = bpf_object__find_map_by_name(obj, "stats");
+    EXPECT_NE(stats_map, nullptr) << "Stats map not found";
+    
+    bpf_object__close(obj);
+}
+
+TEST_F(BPFProgramTest, RenameTracepoint_MapStructure) {
+    std::string path = find_bpf_object("rename_tracepoint.bpf.o");
+    
+    struct bpf_object *obj = bpf_object__open_file(path.c_str(), nullptr);
+    ASSERT_NE(obj, nullptr);
+    
+    struct bpf_map *config_map = bpf_object__find_map_by_name(obj, "config");
+    ASSERT_NE(config_map, nullptr);
+    
+    EXPECT_EQ(bpf_map__type(config_map), BPF_MAP_TYPE_ARRAY);
+    EXPECT_EQ(bpf_map__max_entries(config_map), 3u);
+    EXPECT_EQ(bpf_map__key_size(config_map), sizeof(__u32));
+    EXPECT_EQ(bpf_map__value_size(config_map), sizeof(__u32));
+    
+    struct bpf_map *stats_map = bpf_object__find_map_by_name(obj, "stats");
+    ASSERT_NE(stats_map, nullptr);
+    
+    EXPECT_EQ(bpf_map__type(stats_map), BPF_MAP_TYPE_ARRAY);
+    EXPECT_EQ(bpf_map__max_entries(stats_map), 6u);
+    EXPECT_EQ(bpf_map__value_size(stats_map), sizeof(__u64));
+    
+    bpf_object__close(obj);
+}
+
+TEST_F(BPFProgramTest, RenameTracepoint_ProgramsDefined) {
+    std::string path = find_bpf_object("rename_tracepoint.bpf.o");
+    
+    struct bpf_object *obj = bpf_object__open_file(path.c_str(), nullptr);
+    ASSERT_NE(obj, nullptr);
+    
+    struct bpf_program *rename_prog = bpf_object__find_program_by_name(
+        obj, "trace_rename_exit"
+    );
+    EXPECT_NE(rename_prog, nullptr) << "trace_rename_exit not found";
+    
+    struct bpf_program *unlink_prog = bpf_object__find_program_by_name(
+        obj, "trace_unlink_exit"
+    );
+    EXPECT_NE(unlink_prog, nullptr) << "trace_unlink_exit not found";
+    
+    bpf_object__close(obj);
+}
+
+TEST_F(BPFProgramTest, RenameTracepoint_TracepointSections) {
+    std::string path = find_bpf_object("rename_tracepoint.bpf.o");
+    
+    struct bpf_object *obj = bpf_object__open_file(path.c_str(), nullptr);
+    ASSERT_NE(obj, nullptr);
+    
+    struct bpf_program *prog;
+    bpf_object__for_each_program(prog, obj) {
+        const char *section = bpf_program__section_name(prog);
+        EXPECT_TRUE(strstr(section, "tracepoint") != nullptr)
+            << "Section should be tracepoint: " << section;
+    }
+    
+    bpf_object__close(obj);
+}
+
+// ============================================================================
+// Tests for link_tracepoint.bpf.c (NEW - WORKING!)
+// ============================================================================
+
+TEST_F(BPFProgramTest, LinkTracepoint_OpensSuccessfully) {
+    std::string path = find_bpf_object("link_tracepoint.bpf.o");
+    
+    struct bpf_object *obj = bpf_object__open_file(path.c_str(), nullptr);
+    EXPECT_NE(obj, nullptr) << "Failed to open link_tracepoint.bpf.o";
+    
+    if (obj) {
+        struct bpf_program *prog;
+        int prog_count = 0;
+        bpf_object__for_each_program(prog, obj) {
+            prog_count++;
+        }
+        EXPECT_EQ(prog_count, 2) << "Should have 2 programs (link_exit, unlink_exit)";
+        bpf_object__close(obj);
+    }
+}
+
+TEST_F(BPFProgramTest, LinkTracepoint_MapsDefinedInObject) {
+    std::string path = find_bpf_object("link_tracepoint.bpf.o");
+    
+    struct bpf_object *obj = bpf_object__open_file(path.c_str(), nullptr);
+    ASSERT_NE(obj, nullptr);
+    
+    struct bpf_map *config_map = bpf_object__find_map_by_name(obj, "config");
+    EXPECT_NE(config_map, nullptr) << "Config map not found";
+    
+    struct bpf_map *stats_map = bpf_object__find_map_by_name(obj, "stats");
+    EXPECT_NE(stats_map, nullptr) << "Stats map not found";
+    
+    bpf_object__close(obj);
+}
+
+TEST_F(BPFProgramTest, LinkTracepoint_MapStructure) {
+    std::string path = find_bpf_object("link_tracepoint.bpf.o");
+    
+    struct bpf_object *obj = bpf_object__open_file(path.c_str(), nullptr);
+    ASSERT_NE(obj, nullptr);
+    
+    struct bpf_map *config_map = bpf_object__find_map_by_name(obj, "config");
+    ASSERT_NE(config_map, nullptr);
+    
+    EXPECT_EQ(bpf_map__max_entries(config_map), 3u);
+    EXPECT_EQ(bpf_map__key_size(config_map), sizeof(__u32));
+    EXPECT_EQ(bpf_map__value_size(config_map), sizeof(__u32));
+    
+    struct bpf_map *stats_map = bpf_object__find_map_by_name(obj, "stats");
+    ASSERT_NE(stats_map, nullptr);
+    
+    EXPECT_EQ(bpf_map__max_entries(stats_map), 6u);
+    EXPECT_EQ(bpf_map__value_size(stats_map), sizeof(__u64));
+    
+    bpf_object__close(obj);
+}
+
+TEST_F(BPFProgramTest, LinkTracepoint_ProgramsDefined) {
+    std::string path = find_bpf_object("link_tracepoint.bpf.o");
+    
+    struct bpf_object *obj = bpf_object__open_file(path.c_str(), nullptr);
+    ASSERT_NE(obj, nullptr);
+    
+    struct bpf_program *link_prog = bpf_object__find_program_by_name(
+        obj, "trace_link_exit"
+    );
+    EXPECT_NE(link_prog, nullptr) << "trace_link_exit not found";
+    
+    struct bpf_program *unlink_prog = bpf_object__find_program_by_name(
+        obj, "trace_unlink_exit"
+    );
+    EXPECT_NE(unlink_prog, nullptr) << "trace_unlink_exit not found";
+    
+    bpf_object__close(obj);
+}
+
+TEST_F(BPFProgramTest, LinkTracepoint_TracepointSections) {
+    std::string path = find_bpf_object("link_tracepoint.bpf.o");
+    
+    struct bpf_object *obj = bpf_object__open_file(path.c_str(), nullptr);
+    ASSERT_NE(obj, nullptr);
+    
+    struct bpf_program *prog;
+    bpf_object__for_each_program(prog, obj) {
+        const char *section = bpf_program__section_name(prog);
+        EXPECT_TRUE(strstr(section, "tracepoint") != nullptr)
+            << "Section should be tracepoint: " << section;
+    }
+    
+    bpf_object__close(obj);
+}
 

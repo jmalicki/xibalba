@@ -292,6 +292,98 @@ const injector_descriptor_t injector_multi_hook = {
 };
 
 // ============================================================================
+// Injector 7: Rename Tracepoint (WORKING, MODERATE EFFECTIVENESS)
+// ============================================================================
+
+const injector_descriptor_t injector_rename_tracepoint = {
+    .name = "rename_tracepoint",
+    .description = "Delay at rename/unlink syscall exit (syscall-level, portable)",
+    .bpf_object_filename = "rename_tracepoint.bpf.o",
+    
+    .supports_generic = true,
+    .supports_ext4 = true,
+    .supports_xfs = true,
+    .supports_btrfs = true,
+    .supports_f2fs = true,
+    .supports_bcachefs = true,
+    
+    .requirements = {
+        .min_kernel_version_major = 5,
+        .min_kernel_version_minor = 4,
+        .requires_error_injection = false,
+        .requires_fentry = false,
+    },
+    
+    .config = {
+        .default_probability_pct = 30,
+        .default_delay_us = 15,
+        .min_delay_us = 5,
+        .max_delay_us = 100,
+    },
+    
+    .hook_points = {
+        "tracepoint/syscalls/sys_exit_renameat2",
+        "tracepoint/syscalls/sys_exit_unlinkat",
+    },
+    .num_hooks = 2,
+    
+    .targets = {
+        "rename visibility window (syscall level)",
+        "file missing after rename",
+        "directory scan inconsistency",
+    },
+    .num_targets = 3,
+    
+    .effectiveness = EFFECTIVENESS_MEDIUM,
+};
+
+// ============================================================================
+// Injector 8: Link Tracepoint (WORKING, FOR DIRTY READ TESTING)
+// ============================================================================
+
+const injector_descriptor_t injector_link_tracepoint = {
+    .name = "link_tracepoint",
+    .description = "Delay at link/unlink syscall exit (dirty read testing)",
+    .bpf_object_filename = "link_tracepoint.bpf.o",
+    
+    .supports_generic = true,
+    .supports_ext4 = true,
+    .supports_xfs = true,
+    .supports_btrfs = true,
+    .supports_f2fs = true,
+    .supports_bcachefs = true,
+    
+    .requirements = {
+        .min_kernel_version_major = 5,
+        .min_kernel_version_minor = 4,
+        .requires_error_injection = false,
+        .requires_fentry = false,
+    },
+    
+    .config = {
+        .default_probability_pct = 25,
+        .default_delay_us = 20,
+        .min_delay_us = 5,
+        .max_delay_us = 100,
+    },
+    
+    .hook_points = {
+        "tracepoint/syscalls/sys_exit_linkat",
+        "tracepoint/syscalls/sys_exit_unlinkat",
+    },
+    .num_hooks = 2,
+    
+    .targets = {
+        "transaction abort dirty reads",
+        "reference count races",
+        "hard link consistency",
+    },
+    .num_targets = 3,
+    
+    .effectiveness = EFFECTIVENESS_MEDIUM,
+};
+
+// ============================================================================
 // Registry Functions
 // ============================================================================
 
@@ -303,6 +395,8 @@ static const injector_descriptor_t *all_injectors[] = {
     &injector_vfs_delay,
     &injector_btrfs_specific,
     &injector_multi_hook,
+    &injector_rename_tracepoint,
+    &injector_link_tracepoint,
     NULL  // Sentinel
 };
 

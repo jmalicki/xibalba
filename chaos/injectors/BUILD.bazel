@@ -44,6 +44,36 @@ genrule(
     visibility = ["//visibility:public"],
 )
 
+# Injector: Rename Tracepoint (syscall level, portable)
+genrule(
+    name = "rename_tracepoint_bpf",
+    srcs = ["rename_tracepoint.bpf.c"],
+    outs = ["rename_tracepoint.bpf.o"],
+    cmd = """
+        $$CC -g -O2 -target bpf \
+            -D__TARGET_ARCH_x86_64 \
+            -I/usr/include/x86_64-linux-gnu \
+            -c $(location rename_tracepoint.bpf.c) \
+            -o $@
+    """,
+    visibility = ["//visibility:public"],
+)
+
+# Injector: Link Tracepoint (syscall level, for dirty read testing)
+genrule(
+    name = "link_tracepoint_bpf",
+    srcs = ["link_tracepoint.bpf.c"],
+    outs = ["link_tracepoint.bpf.o"],
+    cmd = """
+        $$CC -g -O2 -target bpf \
+            -D__TARGET_ARCH_x86_64 \
+            -I/usr/include/x86_64-linux-gnu \
+            -c $(location link_tracepoint.bpf.c) \
+            -o $@
+    """,
+    visibility = ["//visibility:public"],
+)
+
 # TODO: Add more injector BPF programs as they're implemented
 # - vfs_delay.bpf.c
 # - btrfs_specific.bpf.c  
@@ -75,6 +105,8 @@ cc_test(
     ],
     data = [
         "//chaos:pause_injector_bpf",  # The working BPF program
+        ":rename_tracepoint_bpf",      # NEW: Tracepoint injector
+        ":link_tracepoint_bpf",        # NEW: Link tracepoint injector
     ],
     linkopts = [
         "-lbpf",

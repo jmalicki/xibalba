@@ -27,7 +27,9 @@ TEST(InjectorRegistryTest, GetInjector_ValidNames) {
         "transaction_abort",
         "vfs_delay",
         "btrfs_specific",
-        "multi_hook"
+        "multi_hook",
+        "rename_tracepoint",
+        "link_tracepoint"
     };
     
     for (const char* name : valid_names) {

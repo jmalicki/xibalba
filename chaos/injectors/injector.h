@@ -70,6 +70,8 @@ extern const injector_descriptor_t injector_transaction_abort;
 extern const injector_descriptor_t injector_vfs_delay;
 extern const injector_descriptor_t injector_btrfs_specific;
 extern const injector_descriptor_t injector_multi_hook;
+extern const injector_descriptor_t injector_rename_tracepoint;
+extern const injector_descriptor_t injector_link_tracepoint;
 
 // Get injector by name
 // Returns NULL if not found
