@@ -15,9 +15,11 @@
  * REQUIRES: CONFIG_BPF_KPROBE_OVERRIDE=y in kernel
  */
 
+#include <linux/types.h>
 #include <linux/bpf.h>
 #include <bpf/bpf_helpers.h>
 #include <bpf/bpf_tracing.h>
+#include <bpf/bpf_core_read.h>
 
 char LICENSE[] SEC("license") = "GPL";
 
@@ -117,7 +119,7 @@ static __always_inline void inject_delay(void) {
 
 SEC("kretprobe/btrfs_insert_inode_ref")
 int hook_after_inode_ref_insert(struct pt_regs *ctx) {
-    int ret = PT_REGS_RC(ctx);
+    long ret = PT_REGS_RC(ctx);
     
     // Update call count
     __u32 stat_key = STAT_INODE_REF_CALLS;

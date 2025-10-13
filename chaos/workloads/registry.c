@@ -10,17 +10,17 @@
 
 // Forward declarations (implemented in respective .c files)
 extern const workload_ops_t workload_create_delete;
-// extern const workload_ops_t workload_rename;     // TODO: Implement
-// extern const workload_ops_t workload_hardlink;   // TODO: Implement
-// extern const workload_ops_t workload_mixed;      // TODO: Implement
+extern const workload_ops_t workload_rename;
+extern const workload_ops_t workload_hardlink;
+extern const workload_ops_t workload_mixed;
 // extern const workload_ops_t workload_btrfs_torture;  // TODO: Implement
 
 // All available workloads
 static const workload_ops_t *all_workloads[] = {
     &workload_create_delete,
-    // &workload_rename,      // TODO: Uncomment when implemented
-    // &workload_hardlink,    // TODO: Uncomment when implemented
-    // &workload_mixed,       // TODO: Uncomment when implemented
+    &workload_rename,
+    &workload_hardlink,
+    &workload_mixed,
     // &workload_btrfs_torture,  // TODO: Uncomment when implemented
     NULL  // Sentinel
 };

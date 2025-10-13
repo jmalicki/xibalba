@@ -2,21 +2,27 @@
 
 package(default_visibility = ["//visibility:public"])
 
-# Workload registry
+# Workload implementations
 cc_library(
-    name = "registry",
-    srcs = ["registry.c"],
+    name = "workloads",
+    srcs = [
+        "create_delete.c",
+        "rename.c",
+        "hardlink.c",
+        "mixed.c",
+        "registry.c",
+    ],
     hdrs = ["workload.h"],
     deps = [
+        "//common:dir_reader",
         "//common:state_tracker",
     ],
     visibility = ["//visibility:public"],
 )
 
-# TODO: Add workload implementations as they're created
-# - create_delete.c (extract from simple_chaos_test.c)
-# - rename.c
-# - hardlink.c
-# - mixed.c
-# - btrfs_torture.c
+# Alias for registry (backward compatibility)
+alias(
+    name = "registry",
+    actual = ":workloads",
+)
 

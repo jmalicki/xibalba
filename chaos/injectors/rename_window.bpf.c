@@ -13,9 +13,11 @@
  * Based on research: docs/design/BTRFS-LOST-UPDATE-ANALYSIS.md
  */
 
+#include <linux/types.h>
 #include <linux/bpf.h>
 #include <bpf/bpf_helpers.h>
 #include <bpf/bpf_tracing.h>
+#include <bpf/bpf_core_read.h>
 
 char LICENSE[] SEC("license") = "GPL";
 
@@ -99,7 +101,7 @@ static __always_inline void inject_delay(void) {
 
 SEC("kretprobe/__btrfs_unlink_inode")
 int hook_btrfs_unlink_exit(struct pt_regs *ctx) {
-    int ret = PT_REGS_RC(ctx);
+    long ret = PT_REGS_RC(ctx);
     
     // Update call count
     __u32 stat_key = STAT_BTRFS_UNLINK_CALLS;
@@ -162,7 +164,7 @@ int hook_vfs_rename_entry(struct pt_regs *ctx) {
 
 SEC("kretprobe/do_unlinkat")
 int hook_unlinkat_exit(struct pt_regs *ctx) {
-    int ret = PT_REGS_RC(ctx);
+    long ret = PT_REGS_RC(ctx);
     
     // Update total calls
     __u32 stat_key = STAT_TOTAL_CALLS;
