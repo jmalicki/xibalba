@@ -49,3 +49,20 @@ genrule(
 # - btrfs_specific.bpf.c  
 # - multi_hook.bpf.c
 
+# ============================================================================
+# Unit Tests
+# ============================================================================
+
+cc_test(
+    name = "registry_test",
+    srcs = ["registry_test.cc"],
+    deps = [
+        ":registry",
+        "@googletest//:gtest_main",
+    ],
+    copts = [
+        "-Wno-unused-parameter",
+    ],
+    size = "small",
+)
+

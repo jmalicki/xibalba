@@ -28,7 +28,7 @@ typedef struct {
 // Reader Thread
 // ============================================================================
 
-static void *create_delete_reader(void *arg) {
+void *create_delete_reader(void *arg) {
     workload_state_t *state = (workload_state_t *)arg;
     struct dir_reader *reader = dir_reader_create_classic();
     uint64_t thread_id = (uint64_t)pthread_self();

@@ -145,7 +145,7 @@ static void *hardlink_writer(void *arg) {
 // Reader Thread (Validates Reference Counts)
 // ============================================================================
 
-static void *hardlink_reader(void *arg) {
+void *hardlink_reader(void *arg) {
     workload_state_t *state = (workload_state_t *)arg;
     struct dir_reader *reader = dir_reader_create_classic();
     uint64_t thread_id = (uint64_t)pthread_self();

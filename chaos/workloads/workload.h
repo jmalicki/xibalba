@@ -103,5 +103,9 @@ const workload_ops_t *get_workload(const char *name);
 // List all available workloads
 void list_workloads(FILE *out);
 
+// Shared reader functions (exported for reuse)
+void *create_delete_reader(void *arg);
+void *hardlink_reader(void *arg);
+
 #endif /* XIBALBA_WORKLOAD_H */
 

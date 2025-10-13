@@ -26,3 +26,21 @@ alias(
     actual = ":workloads",
 )
 
+# ============================================================================
+# Unit Tests
+# ============================================================================
+
+cc_test(
+    name = "workload_test",
+    srcs = ["workload_test.cc"],
+    deps = [
+        ":workloads",
+        "@googletest//:gtest_main",
+    ],
+    copts = [
+        "-Wno-unused-parameter",
+        "-Wno-c11-extensions",  # workload.h uses C11 atomics
+    ],
+    size = "small",
+)
+
