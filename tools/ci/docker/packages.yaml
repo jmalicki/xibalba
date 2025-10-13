@@ -1,0 +1,49 @@
+version: 1
+
+sources:
+  - channel: noble main
+    url: https://snapshot.ubuntu.com/ubuntu/20241001T000000Z
+  - channel: noble universe
+    url: https://snapshot.ubuntu.com/ubuntu/20241001T000000Z
+
+archs:
+  - "amd64"
+  - "arm64"
+
+packages:
+  # System essentials
+  - bash
+  - coreutils
+  - findutils
+  - git  # GitHub Actions needs git
+  
+  # Build dependencies (what CI needs to COMPILE Xibalba)
+  - clang-18
+  - libclang-cpp18
+  - libllvm18
+  - libedit2
+  - libbpf-dev
+  - libelf-dev
+  - linux-headers-generic
+  - libc6-dev  # Standard C library development files (provides libm.so.6, libmvec.so.1)
+  - libstdc++-13-dev  # C++ standard library development files
+  
+  # Bazel dependencies
+  - python3
+  - openjdk-21-jdk-headless
+  - zip
+  - unzip
+  - wget
+  
+  # Utilities (for CI scripts)
+  - jq
+  - libjq1
+  - libonig5
+  - curl
+  - ca-certificates
+  - openssl
+
+# NOTE: Filesystem tools (mkfs.*, etc.) are NOT needed here!
+# They are installed in QEMU VMs via initramfs (see vm/build-scripts/build-initramfs.sh)
+# This container is ONLY for building Xibalba, not testing it.
+

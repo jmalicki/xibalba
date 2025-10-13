@@ -13,16 +13,38 @@ module(
 # C/C++ testing framework
 bazel_dep(name = "googletest", version = "1.14.0")
 
+# Bazel utility functions (needed by vm/BUILD.bazel for native_binary)
+bazel_dep(name = "bazel_skylib", version = "1.5.0")
+
+# Packaging rules (for .deb creation)
+bazel_dep(name = "rules_pkg", version = "0.9.1")
+
 # Rules for building OCI (Docker) images - used for hermetic build environment
 bazel_dep(name = "rules_oci", version = "1.7.4")
 
-# Pull Ubuntu base image for build tools container
+# Hermetic Debian package management (needs bazel_gazelle)
+bazel_dep(name = "gazelle", version = "0.36.0")
+bazel_dep(name = "rules_distroless", version = "0.5.3")
+bazel_dep(name = "aspect_bazel_lib", version = "2.7.7")
+
+# Pull base images for containers
 oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
+
+# Ubuntu base
 oci.pull(
     name = "ubuntu_base",
     image = "ubuntu",
+    platforms = ["linux/amd64"],
     tag = "24.04",
-    platforms = ["linux/amd64"],  # We're targeting x86-64
-    # TODO: Pin digest once we verify this works
 )
 use_repo(oci, "ubuntu_base")
+
+# Configure apt package sources for CI dev environment
+apt = use_extension("@rules_distroless//apt:extensions.bzl", "apt")
+apt.install(
+    name = "ubuntu_packages",
+    lock = "//tools/ci/docker:packages.lock.json",
+    manifest = "//tools/ci/docker:packages.yaml",
+    mergedusr = True,  # Normalize paths for usr-merge (fixes /lib vs /usr/lib conflicts)
+)
+use_repo(apt, "ubuntu_packages")
