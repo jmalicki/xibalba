@@ -1,0 +1,51 @@
+# eBPF Fault Injection Modules
+
+package(default_visibility = ["//visibility:public"])
+
+# Injector registry (links all injector descriptors)
+cc_library(
+    name = "registry",
+    srcs = ["registry.c"],
+    hdrs = ["injector.h"],
+    visibility = ["//visibility:public"],
+)
+
+# ============================================================================
+# eBPF Programs (compiled for BPF target)
+# ============================================================================
+
+# Injector: Rename Window Delay
+genrule(
+    name = "rename_window_bpf",
+    srcs = ["rename_window.bpf.c"],
+    outs = ["rename_window.bpf.o"],
+    cmd = """
+        $$CC -g -O2 -target bpf \
+            -D__TARGET_ARCH_x86_64 \
+            -I/usr/include/x86_64-linux-gnu \
+            -c $(location rename_window.bpf.c) \
+            -o $@
+    """,
+    visibility = ["//visibility:public"],
+)
+
+# Injector: Transaction Abort (Btrfs-specific)
+genrule(
+    name = "transaction_abort_bpf",
+    srcs = ["transaction_abort.bpf.c"],
+    outs = ["transaction_abort.bpf.o"],
+    cmd = """
+        $$CC -g -O2 -target bpf \
+            -D__TARGET_ARCH_x86_64 \
+            -I/usr/include/x86_64-linux-gnu \
+            -c $(location transaction_abort.bpf.c) \
+            -o $@
+    """,
+    visibility = ["//visibility:public"],
+)
+
+# TODO: Add more injector BPF programs as they're implemented
+# - vfs_delay.bpf.c
+# - btrfs_specific.bpf.c  
+# - multi_hook.bpf.c
+

@@ -1,0 +1,22 @@
+# Chaos Testing Workload Modules
+
+package(default_visibility = ["//visibility:public"])
+
+# Workload registry
+cc_library(
+    name = "registry",
+    srcs = ["registry.c"],
+    hdrs = ["workload.h"],
+    deps = [
+        "//common:state_tracker",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# TODO: Add workload implementations as they're created
+# - create_delete.c (extract from simple_chaos_test.c)
+# - rename.c
+# - hardlink.c
+# - mixed.c
+# - btrfs_torture.c
+
