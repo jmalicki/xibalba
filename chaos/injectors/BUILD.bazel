@@ -66,3 +66,26 @@ cc_test(
     size = "small",
 )
 
+# BPF program tests using BPF_PROG_TEST_RUN
+cc_test(
+    name = "bpf_test",
+    srcs = ["bpf_test.cc"],
+    deps = [
+        "@googletest//:gtest_main",
+    ],
+    data = [
+        "//chaos:pause_injector_bpf",  # The working BPF program
+    ],
+    linkopts = [
+        "-lbpf",
+        "-lelf",
+        "-lz",
+    ],
+    copts = [
+        "-Wno-unused-parameter",
+        "-Wno-format-nonliteral",
+    ],
+    size = "small",
+    tags = ["requires-bpf"],  # Can skip on systems without BPF support
+)
+
