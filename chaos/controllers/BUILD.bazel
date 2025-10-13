@@ -1,0 +1,20 @@
+# eBPF Controller Implementation
+
+package(default_visibility = ["//visibility:public"])
+
+# Generic controller library
+cc_library(
+    name = "generic_controller",
+    srcs = ["generic_controller.c"],
+    hdrs = ["controller.h"],
+    deps = [
+        "//chaos/injectors:registry",
+    ],
+    linkopts = [
+        "-lbpf",
+        "-lelf",
+        "-lz",
+    ],
+    visibility = ["//visibility:public"],
+)
+

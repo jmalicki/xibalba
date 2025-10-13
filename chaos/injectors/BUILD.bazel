@@ -21,7 +21,7 @@ genrule(
     outs = ["rename_window.bpf.o"],
     cmd = """
         $$CC -g -O2 -target bpf \
-            -D__TARGET_ARCH_x86 \
+            -D__TARGET_ARCH_x86_64 \
             -I/usr/include/x86_64-linux-gnu \
             -c $(location rename_window.bpf.c) \
             -o $@
@@ -36,7 +36,7 @@ genrule(
     outs = ["transaction_abort.bpf.o"],
     cmd = """
         $$CC -g -O2 -target bpf \
-            -D__TARGET_ARCH_x86 \
+            -D__TARGET_ARCH_x86_64 \
             -I/usr/include/x86_64-linux-gnu \
             -c $(location transaction_abort.bpf.c) \
             -o $@

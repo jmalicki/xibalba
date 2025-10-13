@@ -381,6 +381,9 @@ bool injector_supports_filesystem(const injector_descriptor_t *inj, const char *
 
 bool injector_check_requirements(const injector_descriptor_t *inj, 
                                  char *error_buf, size_t error_len) {
+    (void)error_buf;  // TODO: Use for error reporting
+    (void)error_len;  // TODO: Use for error reporting
+    
     if (!inj) return false;
     
     // TODO: Check kernel version via uname()
