@@ -115,8 +115,15 @@ oci_push(
 # ============================================================================
 
 # Get Bazel's action hash for the image (truly hermetic cache key)
+# This is used by build-container.yml to generate cache tags
 sh_binary(
     name = "get_image_hash",
     srcs = ["get_image_hash.sh"],
+)
+
+# Alias for backwards compatibility
+alias(
+    name = "generate_cache_key",
+    actual = ":get_image_hash",
 )
 
