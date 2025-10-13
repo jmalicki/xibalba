@@ -123,17 +123,19 @@
 
 ### Task 4: Add BPF Tests for New Injectors
 
+**IMPORTANT:** eBPF execution testing happens in VMs, not on build host!
+
+**Unit tests (no kernel needed):**
 - [ ] Update `chaos/injectors/bpf_test.cc`
   - [ ] Add `RenameTracepoint_OpensSuccessfully` test
   - [ ] Add `RenameTracepoint_MapsDefinedInObject` test
   - [ ] Add `RenameTracepoint_MapStructure` test
   - [ ] Add `RenameTracepoint_ProgramDefined` test
+  - [ ] Add `RenameTracepoint_HooksCorrectTracepoints` test
   
-  - [ ] Add same tests for `link_tracepoint`
+  - [ ] Add same 5 tests for `link_tracepoint`
   
-  - [ ] Add `DISABLED` tests for execution (needs CAP_BPF):
-    - [ ] `DISABLED_RenameTracepoint_TestRun`
-    - [ ] `DISABLED_LinkTracepoint_TestRun`
+  - [ ] NO execution tests in unit tests (those run in VM integration tests)
 
 - [ ] Update BUILD.bazel data dependencies
   - [ ] Add `//chaos/injectors:rename_tracepoint_bpf`
@@ -141,8 +143,13 @@
 
 - [ ] Run tests
   - [ ] `bazel test //chaos/injectors:bpf_test`
-  - [ ] Verify all tests pass
-  - [ ] Expect ~10 new tests
+  - [ ] Verify all tests pass (should be ~16 tests now)
+  - [ ] All pass WITHOUT kernel permissions
+
+**VM integration tests (Phase 5):**
+- [ ] Actual execution happens in `bazel test //vm:...` tests
+- [ ] VMs have kernel BPF enabled
+- [ ] End-to-end testing with real filesystems
 
 **Estimated time:** 30 minutes
 
@@ -426,7 +433,12 @@
 **Time Estimate:** 2-3 hours  
 **Expected Result:** Bugs found, architecture validated
 
-### Task 1: Manual Testing
+**TESTING STRATEGY:**
+- Unit tests run on build host (no kernel BPF needed)
+- Integration tests run in VMs (via `bazel test //vm:...`)
+- VMs have full kernel BPF support + multiple filesystems
+
+### Task 1: Manual Testing (On Build Host)
 
 - [ ] Test runner help and listing
   - [ ] Run `chaos_test_runner --help`
@@ -434,7 +446,7 @@
   - [ ] Run `chaos_test_runner --list-injectors`
   - [ ] Verify output is helpful
 
-- [ ] Test each workload WITHOUT injector
+- [ ] Test each workload WITHOUT injector (on tmpfs, no BPF)
   - [ ] `--workload create_delete /tmp/test`
   - [ ] `--workload rename /tmp/test`
   - [ ] `--workload hardlink /tmp/test`
@@ -447,45 +459,51 @@
 
 ---
 
-### Task 2: Test with Existing Injector
+### Task 2: Create VM Integration Tests
 
-- [ ] Test getdents_delay with each workload
-  - [ ] `--workload create_delete --injector getdents_delay`
-  - [ ] `--workload rename --injector getdents_delay`
-  - [ ] `--workload hardlink --injector getdents_delay`
-  - [ ] `--workload mixed --injector getdents_delay`
-  - [ ] Run on tmpfs (should find 0 bugs - injector ineffective)
-  - [ ] Verify injector loads successfully
-  - [ ] Verify stats are collected
+**NOTE:** eBPF execution tests run in VMs, not on build host!
 
-**Estimated time:** 30 minutes
+- [ ] Create `vm/tests/test_chaos_injectors.sh`
+  - [ ] Script to run in VM with BPF support
+  - [ ] Test getdents_delay with each workload
+  - [ ] Test rename_tracepoint with rename workload
+  - [ ] Test link_tracepoint with hardlink workload
+  - [ ] Record results to output file
+
+- [ ] Update VM test framework
+  - [ ] Add chaos_test_runner to VM image
+  - [ ] Ensure BPF is enabled in test kernel
+  - [ ] Add btrfs filesystem to test VMs
+
+- [ ] Run VM tests
+  - [ ] `bazel test //vm:chaos_injector_tests`
+  - [ ] Verify tests pass
+  - [ ] Check results for bug detection
+
+**Estimated time:** 1-2 hours
 
 ---
 
-### Task 3: Test with New Tracepoint Injectors
+### Task 3: Analyze VM Test Results
 
-- [ ] Test rename_tracepoint with rename workload
-  - [ ] `--workload rename --injector rename_tracepoint`
-  - [ ] Run on btrfs filesystem
-  - [ ] Duration: 60 seconds
-  - [ ] **Critical:** Do we find bugs?
-  - [ ] Record bug count
-  - [ ] Analyze bug types (missing vs duplicates)
+- [ ] Review bug detection data from VMs
+  - [ ] How many bugs with getdents_delay? (expect 0-5)
+  - [ ] How many bugs with rename_tracepoint? (expect 10-50)
+  - [ ] How many bugs with link_tracepoint? (expect 10-30)
+  - [ ] Compare to predictions
 
-- [ ] Test link_tracepoint with hardlink workload
-  - [ ] `--workload hardlink --injector link_tracepoint`
-  - [ ] Run on btrfs filesystem
-  - [ ] Duration: 60 seconds
-  - [ ] **Critical:** Do we find ref count bugs?
-  - [ ] Record results
+- [ ] Analyze bug types
+  - [ ] Missing files during rename?
+  - [ ] Duplicate entries?
+  - [ ] Reference count issues?
+  - [ ] Match expected race conditions?
 
-- [ ] Test mixed combinations
-  - [ ] rename workload + link_tracepoint
-  - [ ] hardlink workload + rename_tracepoint
-  - [ ] mixed workload + rename_tracepoint
-  - [ ] Document which combinations work best
+- [ ] Decision point
+  - [ ] If >10 bugs/100K → SUCCESS! Ship it
+  - [ ] If 5-10 bugs/100K → Marginal, consider fentry/fexit
+  - [ ] If <5 bugs/100K → Need better precision (Phase 6)
 
-**Estimated time:** 1 hour (with analysis)
+**Estimated time:** 30 minutes (analysis)
 
 ---
 
