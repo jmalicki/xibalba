@@ -462,15 +462,66 @@
 
 ---
 
-## Phase 5: Integration Testing and Validation
+## Testing Confidence Assessment (Added 2025-10-13)
+
+**Current Confidence Level: 45%**
+
+### ✅ High Confidence (Tested):
+- **Workload modules:** 95% - 20 unit tests + manual execution
+- **Registry system:** 100% - 21 tests, all validated
+- **BPF structure:** 100% - 16 tests, compilation verified
+- **CLI interface:** 90% - Manual testing, all flags work
+
+### ❌ Low/No Confidence (Untested):
+- **eBPF execution:** 0% - Never loaded into kernel
+- **Bug detection:** 0% - Never measured
+- **Controller integration:** 30% - No execution tests
+- **VM compatibility:** 0% - Not tested
+
+### 🔴 CRITICAL GAPS:
+1. **Zero eBPF execution testing** - Never loaded BPF into kernel
+2. **Zero integration testing** - Components tested separately, not together
+3. **Zero bug detection validation** - All predictions, no data
+
+### ✅ What We Know:
+- Unit tests pass (57/57)
+- Code compiles cleanly
+- Workloads execute correctly
+- BPF programs compile
+
+### ❌ What We DON'T Know:
+- Will BPF load into kernel?
+- Will tracepoints attach?
+- Will delays inject?
+- Will we find ANY bugs?
+- Are predictions accurate?
+
+### 🎯 Recommendation:
+**Run ONE smoke test before merging:**
+```bash
+sudo chaos_test_runner --workload rename --injector rename_tracepoint --duration 60 /tmp/test
+```
+
+**Decision criteria:**
+- Finds >10 bugs → ✅ MERGE (proven effective)
+- Finds 1-10 bugs → ⚠️ MERGE with caveat
+- Finds 0 bugs → ❌ Need Phase 6 (fentry/fexit)
+
+**Time:** 10 minutes  
+**Confidence gain:** 45% → 85%
+
+---
+
+## Phase 5: Integration Testing and Validation ⏸️ IN PROGRESS
 
 **Goal:** Verify the complete system works  
 **Time Estimate:** 2-3 hours  
-**Expected Result:** Bugs found, architecture validated
+**Expected Result:** Bugs found, architecture validated  
+**Status:** ⏸️ BLOCKED on VM test infrastructure
 
 **TESTING STRATEGY:**
-- Unit tests run on build host (no kernel BPF needed)
-- Integration tests run in VMs (via `bazel test //vm:...`)
+- Unit tests run on build host (no kernel BPF needed) ✅ DONE
+- Integration tests run in VMs (via `bazel test //vm:...`) ⏸️ PENDING
 - VMs have full kernel BPF support + multiple filesystems
 
 ### Task 1: Manual Testing (On Build Host) ✅ COMPLETE
@@ -501,51 +552,82 @@
 
 ---
 
-### Task 2: Create VM Integration Tests
+### Task 2: Create VM Integration Tests ⏸️ PARTIAL
 
 **NOTE:** eBPF execution tests run in VMs, not on build host!
 
-- [ ] Create `vm/tests/test_chaos_injectors.sh`
-  - [ ] Script to run in VM with BPF support
-  - [ ] Test getdents_delay with each workload
-  - [ ] Test rename_tracepoint with rename workload
-  - [ ] Test link_tracepoint with hardlink workload
-  - [ ] Record results to output file
+- [x] Create VM test infrastructure
+  - [x] Created `vm/qemu/chaos_modular_test.bzl`
+  - [x] Created `vm/qemu/run-qemu-modular-test.sh`
+  - [x] Created `vm/qemu/test-wrapper-modular.sh`
+  - [x] Defined 4 tests in vm/BUILD.bazel
 
-- [ ] Update VM test framework
-  - [ ] Add chaos_test_runner to VM image
-  - [ ] Ensure BPF is enabled in test kernel
-  - [ ] Add btrfs filesystem to test VMs
+- [ ] Fix VM test configuration
+  - [ ] Fix chaos_modular_test load statement in BUILD.bazel
+  - [ ] Build initramfs with chaos_test_runner
+  - [ ] Build initramfs with BPF injector .o files
+  - [ ] Verify kernel supports tracepoints
+
+- [ ] Update init.sh for modular chaos
+  - [ ] Parse xibalba_workload param
+  - [ ] Parse xibalba_injector param
+  - [ ] Call chaos_test_runner instead of simple_chaos_test
+  - [ ] Pass all parameters correctly
+
+- [ ] Run smoke test
+  - [ ] Single test: rename + rename_tracepoint
+  - [ ] Duration: 60 seconds
+  - [ ] **CRITICAL:** Does it load? Does it inject? Does it find bugs?
 
 - [ ] Run VM tests
-  - [ ] `bazel test //vm:chaos_injector_tests`
-  - [ ] Verify tests pass
+  - [ ] `bazel test //vm:chaos_rename_with_tracepoint`
+  - [ ] Verify test passes or analyze failure
   - [ ] Check results for bug detection
 
-**Estimated time:** 1-2 hours
+**Status:** ⏸️ BLOCKED  
+**Blocker:** VM test infrastructure needs:
+1. chaos_test_runner in initramfs (not just simple_chaos_test)
+2. BPF .o files in initramfs
+3. init.sh updated for new parameters
+
+**Estimated time remaining:** 1-2 hours  
+**Critical for confidence:** YES - This is the GAP between theory and reality
 
 ---
 
-### Task 3: Analyze VM Test Results
+### Task 3: Analyze VM Test Results ⏸️ PENDING
+
+**Status:** ⏸️ WAITING for Task 2 completion
+
+**When Task 2 completes, analyze:**
 
 - [ ] Review bug detection data from VMs
-  - [ ] How many bugs with getdents_delay? (expect 0-5)
+  - [ ] How many bugs with no injection? (baseline: expect 0-5)
   - [ ] How many bugs with rename_tracepoint? (expect 10-50)
   - [ ] How many bugs with link_tracepoint? (expect 10-30)
   - [ ] Compare to predictions
+  - [ ] Calculate improvement ratio (injection vs baseline)
 
 - [ ] Analyze bug types
   - [ ] Missing files during rename?
   - [ ] Duplicate entries?
   - [ ] Reference count issues?
-  - [ ] Match expected race conditions?
+  - [ ] Match expected race conditions from research?
+
+- [ ] Validate eBPF injection worked
+  - [ ] Check injector stats (delays_injected > 0?)
+  - [ ] Verify injection rate matches config
+  - [ ] Confirm tracepoints actually triggered
 
 - [ ] Decision point
-  - [ ] If >10 bugs/100K → SUCCESS! Ship it
-  - [ ] If 5-10 bugs/100K → Marginal, consider fentry/fexit
-  - [ ] If <5 bugs/100K → Need better precision (Phase 6)
+  - [ ] If >10 bugs/100K → ✅ SUCCESS! Ship it
+  - [ ] If 5-10 bugs/100K → ⚠️ Marginal, consider fentry/fexit
+  - [ ] If <5 bugs/100K → ❌ Need better precision (Phase 6)
+  - [ ] If 0 bugs but injection worked → 🔴 Wrong approach
+  - [ ] If 0 bugs and no injection → 🔴 BPF didn't work
 
-**Estimated time:** 30 minutes (analysis)
+**Estimated time:** 30 minutes (analysis)  
+**Critical:** This determines if we ship, iterate, or pivot
 
 ---
 
@@ -852,38 +934,59 @@ The transaction abort dirty read theory is the breakthrough. Focus there:
 
 ---
 
-## Decision Tree
+## Decision Tree (Updated with Testing Reality)
 
 ```
-START: Phase 3a (Tracepoint)
+START: Phase 3a (Tracepoint) ✅ DONE
   ↓
-  3 hours
+Phase 4 (Test Runner) ✅ DONE
   ↓
-Phase 4 (Test Runner)
+Phase 5 (Integration Tests) ⏸️ CURRENT
   ↓
-  6 hours
+CRITICAL UNKNOWN: Does eBPF execution work?
+  ├─ NOT TESTED YET (0% confidence)
+  ├─ Need: ONE smoke test in VM
+  └─ Time: 10 minutes
   ↓
-Phase 5 (Experiments)
-  ↓
-  Is bug detection good? (>10 bugs/100K ops)
-  ├─ YES → ✅ SHIP IT
-  │         Document results
-  │         Write paper about transaction aborts
-  │         Add more workloads/injectors over time
+Smoke Test Result?
+  ├─ BPF fails to load → 🔴 BLOCKER
+  │   ├─ Debug BPF verifier errors
+  │   ├─ Fix compilation issues
+  │   └─ OR: Try different approach
   │
-  └─ NO → Try Phase 6 (fentry/fexit)
-            ↓
-            2 days
-            ↓
-            Is bug detection better?
-            ├─ YES → ✅ USE IT
-            │         Compare approaches in paper
-            │
-            └─ NO → Try Phase 7 (kretprobe) OR
-                    ├─ Accept current results
-                    ├─ Try kernel module
-                    └─ Re-evaluate approach
+  ├─ BPF loads but 0 delays injected → 🔴 BLOCKER
+  │   ├─ Debug tracepoint attachment
+  │   ├─ Check kernel config
+  │   └─ OR: Try different hooks
+  │
+  ├─ BPF works but 0 bugs found → ⚠️ INEFFECTIVE
+  │   ├─ Check: Are delays long enough?
+  │   ├─ Check: Are we hitting the syscalls?
+  │   ├─ Try: Increase probability, delay
+  │   └─ OR: Need Phase 6 (fentry/fexit)
+  │
+  └─ BPF works AND finds bugs → ✅ SUCCESS
+      ↓
+      How many bugs?
+      ├─ >50 bugs/100K → 🎉 EXCELLENT! Ship immediately
+      ├─ 10-50 bugs/100K → ✅ GOOD! Ship and iterate
+      ├─ 5-10 bugs/100K → ⚠️ MARGINAL - Ship or try Phase 6
+      └─ 1-5 bugs/100K → ❌ WEAK - Need Phase 6
+  ↓
+IF NOT EFFECTIVE ENOUGH:
+  └─ Try Phase 6 (fentry/fexit)
+      ↓
+      2 days
+      ↓
+      Better results?
+      ├─ YES → ✅ USE IT
+      └─ NO → Try Phase 7 (kretprobe) OR kernel module
 ```
+
+**KEY INSIGHT:** We're at a critical decision point!
+- **Current state:** High-quality code, zero execution testing
+- **Next step:** ONE test gives us 80% of needed confidence
+- **Then:** Data-driven decision on ship vs iterate
 
 ---
 
@@ -933,27 +1036,33 @@ Phase 5 (Experiments)
 
 ---
 
-## Recommendations by Goal
+## Recommendations by Goal (Updated with Testing Reality)
 
 ### **Goal: Working Tool in Production**
-**Path:** Phase 3a → Phase 4 → Phase 5  
-**Time:** 1 week  
-**Stop when:** Finds bugs consistently
+**Path:** Phase 3a ✅ → Phase 4 ✅ → **SMOKE TEST** → Phase 5  
+**Time:** 1 week (but smoke test is NEXT STEP!)  
+**Stop when:** Finds bugs consistently  
+**Current blocker:** Need VM smoke test to verify eBPF execution
 
 ### **Goal: Research Publication**
-**Path:** Phase 3a → Phase 4 → Phase 5 → Phase 6 → Phase 7  
+**Path:** Phase 3a ✅ → Phase 4 ✅ → **SMOKE TEST** → Phase 5 → Phase 6 → Phase 7  
 **Time:** 2-3 weeks  
-**Stop when:** Have comprehensive comparison
+**Stop when:** Have comprehensive comparison  
+**Current blocker:** Need data before writing results section
 
 ### **Goal: Find Specific Bug**
-**Path:** Phase 3a → Phase 4 → Run targeted tests  
+**Path:** Phase 3a ✅ → Phase 4 ✅ → **SMOKE TEST** → Run targeted tests  
 **Time:** 2-3 days  
-**Stop when:** Bug reproduced
+**Stop when:** Bug reproduced  
+**Current blocker:** Can't hunt bugs without proven tool
 
 ### **Goal: Validate Transaction Abort Theory**
-**Path:** Focus on link_tracepoint + hardlink workload  
+**Path:** Focus on link_tracepoint + hardlink workload + **SMOKE TEST**  
 **Time:** 1 week  
-**Stop when:** Theory proven or disproven
+**Stop when:** Theory proven or disproven  
+**Current blocker:** Need to verify BPF execution first
+
+**ALL PATHS BLOCKED ON:** One smoke test in VM with CAP_BPF
 
 ---
 
@@ -1015,4 +1124,118 @@ Phase 5 (Experiments)
 
 *My vote: Start with tracepoint, iterate based on results.*  
 *The architecture is solid - now let's get data!*
+
+---
+
+## ADDENDUM: Critical Next Step (Added 2025-10-13)
+
+### 🚨 **CURRENT STATE: Theory vs Reality Gap**
+
+**What we have:**
+- ✅ Excellent architecture (modular, pluggable)
+- ✅ High-quality code (strict warnings, clean)
+- ✅ Comprehensive unit tests (57 tests, 100% passing)
+- ✅ Working CLI (tested manually)
+- ✅ Sound research (4,687 lines)
+
+**What we DON'T have:**
+- ❌ ANY eBPF execution testing
+- ❌ ANY bug detection data
+- ❌ ANY integration validation
+- ❌ ANY proof it works in practice
+
+**The gap:**
+```
+Theory: "Tracepoint delays will find 10-50 bugs"
+Reality: ???
+```
+
+### 🎯 **Critical Next Step: Smoke Test**
+
+**Before doing ANYTHING else, run this:**
+
+```bash
+# In VM with CAP_BPF (10 minutes total):
+sudo chaos_test_runner \
+    --workload rename \
+    --injector rename_tracepoint \
+    --duration 60 \
+    /tmp/test
+```
+
+**This ONE test tells us:**
+1. Does BPF load? (bpf_object__load success?)
+2. Do tracepoints attach? (no errors?)
+3. Do delays inject? (stats.delays_injected > 0?)
+4. Do we find bugs? (bugs_found > 0?)
+
+**Possible outcomes:**
+
+**Best:** "Bugs found: 523" → 🎉 Theory validated! Ship it!  
+**Good:** "Bugs found: 15" → ✅ Works! May need tuning  
+**Meh:** "Bugs found: 2" → ⚠️ Marginal, need Phase 6  
+**Bad:** "Bugs found: 0, delays injected: 1234" → 🔴 Wrong approach  
+**Worst:** "Error loading BPF" → 🔴🔴 Fundamental issue
+
+### 📊 **Confidence Impact**
+
+**Without smoke test:** 45% confidence  
+**With smoke test (any result):** 85% confidence
+
+**Why such a big jump?**
+- We'd know if eBPF execution works
+- We'd have real bug detection data
+- We'd know if approach is viable
+- We'd make data-driven decisions
+
+### ⚠️ **Recommendation: DON'T MERGE Without Smoke Test**
+
+**Reasons:**
+1. Zero execution testing (could be completely broken)
+2. Unknown if approach works (could find 0 bugs)
+3. Unknown if predictions accurate (could be way off)
+4. High risk of merging broken code
+
+**Mitigation:**
+- Run ONE 10-minute smoke test
+- Gain 40% confidence
+- Then make informed decision
+
+### 🔧 **What's Blocking Smoke Test**
+
+**Option A: Manual VM Test (Fastest - 30 minutes)**
+```bash
+# SSH into existing VM
+# Copy chaos_test_runner binary
+# Copy BPF .o files
+# Run test manually
+# See what happens
+```
+
+**Option B: Fix Bazel VM Tests (Proper - 1-2 hours)**
+```bash
+# Fix vm/BUILD.bazel load statement
+# Add chaos_test_runner to initramfs build
+# Add BPF .o files to initramfs
+# Update init.sh
+# Run bazel test //vm:chaos_rename_with_tracepoint
+```
+
+**Option C: Local Test with sudo (Quickest - 5 minutes)**
+```bash
+# If build host has CAP_BPF support:
+sudo bazel run //chaos:chaos_test_runner -- \
+    --workload rename \
+    --injector rename_tracepoint \
+    --duration 10 \
+    /tmp/test
+
+# Limitation: Not real VM, but proves BPF works
+```
+
+**My recommendation:** Try Option C first (5 min), then Option A (30 min), then Option B (proper solution)
+
+---
+
+**BOTTOM LINE:** We have a beautiful race car. Let's start the engine and see if it runs! 🏎️
 
