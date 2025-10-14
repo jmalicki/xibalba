@@ -4,17 +4,20 @@
 
 set -euo pipefail
 
-if [ $# -lt 5 ]; then
-    echo "Usage: $0 INIT_SCRIPT PAUSE_CONTROLLER SIMPLE_CHAOS_TEST GAUNTLET_SCRIPT OUTPUT_FILE [KERNEL_MODULES_TAR]"
+if [ $# -lt 8 ]; then
+    echo "Usage: $0 INIT_SCRIPT PAUSE_CONTROLLER SIMPLE_CHAOS_TEST CHAOS_RUNNER RENAME_BPF LINK_BPF GAUNTLET_SCRIPT OUTPUT_FILE [KERNEL_MODULES_TAR]"
     exit 1
 fi
 
 INIT_SCRIPT="$1"
 PAUSE_CONTROLLER="$2"
 SIMPLE_CHAOS_TEST="$3"
-GAUNTLET_SCRIPT="$4"
-OUTPUT_FILE="$5"
-KERNEL_MODULES_TAR="${6:-}"
+CHAOS_RUNNER="$4"
+RENAME_BPF="$5"
+LINK_BPF="$6"
+GAUNTLET_SCRIPT="$7"
+OUTPUT_FILE="$8"
+KERNEL_MODULES_TAR="${9:-}"
 
 echo "Building minimal initramfs with embedded xibalba binaries and kernel modules..."
 
@@ -65,11 +68,18 @@ cp /sbin/depmod initrd/sbin/ || true
 
 # Copy xibalba binaries into initramfs FIRST
 echo "Installing xibalba binaries..."
-mkdir -p initrd/usr/bin
+mkdir -p initrd/usr/bin initrd/opt/xibalba/bpf
 cp "$PAUSE_CONTROLLER" initrd/usr/bin/pause_controller
 cp "$SIMPLE_CHAOS_TEST" initrd/usr/bin/simple_chaos_test
+cp "$CHAOS_RUNNER" initrd/usr/bin/chaos_test_runner
 cp "$GAUNTLET_SCRIPT" initrd/usr/bin/xibalba-gauntlet
 chmod +x initrd/usr/bin/*
+
+# Copy eBPF programs
+echo "Installing eBPF programs..."
+cp "$RENAME_BPF" initrd/opt/xibalba/bpf/rename_tracepoint.bpf.o
+cp "$LINK_BPF" initrd/opt/xibalba/bpf/link_tracepoint.bpf.o
+echo "  ✓ eBPF programs installed"
 
 # Copy required libraries AFTER binaries are in place
 echo "Copying required libraries..."
