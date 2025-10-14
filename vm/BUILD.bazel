@@ -114,6 +114,56 @@ qemu_filesystem_suite(
 )
 
 # ============================================================================
+# Modular Chaos Testing (NEW)
+# ============================================================================
+
+# Test individual workloads without injection (baseline)
+chaos_modular_test(
+    name = "chaos_rename_baseline",
+    workload = "rename",
+    injector = "none",
+    filesystem = "btrfs",
+    duration = 60,
+)
+
+chaos_modular_test(
+    name = "chaos_hardlink_baseline",
+    workload = "hardlink",
+    injector = "none",
+    filesystem = "btrfs",
+    duration = 60,
+)
+
+# Test with tracepoint injectors (should find bugs!)
+chaos_modular_test(
+    name = "chaos_rename_with_tracepoint",
+    workload = "rename",
+    injector = "rename_tracepoint",
+    filesystem = "btrfs",
+    duration = 120,
+)
+
+chaos_modular_test(
+    name = "chaos_hardlink_with_link_injector",
+    workload = "hardlink",
+    injector = "link_tracepoint",
+    filesystem = "btrfs",
+    duration = 120,
+)
+
+# Test suite: All modular chaos tests
+test_suite(
+    name = "modular_chaos_tests",
+    tests = [
+        ":chaos_rename_baseline",
+        ":chaos_hardlink_baseline",
+        ":chaos_rename_with_tracepoint",
+        ":chaos_hardlink_with_link_injector",
+    ],
+    tags = ["modular", "chaos", "manual"],
+)
+
+# ============================================================================
 # Consistency Model Comparison Tests
 # ============================================================================
 # Test ext4 and ZFS with both POSIX and WEAK models to empirically validate:
