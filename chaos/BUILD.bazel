@@ -81,3 +81,26 @@ cc_binary(
     # Runs simple_chaos_test multiple times with different models
 )
 
+# ============================================================================
+# Unified Chaos Test Runner (Phase 4)
+# ============================================================================
+
+cc_binary(
+    name = "chaos_test_runner",
+    srcs = ["tests/chaos_test_runner.c"],
+    deps = [
+        "//chaos/workloads:workloads",
+        "//chaos/injectors:registry",
+        "//chaos/controllers:generic_controller",
+        "//common:state_tracker",
+        "//common:dir_reader",
+    ],
+    linkopts = [
+        "-pthread",
+        "-lbpf",
+        "-lelf",
+        "-lz",
+    ],
+    visibility = ["//visibility:public"],
+)
+

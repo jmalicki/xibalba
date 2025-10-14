@@ -1,0 +1,46 @@
+# Chaos Testing Workload Modules
+
+package(default_visibility = ["//visibility:public"])
+
+# Workload implementations
+cc_library(
+    name = "workloads",
+    srcs = [
+        "create_delete.c",
+        "rename.c",
+        "hardlink.c",
+        "mixed.c",
+        "registry.c",
+    ],
+    hdrs = ["workload.h"],
+    deps = [
+        "//common:dir_reader",
+        "//common:state_tracker",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# Alias for registry (backward compatibility)
+alias(
+    name = "registry",
+    actual = ":workloads",
+)
+
+# ============================================================================
+# Unit Tests
+# ============================================================================
+
+cc_test(
+    name = "workload_test",
+    srcs = ["workload_test.cc"],
+    deps = [
+        ":workloads",
+        "@googletest//:gtest_main",
+    ],
+    copts = [
+        "-Wno-unused-parameter",
+        "-Wno-c11-extensions",  # workload.h uses C11 atomics
+    ],
+    size = "small",
+)
+

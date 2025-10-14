@@ -63,6 +63,9 @@ genrule(
         "qemu/init.sh",
         "//chaos:pause_controller",
         "//chaos:simple_chaos_test",
+        "//chaos:chaos_test_runner",  # NEW: Modular test runner
+        "//chaos/injectors:rename_tracepoint_bpf",  # NEW: BPF programs
+        "//chaos/injectors:link_tracepoint_bpf",
         ":xibalba-gauntlet.sh",
         ":kernel-modules.tar.gz",
     ],
@@ -72,6 +75,9 @@ genrule(
         INIT=$$(realpath $(location qemu/init.sh))
         PAUSE_CTRL=$$(realpath $(location //chaos:pause_controller))
         CHAOS_TEST=$$(realpath $(location //chaos:simple_chaos_test))
+        CHAOS_RUNNER=$$(realpath $(location //chaos:chaos_test_runner))
+        RENAME_BPF=$$(realpath $(location //chaos/injectors:rename_tracepoint_bpf))
+        LINK_BPF=$$(realpath $(location //chaos/injectors:link_tracepoint_bpf))
         GAUNTLET=$$(realpath $(location :xibalba-gauntlet.sh))
         MODULES=$$(realpath $(location :kernel-modules.tar.gz))
         OUTPUT=$$(realpath $(@D))
@@ -80,13 +86,16 @@ genrule(
             -v $$INIT:/input/init.sh:ro \
             -v $$PAUSE_CTRL:/input/pause_controller:ro \
             -v $$CHAOS_TEST:/input/simple_chaos_test:ro \
+            -v $$CHAOS_RUNNER:/input/chaos_test_runner:ro \
+            -v $$RENAME_BPF:/input/rename_tracepoint.bpf.o:ro \
+            -v $$LINK_BPF:/input/link_tracepoint.bpf.o:ro \
             -v $$GAUNTLET:/input/xibalba-gauntlet:ro \
             -v $$MODULES:/input/kernel-modules.tar.gz:ro \
             -v $$OUTPUT:/output \
             -e HOST_UID=$$(id -u) \
             -e HOST_GID=$$(id -g) \
             ubuntu:24.04 \
-            bash -c 'apt-get update -qq && apt-get install -y -qq cpio gzip tar zstd kmod udev && bash /build.sh /input/init.sh /input/pause_controller /input/simple_chaos_test /input/xibalba-gauntlet /output/initramfs.img /input/kernel-modules.tar.gz && chown $$HOST_UID:$$HOST_GID /output/initramfs.img'
+            bash -c 'apt-get update -qq && apt-get install -y -qq cpio gzip tar zstd kmod udev && bash /build.sh /input/init.sh /input/pause_controller /input/simple_chaos_test /input/chaos_test_runner /input/rename_tracepoint.bpf.o /input/link_tracepoint.bpf.o /input/xibalba-gauntlet /output/initramfs.img /input/kernel-modules.tar.gz && chown $$HOST_UID:$$HOST_GID /output/initramfs.img'
     """,
     tags = ["docker", "requires-network", "local", "no-sandbox"],
 )
@@ -111,6 +120,56 @@ qemu_filesystem_suite(
     name = "qemu_fast_tests",
     filesystems = ["ext4", "xfs", "btrfs"],
     duration = 60,
+)
+
+# ============================================================================
+# Modular Chaos Testing (NEW)
+# ============================================================================
+
+# Test individual workloads without injection (baseline)
+chaos_modular_test(
+    name = "chaos_rename_baseline",
+    workload = "rename",
+    injector = "none",
+    filesystem = "btrfs",
+    duration = 60,
+)
+
+chaos_modular_test(
+    name = "chaos_hardlink_baseline",
+    workload = "hardlink",
+    injector = "none",
+    filesystem = "btrfs",
+    duration = 60,
+)
+
+# Test with tracepoint injectors (should find bugs!)
+chaos_modular_test(
+    name = "chaos_rename_with_tracepoint",
+    workload = "rename",
+    injector = "rename_tracepoint",
+    filesystem = "btrfs",
+    duration = 120,
+)
+
+chaos_modular_test(
+    name = "chaos_hardlink_with_link_injector",
+    workload = "hardlink",
+    injector = "link_tracepoint",
+    filesystem = "btrfs",
+    duration = 120,
+)
+
+# Test suite: All modular chaos tests
+test_suite(
+    name = "modular_chaos_tests",
+    tests = [
+        ":chaos_rename_baseline",
+        ":chaos_hardlink_baseline",
+        ":chaos_rename_with_tracepoint",
+        ":chaos_hardlink_with_link_injector",
+    ],
+    tags = ["modular", "chaos", "manual"],
 )
 
 # ============================================================================
